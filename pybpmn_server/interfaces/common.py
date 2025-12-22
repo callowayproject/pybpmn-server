@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Protocol, Union
 
 if TYPE_CHECKING:
@@ -17,8 +18,8 @@ class ISQLiteDatabaseConfiguration(Protocol):
 
 
 class IConfiguration(Protocol):
-    definitions_path: Optional[str]
-    templates_path: Optional[str]
+    definitions_path: Optional[Path]
+    templates_path: Optional[Path]
     timers: Mapping[str, int | float]
     database: Union[IMongoDBDatabaseConfiguration, ISQLiteDatabaseConfiguration, Any]
     api_key: str

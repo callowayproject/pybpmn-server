@@ -52,6 +52,7 @@ test = [
     "pytest-asyncio",
     "pytest",
     "mongomock",
+    "mypy",
 ]
 docs = [
     "mkdocs-include-markdown-plugin",
