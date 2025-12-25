@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 from bson.objectid import ObjectId
-from pymongo import MongoClient
+from pymongo import AsyncMongoClient
 
 if TYPE_CHECKING:
     from pymongo.results import DeleteResult, InsertManyResult, UpdateResult
@@ -36,7 +36,7 @@ class MongoDB:
 
     def __init__(self, db_config: MongoDBSettings):
         self.db_config = db_config
-        self.client = MongoClient(self.db_config.db_url)
+        self.client = AsyncMongoClient(self.db_config.db_url)
 
     async def find(
         self,
@@ -50,11 +50,9 @@ class MongoDB:
         db = self.client[db_name]
         collection = db[coll_name]
 
-        with (
-            profile(self, f">mongo.find:{coll_name}"),
-            collection.find(qry, projection=projection, sort=sort) as cursor,
-        ):
-            docs = list(cursor)
+        with profile(self, f">mongo.find:{coll_name}"):
+            async with collection.find(qry, projection=projection, sort=sort) as cursor:
+                docs = await cursor.to_list()
 
         return docs
 
@@ -64,7 +62,7 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.create_index:{coll_name}"):
-            result = collection.create_index(index, unique=unique)
+            result = await collection.create_index(index, unique=unique)
             logger.info(f'index named "{result}" was created for collection "{coll_name}"')
             return result
 
@@ -74,7 +72,7 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.insert:{coll_name}"):
-            result: InsertManyResult = collection.insert_many(docs)
+            result: InsertManyResult = await collection.insert_many(docs)
 
         return len(result.inserted_ids)
 
@@ -91,7 +89,7 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.update:{coll_name}"):
-            result: UpdateResult = collection.update_one(query, update_object, upsert=upsert)
+            result: UpdateResult = await collection.update_one(query, update_object, upsert=upsert)
 
         logger.info(f" updated {result.modified_count}")
         return result.modified_count
@@ -113,7 +111,7 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.update:{coll_name}"):
-            result: UpdateResult = collection.update_many(query, update_object, upsert=upsert)
+            result: UpdateResult = await collection.update_many(query, update_object, upsert=upsert)
 
         logger.info(f" updated {result.modified_count}")
         return result.modified_count
@@ -124,7 +122,7 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.remove:{coll_name}"):
-            result: DeleteResult = collection.delete_many(query)
+            result: DeleteResult = await collection.delete_many(query)
 
         logger.info(f"remove done for {result.deleted_count} docs in {coll_name}")
         return result.deleted_count
@@ -135,6 +133,6 @@ class MongoDB:
         collection = db[coll_name]
 
         with profile(self, f">mongo.remove_by_id:{coll_name}"):
-            result: DeleteResult = collection.delete_one({"_id": ObjectId(id_)})
+            result: DeleteResult = await collection.delete_one({"_id": ObjectId(id_)})
             logger.info(f"remove done for {id_} > {result.deleted_count}")
             return result.deleted_count

@@ -1,8 +1,9 @@
 """Tests for the mongodb module."""
 
-from unittest.mock import MagicMock
+from typing import AsyncGenerator
 
 import pytest
+import pytest_asyncio
 from bson.objectid import ObjectId
 
 from pybpmn_server.common.default_configuration import MongoDBSettings
@@ -54,38 +55,30 @@ class TestMongoDB:
     @pytest.fixture
     def db_config(self) -> MongoDBSettings:
         """Returns a MongoDBSettings instance with default values."""
-        return MongoDBSettings(db_url="mongodb://localhost:27017", enable_profiler=False)
+        return MongoDBSettings(db_url="mongodb://localhost:27017", enable_profiler=False, db="test_db")
 
-    @pytest.fixture
-    def mock_client(self, mocker) -> MagicMock:
-        """Returns a mock for the MongoClient class."""
-        return mocker.patch("pybpmn_server.datastore.mongodb.MongoClient")
-
-    def test_init_sets_config_and_client(self, db_config, mock_client):
-        """
-        The MongoDB class correctly initializes with the provided database configuration and creates a MongoClient.
-        """
-        # Act
+    @pytest_asyncio.fixture
+    async def mongo_db(self, db_config) -> AsyncGenerator[MongoDB, None]:
+        """Returns a MongoDBSettings instance with default values."""
         mongo_db = MongoDB(db_config)
+        db = mongo_db.client["test_db"]
+        await db.create_collection("test_coll")
 
-        # Assert
-        assert db_config == mongo_db.db_config
-        mock_client.assert_called_once_with(db_config.db_url)
+        yield mongo_db
+
+        await mongo_db.client.drop_database("test_db")
 
     @pytest.mark.asyncio
-    async def test_find_returns_documents(self, db_config, mock_client):
+    async def test_find_returns_documents(self, mongo_db):
         """
-        Tests that the find method correctly queries the database and returns a list
-        of documents matching the query, applying projections and sorting as expected.
+        Tests that the find method correctly queries the database and returns a list of documents matching the query.
+
+        It should apply projections and sorting as expected.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_db = mock_client.return_value["test_db"]
-        mock_coll = mock_db["test_coll"]
-        mock_cursor = MagicMock()
-        mock_cursor.__enter__.return_value = mock_cursor
-        mock_cursor.__iter__.return_value = [{"_id": "1", "name": "test"}]
-        mock_coll.find.return_value = mock_cursor
+        db = mongo_db.client["test_db"]
+        collection = db["test_coll"]
+        await collection.insert_many([{"_id": "1", "name": "test"}])
 
         query = {"name": "test"}
         projection = {"name": 1}
@@ -96,39 +89,26 @@ class TestMongoDB:
 
         # Assert
         assert result == [{"_id": "1", "name": "test"}]
-        mock_coll.find.assert_called_once_with(query, projection=projection, sort=sort)
 
     @pytest.mark.asyncio
-    async def test_create_index_returns_index_name(self, db_config, mock_client):
+    async def test_create_index_returns_index_name(self, mongo_db):
         """
-        Tests that the create_index method correctly calls the PyMongo create_index
-        method and returns the name of the created index.
+        Tests that the create_index method correctly calls the PyMongo create_index method and returns the name.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_coll.create_index.return_value = "idx_name"
 
         # Act
         result = await mongo_db.create_index("test_db", "test_coll", "field", unique=True)
 
         # Assert
-        assert result == "idx_name"
-        mock_coll.create_index.assert_called_once_with("field", unique=True)
+        assert result == "field_1"
 
     @pytest.mark.asyncio
-    async def test_insert_returns_inserted_count(self, db_config, mock_client):
+    async def test_insert_returns_inserted_count(self, mongo_db):
         """
-        Tests that the insert method correctly calls the PyMongo insert_many
-        method and returns the number of successfully inserted documents.
+        Tests that the insert method correctly calls the PyMongo insert_many method and returns the number inserted.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_result = MagicMock()
-        mock_result.inserted_ids = [ObjectId(), ObjectId()]
-        mock_coll.insert_many.return_value = mock_result
-
         docs = [{"a": 1}, {"b": 2}]
 
         # Act
@@ -136,20 +116,16 @@ class TestMongoDB:
 
         # Assert
         assert result == 2
-        mock_coll.insert_many.assert_called_once_with(docs)
 
     @pytest.mark.asyncio
-    async def test_update_returns_modified_count(self, db_config, mock_client):
+    async def test_update_returns_modified_count(self, mongo_db):
         """
-        Tests that the update method correctly calls the PyMongo update_one
-        method and returns the number of documents modified by the operation.
+        Tests that the update method correctly calls the PyMongo update_one method and returns the number of modified.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_result = MagicMock()
-        mock_result.modified_count = 1
-        mock_coll.update_one.return_value = mock_result
+        db = mongo_db.client["test_db"]
+        collection = db["test_coll"]
+        await collection.insert_one({"_id": "1", "name": "old"})
 
         query = {"_id": "1"}
         update_obj = {"$set": {"name": "new"}}
@@ -159,20 +135,17 @@ class TestMongoDB:
 
         # Assert
         assert result == 1
-        mock_coll.update_one.assert_called_once_with(query, update_obj, upsert=True)
+        assert await collection.find_one(query) == {"_id": "1", "name": "new"}
 
     @pytest.mark.asyncio
-    async def test_update2_returns_modified_count(self, db_config, mock_client):
+    async def test_update2_returns_modified_count(self, mongo_db):
         """
-        Tests that the update2 method correctly calls the PyMongo update_many
-        method and returns the number of documents modified by the operation.
+        Tests that the update2 method correctly calls update_many method and returns the number of documents modified.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_result = MagicMock()
-        mock_result.modified_count = 5
-        mock_coll.update_many.return_value = mock_result
+        db = mongo_db.client["test_db"]
+        mock_coll = db["test_coll"]
+        await mock_coll.insert_many([{"index": i, "status": "old"} for i in range(5)])
 
         query = {"status": "old"}
         update_obj = {"$set": {"status": "new"}}
@@ -182,20 +155,17 @@ class TestMongoDB:
 
         # Assert
         assert result == 5
-        mock_coll.update_many.assert_called_once_with(query, update_obj, upsert=False)
+        assert len(await mock_coll.find({"status": "new"}).to_list()) == 5
 
     @pytest.mark.asyncio
-    async def test_remove_returns_deleted_count(self, db_config, mock_client):
+    async def test_remove_returns_deleted_count(self, mongo_db):
         """
-        Tests that the remove method correctly calls the PyMongo delete_many
-        method and returns the number of documents removed from the collection.
+        Tests that the remove method correctly calls delete_many and returns the number of documents removed.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_result = MagicMock()
-        mock_result.deleted_count = 3
-        mock_coll.delete_many.return_value = mock_result
+        db = mongo_db.client["test_db"]
+        mock_coll = db["test_coll"]
+        await mock_coll.insert_many([{"index": i, "type": "temp"} for i in range(3)])
 
         query = {"type": "temp"}
 
@@ -204,26 +174,23 @@ class TestMongoDB:
 
         # Assert
         assert result == 3
-        mock_coll.delete_many.assert_called_once_with(query)
+        assert len(await mock_coll.find(query).to_list()) == 0
 
     @pytest.mark.asyncio
-    async def test_remove_by_id_returns_deleted_count(self, db_config, mock_client):
+    async def test_remove_by_id_returns_deleted_count(self, mongo_db):
         """
-        Tests that the remove_by_id method correctly calls the PyMongo delete_one
-        method with a specific ObjectId and returns the number of documents deleted.
+        Tests that the remove_by_id method correctly calls delete_one with a specific ObjectId.
         """
         # Arrange
-        mongo_db = MongoDB(db_config)
-        mock_coll = mock_client.return_value["test_db"]["test_coll"]
-        mock_result = MagicMock()
-        mock_result.deleted_count = 1
-        mock_coll.delete_one.return_value = mock_result
+        db = mongo_db.client["test_db"]
+        mock_coll = db["test_coll"]
+        result = await mock_coll.insert_one({"index": 1, "type": "temp"})
 
-        obj_id_str = "6587dab5f1593c6f0a40d6c1"
+        obj_id_str = result.inserted_id
 
         # Act
         result = await mongo_db.remove_by_id("test_db", "test_coll", obj_id_str)
 
         # Assert
         assert result == 1
-        mock_coll.delete_one.assert_called_once_with({"_id": ObjectId(obj_id_str)})
+        assert len(await mock_coll.find({"_id": ObjectId(obj_id_str)}).to_list()) == 0

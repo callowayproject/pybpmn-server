@@ -1,35 +1,47 @@
+from typing import AsyncGenerator
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest_asyncio
 from pymongo.errors import PyMongoError
+
+from pybpmn_server.common.default_configuration import MongoDBSettings
 from pybpmn_server.datastore.instance_locker import InstanceLocker
+from pybpmn_server.datastore.data_store import DataStore
 
 
 class TestLock:
     """Tests for the lock method of InstanceLocker."""
 
+    @pytest.fixture
+    def db_config(self) -> MongoDBSettings:
+        """Returns a MongoDBSettings instance with default values."""
+        return MongoDBSettings(db_url="mongodb://localhost:27017", enable_profiler=False, db="test_db")
+
+    @pytest_asyncio.fixture
+    async def docstore(self, db_config) -> AsyncGenerator[DataStore, None]:
+        """Returns a MongoDBSettings instance with default values."""
+        datastore = DataStore(db_config)
+        db = datastore.db.client["test_db"]
+        await db.create_collection("wf_locks")
+
+        yield datastore
+
+        await datastore.db.client.drop_database("test_db")
+
     @pytest.mark.asyncio
-    async def test_lock_returns_true_on_success(self, mocker):
+    async def test_lock_returns_true_on_success(self, docstore):
         """
         The lock method should return True when the database update operation succeeds.
 
         This ensures that the instance is correctly marked as locked in the datastore.
         """
-        mock_datastore = MagicMock()
-        mock_datastore.db_configuration.db = "test_db"
-        mock_datastore.db_configuration.locks_collection = "test_locks"
-        mock_datastore.db.update = AsyncMock(return_value=1)
-
-        locker = InstanceLocker(mock_datastore)
+        locker = InstanceLocker(docstore)
         result = await locker.lock("instance_123")
 
         assert result is True
-        mock_datastore.db.update.assert_called_once()
-        args, _ = mock_datastore.db.update.call_args
-        assert args[0] == "test_db"
-        assert args[1] == "test_locks"
-        assert args[2] == {"id": "instance_123"}
-        assert args[3]["$set"]["id"] == "instance_123"
-        assert args[4] == {"upsert": True}
+        assert len(await docstore.db.find("test_db", "wf_locks", {})) == 1
 
     @pytest.mark.asyncio
     async def test_lock_returns_false_on_pymongo_error(self, mocker):
