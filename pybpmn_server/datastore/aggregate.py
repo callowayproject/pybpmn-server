@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List
 
-from pybpmn_server.interfaces.datastore import FindResult
+from pybpmn_server.datastore.interfaces import FindResult
 
 if TYPE_CHECKING:
+    from pybpmn_server.datastore.interfaces import FindParams
     from pybpmn_server.datastore.mongodb import MongoDB
-    from pybpmn_server.interfaces.datastore import FindParams
 
 
 class Aggregate:

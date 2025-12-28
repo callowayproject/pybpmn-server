@@ -19,7 +19,7 @@ class InstanceLocker:
 
     def __init__(self, datastore: DataStore):
         self.datastore = datastore
-        self.db_config = datastore.db_configuration
+        self.db_config = datastore.db_config
         self.client = datastore.db
         self.db_name = self.db_config.db
         self.collection = self.db_config.locks_collection

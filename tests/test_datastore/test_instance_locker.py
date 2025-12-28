@@ -11,24 +11,26 @@ from pybpmn_server.datastore.instance_locker import InstanceLocker
 from pybpmn_server.datastore.data_store import DataStore
 
 
+@pytest.fixture
+def db_config() -> MongoDBSettings:
+    """Returns a MongoDBSettings instance with default values."""
+    return MongoDBSettings(db_url="mongodb://localhost:27017", enable_profiler=False, db="test_db")
+
+
+@pytest_asyncio.fixture
+async def docstore(db_config) -> AsyncGenerator[DataStore, None]:
+    """Returns a MongoDBSettings instance with default values."""
+    datastore = DataStore(db_config)
+    db = datastore.db.client["test_db"]
+    await db.create_collection("wf_locks")
+
+    yield datastore
+
+    await datastore.db.client.drop_database("test_db")
+
+
 class TestLock:
     """Tests for the lock method of InstanceLocker."""
-
-    @pytest.fixture
-    def db_config(self) -> MongoDBSettings:
-        """Returns a MongoDBSettings instance with default values."""
-        return MongoDBSettings(db_url="mongodb://localhost:27017", enable_profiler=False, db="test_db")
-
-    @pytest_asyncio.fixture
-    async def docstore(self, db_config) -> AsyncGenerator[DataStore, None]:
-        """Returns a MongoDBSettings instance with default values."""
-        datastore = DataStore(db_config)
-        db = datastore.db.client["test_db"]
-        await db.create_collection("wf_locks")
-
-        yield datastore
-
-        await datastore.db.client.drop_database("test_db")
 
     @pytest.mark.asyncio
     async def test_lock_returns_true_on_success(self, docstore):
@@ -63,21 +65,18 @@ class TestRelease:
     """Tests for the release method of InstanceLocker."""
 
     @pytest.mark.asyncio
-    async def test_release_returns_true_on_success(self, mocker):
+    async def test_release_returns_true_on_success(self, docstore):
         """
         The release method should return True when the database remove operation succeeds.
+
         This confirms that the lock has been successfully removed from the datastore.
         """
-        mock_datastore = MagicMock()
-        mock_datastore.db_configuration.db = "test_db"
-        mock_datastore.db_configuration.locks_collection = "test_locks"
-        mock_datastore.db.remove = AsyncMock(return_value=1)
+        locker = InstanceLocker(docstore)
+        lock_result = await locker.lock("instance_123")
+        release_result = await locker.release("instance_123")
 
-        locker = InstanceLocker(mock_datastore)
-        result = await locker.release("instance_123")
-
-        assert result is True
-        mock_datastore.db.remove.assert_called_once_with("test_db", "test_locks", {"id": "instance_123"})
+        assert lock_result is True
+        assert release_result is True
 
     @pytest.mark.asyncio
     async def test_release_returns_false_on_pymongo_error(self, mocker):
@@ -98,26 +97,24 @@ class TestIsLocked:
     """Tests for the is_locked method of InstanceLocker."""
 
     @pytest.mark.asyncio
-    async def test_is_locked_returns_true_if_record_exists(self, mocker):
+    async def test_is_locked_returns_true_if_record_exists(self, docstore):
         """
         The is_locked method should return True if at least one record is found in the locks collection.
+
         This correctly identifies that an instance is currently locked.
         """
-        mock_datastore = MagicMock()
-        mock_datastore.db_configuration.db = "test_db"
-        mock_datastore.db_configuration.locks_collection = "test_locks"
-        mock_datastore.db.find = AsyncMock(return_value=[{"id": "instance_123"}])
-
-        locker = InstanceLocker(mock_datastore)
+        locker = InstanceLocker(docstore)
+        lock_result = await locker.lock("instance_123")
         result = await locker.is_locked("instance_123")
 
+        assert lock_result is True
         assert result is True
-        mock_datastore.db.find.assert_called_once_with("test_db", "test_locks", {"id": "instance_123"})
 
     @pytest.mark.asyncio
     async def test_is_locked_returns_false_if_no_record_exists(self, mocker):
         """
         The is_locked method should return False if no record is found in the locks collection.
+
         This confirms that the instance is not currently locked.
         """
         mock_datastore = MagicMock()

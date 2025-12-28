@@ -8,7 +8,7 @@ import pytest_asyncio
 from pybpmn_server.common.default_configuration import MongoDBSettings
 from pybpmn_server.datastore.aggregate import Aggregate
 from pybpmn_server.datastore.mongodb import MongoDB
-from pybpmn_server.interfaces.datastore import FindParams, FindResult
+from pybpmn_server.datastore.interfaces import FindParams, FindResult
 
 
 class TestAggregateFind:
