@@ -144,6 +144,23 @@ class NodeAction(IntEnum):
 
 
 class ItemStatus(StrEnum):
+    """
+    Represents the various statuses an item can have in a given process.
+
+    Provides a standardized set of states that can be used to track the
+    lifecycle or progress of an item in a workflow, ensuring consistency
+    and clarity in status representation.
+
+    Attributes:
+        enter: Initial state indicating the item has been entered.
+        start: State indicating the item has started processing.
+        wait: State indicating the item is waiting for further action.
+        end: State indicating the item has completed all processing.
+        terminated: State indicating the item has been forcibly stopped.
+        cancelled: State indicating the item has been intentionally canceled.
+        discard: State indicating the item has been removed or ignored.
+    """
+
     enter = "enter"
     start = "start"
     wait = "wait"
@@ -171,3 +188,31 @@ class TokenStatus(StrEnum):
 class FlowAction(StrEnum):
     take = "take"
     discard = "discard"
+
+
+class TokenType(StrEnum):
+    """
+    Represents types of tokens in a system.
+
+    This class enumerates various categories of tokens that are used to classify
+    and organize specific processes, subprocesses, events, and other operational
+    constructs within the system. It extends `StrEnum` to ensure the tokens are
+    both human-readable and usable as strings.
+
+    Attributes:
+        Primary: Represents a primary entity or process.
+        SubProcess: Represents a subprocess within a larger context.
+        Instance: Denotes an instance of a particular entity.
+        Diverge: Represents a diverging point in a process flow.
+        EventSubProcess: Represents an event-based subprocess.
+        BoundaryEvent: Represents a boundary event in a workflow.
+        AdHoc: Denotes an ad-hoc process or operation.
+    """
+
+    Primary = "Primary"
+    SubProcess = "SubProcess"
+    Instance = "Instance"
+    Diverge = "Diverge"
+    EventSubProcess = "EventSubProcess"
+    BoundaryEvent = "BoundaryEvent"
+    AdHoc = "AdHoc"

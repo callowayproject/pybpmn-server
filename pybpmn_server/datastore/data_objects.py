@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 from datetime import datetime  # NOQA: TC003
-from typing import Any, List, Literal, Optional
+from typing import TYPE_CHECKING, Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, TypeAdapter
 
 from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, TokenStatus, TokenType
 
+if TYPE_CHECKING:
+    from ulid import ULID
+
 
 class LoopData(BaseModel):
     """Data object for a loop."""
 
-    id: str
+    id: int
     node_id: str
     owner_token_id: str
     data_path: str = Field(default="")
@@ -26,7 +29,7 @@ class LoopData(BaseModel):
 class TokenData(BaseModel):
     """Data object for a token."""
 
-    id: str
+    id: ULID
     type: TokenType
     start_node_id: str
     current_node_id: str
@@ -41,12 +44,12 @@ class TokenData(BaseModel):
 class ItemData(BaseModel):
     """Data object for an execution item."""
 
-    id: str = Field(description="System generated unique Id")
-    token_id: str = Field(description="Token Id this item belongs to")
+    id: ULID = Field(description="System generated unique Id")
+    token_id: ULID = Field(description="Token Id this item belongs to")
     element_id: str = Field(description="BPMN element Id")
     element_name: str = Field(description="BPMN element name")
     element_type: str = Field(description="BPMN element type")
-    instance_id: Optional[str] = Field(default=None, description="Instance Id this item belongs to")
+    instance_id: Optional[ULID] = Field(default=None, description="Instance Id this item belongs to")
     instance_data: Optional[dict[str, Any]] = Field(default_factory=dict, description="Instance data")
     instance_version: Optional[int] = Field(default=None, description="Instance version")
     data: Optional[dict[str, Any]] = Field(default_factory=dict, description="Item data")
@@ -78,7 +81,7 @@ class ItemData(BaseModel):
 class InstanceData(BaseModel):
     """Data object for an execution instance."""
 
-    id: str
+    id: ULID = Field(description="System generated unique Id")
     name: Optional[str] = Field(default=None)
     status: ExecutionStatus = Field(default=ExecutionStatus.running)
     version: int = Field(default=0)
@@ -124,7 +127,7 @@ class EventData(BaseModel):
 class ProcessData(BaseModel):
     """Process data object in a BPMN model."""
 
-    id: str
+    id: ULID = Field(description="System generated unique Id")
     name: Optional[str] = Field(default=None)
     is_executable: bool = Field(default=False)
     candidate_starter_groups: List[str] = Field(default_factory=list)
