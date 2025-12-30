@@ -16,7 +16,7 @@ from pybpmn_server.interfaces.enums import TokenStatus, TokenType
 
 if TYPE_CHECKING:
     from pybpmn_server.engine.interfaces import IExecution, IToken
-    from pybpmn_server.interfaces.elements import INode
+    from pybpmn_server.elements.interfaces import INode
 
 
 class Loop:

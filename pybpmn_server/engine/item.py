@@ -13,7 +13,7 @@ from pybpmn_server.engine.interfaces import IExecution, IItem, IToken
 from pybpmn_server.interfaces.enums import ItemStatus
 
 if TYPE_CHECKING:
-    from pybpmn_server.interfaces.elements import Element, INode
+    from pybpmn_server.elements.interfaces import Element, INode
 
 
 class Item(IItem):

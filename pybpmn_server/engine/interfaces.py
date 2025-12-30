@@ -22,8 +22,8 @@ from pybpmn_server.interfaces.enums import ItemStatus, TokenStatus
 if TYPE_CHECKING:
     from pybpmn_server.common.default_configuration import Settings
     from pybpmn_server.datastore.data_objects import ItemData
+    from pybpmn_server.elements.interfaces import Element, INode
     from pybpmn_server.interfaces.common import AppDelegateBase
-    from pybpmn_server.interfaces.elements import Element, INode
     from pybpmn_server.interfaces.enums import NodeAction, TokenType
     from pybpmn_server.interfaces.server import IBPMNServer
 

@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from pybpmn_server.engine.execution import Execution
     from pybpmn_server.engine.interfaces import IExecution, IItem
     from pybpmn_server.engine.loop import Loop
-    from pybpmn_server.interfaces.elements import INode
+    from pybpmn_server.elements.interfaces import INode
 
 
 class Token(IToken):

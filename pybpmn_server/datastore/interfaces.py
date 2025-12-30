@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Protocol, 
 
 if TYPE_CHECKING:
     from pybpmn_server.datastore.data_objects import BpmnModelData, EventData, InstanceData, ItemData
-    from pybpmn_server.interfaces.elements import IDefinition
+    from pybpmn_server.elements.interfaces import IDefinition
 
 
 @dataclass

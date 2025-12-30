@@ -1,12 +1,12 @@
+"""Common interfaces."""
+
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Protocol, Union
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Protocol, TypeAlias, Mapping
 
 if TYPE_CHECKING:
-    from .datastore import IDataStore, IModelsDatastore
-    from .engine import IExecution, IItem, IScriptHandler
-    from .server import ICacheManager
+    from pybpmn_server.engine.interfaces import IExecution, IItem
 
 
 class IMongoDBDatabaseConfiguration(Protocol):
@@ -17,48 +17,57 @@ class ISQLiteDatabaseConfiguration(Protocol):
     SQLite: Dict[str, str]
 
 
-class IConfiguration(Protocol):
-    definitions_path: Optional[Path]
-    templates_path: Optional[Path]
-    timers: Mapping[str, int | float]
-    database: Union[IMongoDBDatabaseConfiguration, ISQLiteDatabaseConfiguration, Any]
-    api_key: str
-
-    def definitions(self, server: Any) -> IModelsDatastore: ...
-    def app_delegate(self, server: Any) -> IAppDelegate: ...
-    def data_store(self, server: Any) -> IDataStore: ...
-    def script_handler(self, server: Any) -> IScriptHandler: ...
-    def cache_manager(self, server: Any) -> ICacheManager: ...
+# In Python, we can't easily express string indexer for different types in one Protocol
+# without using __getitem__ or similar, but for migration we use Any for indexer.
+IServiceProvider: TypeAlias = Mapping[str, Callable[..., Any] | "IServiceProvider"]  # noqa: TC010
 
 
-class ILogger(Protocol):
-    def set_options(self, options: Dict[str, Any]) -> None: ...
-    def clear(self) -> None: ...
-    def get(self) -> List[Any]: ...
-    def debug(self, *message: Any) -> Any: ...
-    def warn(self, *message: Any) -> Any: ...
-    def log(self, *message: Any) -> Any: ...
-    def error(self, err: Any) -> None: ...
-    def report_error(self, err: Any) -> None: ...
-    async def save(self, filename: Any) -> None: ...
-    async def save_for_instance(self, instance_id: str) -> Any: ...
+class AppDelegateBase(ABC):
+    """
+    Application Delegate Object to respond to various events and services.
 
+    1.  Receive all events from the workflow
+    2.  Receive service calls
+    3.  Receive message and signal calls
+    4.  Execute scripts
+    """
 
-class IServiceProvider(Protocol):
-    # In Python, we can't easily express string indexer for different types in one Protocol
-    # without using __getitem__ or similar, but for migration we use Any for indexer.
-    def __getitem__(self, key: str) -> Union[Callable[..., Any], IServiceProvider]: ...
+    def __init__(self, server: Any, moddle_options: Optional[Dict[str, Any]] = None):
+        self.server = server
+        self.moddle_options = moddle_options
 
+    @abstractmethod
+    async def get_services_provider(self, execution: IExecution) -> IServiceProvider:
+        pass  # Simplified Promise
 
-class IAppDelegate(Protocol):
-    moddle_options: Any
+    @abstractmethod
+    def send_email(self, to: Any, msg: Any, body: Any) -> Any:
+        pass
 
-    def get_services_provider(self, execution: IExecution) -> Union[IServiceProvider, Any]: ...  # Simplified Promise
-    def send_email(self, to: Any, msg: Any, body: Any) -> Any: ...
-    def execution_started(self, execution: IExecution) -> Any: ...
-    def start_up(self, options: Any) -> Any: ...
-    def message_thrown(self, message_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any: ...
-    def signal_thrown(self, signal_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any: ...
-    def issue_message(self, message_id: str, data: Any) -> Any: ...
-    def issue_signal(self, message_id: str, data: Any) -> Any: ...
-    def service_called(self, kwargs: Dict[str, Any], execution: IExecution, item: IItem) -> Any: ...
+    @abstractmethod
+    def execution_started(self, execution: IExecution) -> Any:
+        pass
+
+    @abstractmethod
+    def start_up(self, options: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def message_thrown(self, message_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any:
+        pass
+
+    @abstractmethod
+    def signal_thrown(self, signal_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any:
+        pass
+
+    @abstractmethod
+    def issue_message(self, message_id: str, data: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def issue_signal(self, message_id: str, data: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def service_called(self, kwargs: Dict[str, Any], execution: IExecution, item: IItem) -> Any:
+        pass

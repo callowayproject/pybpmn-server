@@ -10,7 +10,7 @@ from pybpmn_server.datastore.interfaces import IModelsDatastore
 from pybpmn_server.datastore.mongodb import MongoDB
 from pybpmn_server.datastore.query_translator import QueryTranslator
 from pybpmn_server.elements.definition import Definition
-from pybpmn_server.interfaces.elements import IDefinition
+from pybpmn_server.elements.interfaces import IDefinition
 
 
 class ModelsDatastore(IModelsDatastore):

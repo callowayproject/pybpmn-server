@@ -16,9 +16,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union
 
 if TYPE_CHECKING:
-    from .common import IAppDelegate, IConfiguration
-    from .datastore import IDataStore, IModelsDatastore
-    from .engine import IExecution, IItem, IScriptHandler
+    from pybpmn_server.common.default_configuration import Settings
+    from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
+    from pybpmn_server.engine.interfaces import IExecution, IItem, ScriptHandler
+    from pybpmn_server.interfaces.common import AppDelegateBase
 
 
 class IBPMNServer(Protocol):
@@ -26,31 +27,34 @@ class IBPMNServer(Protocol):
 
     engine: IEngine
     listener: Any  # EventEmitter
-    configuration: IConfiguration
+    configuration: Settings
     definitions: IModelsDatastore
-    app_delegate: IAppDelegate
+    app_delegate: AppDelegateBase
     data_store: IDataStore
     cache: ICacheManager
     cron: ICron
-    script_handler: IScriptHandler
+    script_handler: ScriptHandler
 
 
 class IServerComponent(Protocol):
     """Represents a component of the BPMN server."""
 
     server: IBPMNServer
-    configuration: IConfiguration
+    configuration: Settings
     cron: Any
     cache: Any
-    app_delegate: IAppDelegate
+    app_delegate: AppDelegateBase
     engine: Any
     data_store: IDataStore
-    script_handler: IScriptHandler
+    script_handler: ScriptHandler
     definitions: Any
 
 
 class IEngine(Protocol):
     """Represents the execution engine handling business process executions."""
+
+    running_counter: int
+    calls_counter: int
 
     async def start(
         self,
