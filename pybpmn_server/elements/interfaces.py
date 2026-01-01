@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union, runtime_checkable
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union, runtime_checkable
 
 if TYPE_CHECKING:
+
     from pybpmn_server.elements.behaviors.behavior import Behavior
     from pybpmn_server.engine.interfaces import IItem
     from pybpmn_server.interfaces.enums import ExecutionEvent, ItemStatus, NodeAction
@@ -35,10 +36,13 @@ class IDefinition(Protocol):
     def get_node_by_id(self, id_: Any) -> INode: ...
 
 
-class Element(ABC):
+T = TypeVar("T")
+
+
+class Element(Generic[T]):
     """Base class for Flow and Node elements."""
 
-    def __init__(self, type_: str, def_: Any, id_: str):
+    def __init__(self, type_: str, def_: T, id_: str):
         self.id: str = id_
         self.type: str = type_
         self.sub_type: Optional[str] = None
@@ -49,31 +53,36 @@ class Element(ABC):
         self.def_ = def_
 
     def continue_(self, item: IItem) -> Any:
+        """Continue the behavior."""
         return None
 
-    async def describe(self) -> List[List[str]]:
-        return []
-
     async def restored(self, item: IItem) -> None:
+        """Restore the element's state after deserialization."""
         for behav in self.behaviours.values():
             await behav.restored(item)
 
     async def resume(self, item: IItem) -> None:
+        """Resume the element's behavior after deserialization."""
         for behav in self.behaviours.values():
             await behav.resume(item)
 
     def has_behaviour(self, name: str) -> bool:
+        """Check if the element has a specific behavior by name."""
         return name in self.behaviours
 
     def get_behaviour(self, name: str) -> Optional[Behavior]:
+        """Retrieve a behavior by name."""
         return self.behaviours.get(name)
 
     def add_behaviour(self, name: str, behaviour: Behavior) -> None:
+        """Add a behavior to the element."""
         self.behaviours[name] = behaviour
 
 
-class IFlow(Element, ABC):
-    def __init__(self, type_: str, def_: Any, id_: str, from_node: INode, to_node: INode):
+class IFlow(Element, ABC, Generic[T]):
+    """Base class for Flow elements."""
+
+    def __init__(self, type_: str, def_: T, id_: str, from_node: INode, to_node: INode):
         super().__init__(type_, def_, id_)
         self.id = id_
         self.type = type_
@@ -83,28 +92,30 @@ class IFlow(Element, ABC):
         self.is_flow = True
 
     @abstractmethod
-    async def describe(self) -> List[List[str]]:
-        pass
-
-    @abstractmethod
     async def run(self, item: IItem) -> str:
+        """Execute the flow action based on the condition evaluation."""
         pass
 
     @abstractmethod
     async def end(self, item: IItem) -> None:
+        """End the flow action, typically used for cleanup or finalization."""
         pass
 
     @abstractmethod
     async def evaluate_condition(self, item: IItem) -> bool:
+        """Evaluate the flow condition based on the condition evaluation."""
         pass
 
     @abstractmethod
     async def execute(self, item: IItem) -> None:
+        """Execute the flow action based on the condition evaluation."""
         pass
 
 
-class INode(Element, ABC):
-    def __init__(self, type_: str, def_: Any, id_: str, process: Any):
+class INode(Element, ABC, Generic[T]):
+    """Base class for Node elements."""
+
+    def __init__(self, type_: str, def_: T, id_: str, process: Any):
         super().__init__(type_, def_, id_)
         self.id = id_
         self.process = process
@@ -129,25 +140,35 @@ class INode(Element, ABC):
 
     @property
     def process_id(self) -> Optional[str]:
+        """Get the process ID associated with the node."""
         return self.process.id if self.process else None
 
     @property
     def is_catching(self) -> bool:
+        """Check if the node is catching events."""
+        return False
+
+    @property
+    def is_transaction(self) -> bool:
+        """Indicates whether the node is a transaction event."""
         return False
 
     @property
     @abstractmethod
-    def loop_definition(self) -> Optional[ILoopBehaviour]: ...
+    def loop_definition(self) -> Optional[ILoopBehaviour]:
+        """Get the loop definition associated with the node."""
+        ...
 
     @classmethod
     @abstractmethod
-    def from_element(cls, element: Any) -> INode: ...
+    def from_element(cls, element: Any) -> INode:
+        """Create a node instance from a BPMN element."""
+        ...
 
     @abstractmethod
-    def continue_(self, item: IItem) -> Any: ...  # 'continue' is a keyword in Python
-
-    @abstractmethod
-    async def describe(self) -> List[List[str]]: ...
+    def continue_(self, item: IItem) -> Any:
+        """Continue the node execution."""
+        ...
 
     @abstractmethod
     async def do_event(
@@ -156,36 +177,58 @@ class INode(Element, ABC):
         event: ExecutionEvent,
         new_status: Optional[ItemStatus] = None,
         event_details: Optional[Dict[str, Any]] = None,
-    ) -> list[Any]: ...
+    ) -> list[Any]:
+        """Handle an execution event for the node."""
+        ...
 
     @abstractmethod
-    def enter(self, item: IItem) -> None: ...
+    def enter(self, item: IItem) -> None:
+        """Hook for entering the node for execution."""
+        ...
 
     @property
     @abstractmethod
-    def requires_wait(self) -> bool: ...
+    def requires_wait(self) -> bool:
+        """Check if the node requires waiting for an event or condition."""
+        ...
 
     @property
     @abstractmethod
-    def can_be_invoked(self) -> bool: ...
+    def can_be_invoked(self) -> bool:
+        """Check if the node can be invoked."""
+        ...
 
     @abstractmethod
-    async def execute(self, item: IItem) -> Union[NodeAction, None]: ...
+    async def execute(self, item: IItem) -> Union[NodeAction, None]:
+        """Execute the node."""
+        ...
 
     @abstractmethod
-    async def start(self, item: IItem) -> NodeAction: ...
+    async def start(self, item: IItem) -> NodeAction:
+        """Start the node."""
+        ...
 
     @abstractmethod
-    async def run(self, item: IItem) -> NodeAction: ...
+    async def run(self, item: IItem) -> NodeAction:
+        """Run the node."""
+        ...
 
     @abstractmethod
-    async def end(self, item: IItem, cancel: bool = False) -> None: ...
+    async def end(self, item: IItem, cancel: bool = False) -> None:
+        """End the node execution, typically used for cleanup or finalization."""
+        ...
 
     @abstractmethod
-    def init(self, item: IItem) -> None: ...
+    def init(self, item: IItem) -> None:
+        """Initialize the node for execution."""
+        ...
 
     @abstractmethod
-    async def get_outbounds(self, item: IItem) -> List[IItem]: ...
+    async def get_outbounds(self, item: IItem) -> List[IItem]:
+        """Get the outbound items from the node."""
+        ...
 
     @abstractmethod
-    async def get_output(self, item: IItem) -> dict[str, Any]: ...
+    async def get_output(self, item: IItem) -> dict[str, Any]:
+        """Get the output data from the node."""
+        ...
