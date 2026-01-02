@@ -1,4 +1,5 @@
 """Backend implementations for sending emails."""
+
 from email.message import EmailMessage as PythonEmailMessage
 from email.policy import Policy
 from email.policy import default as default_policy
