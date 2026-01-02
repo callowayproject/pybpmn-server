@@ -55,7 +55,7 @@ class EmailMessage:
         cc: Optional[Sequence[str]] = None,
         reply_to: Optional[Sequence[str]] = None,
     ) -> None:
-        from pybpmn_server.common.default_configuration import settings
+        from pybpmn_server.common.configuration import settings
 
         if to:
             if isinstance(to, str):
@@ -119,7 +119,7 @@ class EmailMessage:
         Returns:
             The constructed email message object.
         """
-        from pybpmn_server.common.default_configuration import settings
+        from pybpmn_server.common.configuration import settings
 
         msg = PythonEmailMessage(policy=policy)
         self._add_bodies(msg)

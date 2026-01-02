@@ -45,7 +45,35 @@ def get_connection(backend: Optional[str] = None, *, fail_silently: bool = False
     Both fail_silently and other keyword arguments are used in the
     constructor of the backend.
     """
-    from pybpmn_server.common.default_configuration import settings
+    from pybpmn_server.common.configuration import settings
 
     klass = import_string(backend or settings.email.backend)
     return klass(fail_silently=fail_silently, **kwds)
+
+
+def send_mail(
+    recipient_list: list[str],
+    subject: str,
+    body: str,
+    from_email: Optional[str] = None,
+    *,
+    fail_silently: bool = False,
+    connection: Optional[BaseEmailBackend] = None,
+    html_message: Optional[str] = None,
+) -> int:
+    """
+    Easy wrapper for sending a single message to a recipient list.
+
+    All members of the recipient list will see the other recipients in the 'To' field.
+
+    If from_email is None, use the DEFAULT_FROM_EMAIL setting.
+    """
+    from .message import EmailMultiAlternatives
+
+    connection = connection or get_connection(fail_silently=fail_silently)
+    mail = EmailMultiAlternatives(subject, body, from_email, recipient_list, connection=connection)
+
+    if html_message:
+        mail.attach_alternative(html_message, "text/html")
+
+    return mail.send()
