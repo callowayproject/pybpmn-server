@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from pybpmn_server.common.default_configuration import MongoDBSettings
+from pybpmn_server.common.configuration import MongoDBSettings
 from pybpmn_server.datastore.data_objects import BpmnModelData
 from pybpmn_server.datastore.model_data_store import ModelsDatastore
 

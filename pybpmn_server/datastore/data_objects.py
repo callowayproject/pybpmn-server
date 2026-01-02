@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime  # NOQA: TC003
-from typing import TYPE_CHECKING, Any, List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, TypeAdapter
+from ulid import ULID  # NOQA: TC002
 
 from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, TokenStatus, TokenType
-
-if TYPE_CHECKING:
-    from ulid import ULID
 
 
 class LoopData(BaseModel):

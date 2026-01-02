@@ -5,8 +5,9 @@ from typing import Generator
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from ulid import ULID
 
-from pybpmn_server.common.default_configuration import MongoDBSettings
+from pybpmn_server.common.configuration import MongoDBSettings
 from pybpmn_server.datastore.data_objects import InstanceData, InstanceDataAdapter
 from pybpmn_server.datastore.data_store import DataStore, _get_items_from_instances
 from pybpmn_server.datastore.interfaces import FindParams, FindResult
@@ -16,15 +17,20 @@ from pybpmn_server.interfaces.enums import TokenType
 class TestGetItemsFromInstances:
     def test_get_items_from_instances_basic(self):
         """Verify that items are correctly extracted from instances and augmented with instance information."""
+        item1_id = ULID()
+        item2_id = ULID()
+        token1_id = ULID()
+        token2_id = ULID()
+        instance_id = ULID()
         instance = InstanceDataAdapter.validate_python(
             {
-                "id": "inst-1",
+                "id": instance_id,
                 "name": "Process 1",
                 "version": 1,
                 "data": {"key": "value"},
                 "tokens": [
                     {
-                        "id": "token-1",
+                        "id": token1_id,
                         "data_path": "path.to.data",
                         "type": TokenType.Instance,
                         "status": "running",
@@ -33,7 +39,7 @@ class TestGetItemsFromInstances:
                         "parent_token_id": None,
                     },
                     {
-                        "id": "token-2",
+                        "id": token2_id,
                         "data_path": "",
                         "type": TokenType.Instance,
                         "start_node_id": "node-1",
@@ -44,16 +50,16 @@ class TestGetItemsFromInstances:
                 ],
                 "items": [
                     {
-                        "id": "item-1",
-                        "token_id": "token-1",
+                        "id": item1_id,
+                        "token_id": token1_id,
                         "seq": 1,
                         "element_id": "element-1",
                         "element_type": "Task",
                         "element_name": "Task 1",
                     },
                     {
-                        "id": "item-2",
-                        "token_id": "token-2",
+                        "id": item2_id,
+                        "token_id": token2_id,
                         "seq": 2,
                         "element_id": "element-2",
                         "element_type": "Task",
@@ -71,12 +77,12 @@ class TestGetItemsFromInstances:
 
             # Should be sorted by seq
             assert len(items) == 2
-            assert items[0].id == "item-1"
-            assert items[1].id == "item-2"
+            assert items[0].id == item1_id
+            assert items[1].id == item2_id
 
             # Check augmentation
             mock_get_data.assert_called_with({"key": "value"}, "path.to.data")
-            assert items[0].instance_id == "inst-1"
+            assert items[0].instance_id == instance_id
             assert items[0].process_name == "Process 1"
             assert items[0].data == {"scoped": "data"}
 

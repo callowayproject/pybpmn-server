@@ -36,6 +36,7 @@ class FindResult:
 
 class IDataStore(Protocol):
     """Data store interface."""
+
     db_configuration: Any
     db: Any
     locker: Any
@@ -55,6 +56,7 @@ class IDataStore(Protocol):
 
 class IModelsDatastore(Protocol):
     """Model data store interface."""
+
     async def get(self, query: dict[str, Any]) -> List[Dict[str, Any]]: ...
     async def get_list(self, query: Optional[dict[str, Any]]) -> List[dict[str, Any]]: ...
     async def get_source(self, name: Any) -> str: ...

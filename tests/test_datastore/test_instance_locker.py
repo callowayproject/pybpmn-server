@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest_asyncio
 from pymongo.errors import PyMongoError
 
-from pybpmn_server.common.default_configuration import MongoDBSettings
+from pybpmn_server.common.configuration import MongoDBSettings
 from pybpmn_server.datastore.instance_locker import InstanceLocker
 from pybpmn_server.datastore.data_store import DataStore
 

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 
 from pydantic import ValidationError
 
-from pybpmn_server.common.default_configuration import MongoDBSettings, settings
+from pybpmn_server.common.configuration import MongoDBSettings, settings
 from pybpmn_server.datastore.aggregate import Aggregate
 from pybpmn_server.datastore.data_objects import InstanceDataList
 from pybpmn_server.datastore.instance_locker import InstanceLocker

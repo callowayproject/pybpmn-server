@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 from bson.objectid import ObjectId
 
-from pybpmn_server.common.default_configuration import MongoDBSettings
+from pybpmn_server.common.configuration import MongoDBSettings
 from pybpmn_server.datastore.mongodb import MongoDB, profile
 
 

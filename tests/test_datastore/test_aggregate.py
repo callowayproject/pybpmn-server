@@ -5,7 +5,7 @@ from typing import AsyncGenerator
 import pytest
 import pytest_asyncio
 
-from pybpmn_server.common.default_configuration import MongoDBSettings
+from pybpmn_server.common.configuration import MongoDBSettings
 from pybpmn_server.datastore.aggregate import Aggregate
 from pybpmn_server.datastore.mongodb import MongoDB
 from pybpmn_server.datastore.interfaces import FindParams, FindResult

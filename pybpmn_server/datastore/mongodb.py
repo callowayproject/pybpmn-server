@@ -13,7 +13,7 @@ from pymongo import AsyncMongoClient
 if TYPE_CHECKING:
     from pymongo.results import DeleteResult, InsertManyResult, UpdateResult
 
-    from pybpmn_server.common.default_configuration import MongoDBSettings
+    from pybpmn_server.common.configuration import MongoDBSettings
 
 logger = logging.getLogger(__name__)
 
