@@ -2,10 +2,16 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pymitter import EventEmitter
+
+from pybpmn_server.common.utils import import_string
+from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
+from pybpmn_server.engine.interfaces import ScriptHandler
+from pybpmn_server.server.interfaces import ICacheManager
 
 logger = logging.getLogger(__name__)
 
@@ -82,10 +88,71 @@ class Settings(BaseSettings):
 
     definitions_path: Path = Field(default_factory=lambda: Path.cwd() / "definitions")
     templates_path: Path = Field(default_factory=lambda: Path.cwd() / "templates")
-    database: SQLiteSettings | MongoDBSettings = Field(default_factory=MongoDBSettings)
+
+    database_settings: SQLiteSettings | MongoDBSettings = Field(default_factory=MongoDBSettings)
+    _data_store: Optional[IDataStore] = None
+    _model_data_store: Optional[IModelsDatastore] = None
+
     timers: TimerSettings = Field(default_factory=TimerSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
     domain_name: str = Field(default="localhost")
+
+    script_backend: str = Field(default="pybpmn_server.engine.script_handler.DefaultScriptHandler")
+    _script_handler: Optional[ScriptHandler] = None
+
+    cache_backend: str = Field(default="pybpmn_server.server.cache_manager.CacheManager")
+    _cache_manager: Optional[ICacheManager] = None
+
+    service_config: dict[str, str] = Field(default_factory=dict)
+    _service_providers: Optional[dict[str, Any]] = None
+
+    _listener: Optional[EventEmitter] = None
+
+    @property
+    def listener(self) -> EventEmitter:
+        """Get the listener."""
+        if self._listener is None:
+            self._listener = EventEmitter()
+        return self._listener
+
+    @property
+    def script_handler(self) -> ScriptHandler:
+        """Get the script handler."""
+        if self._script_handler is None:
+            self._script_handler = import_string(self.script_backend)()
+        return self._script_handler
+
+    @property
+    def cache_manager(self) -> ICacheManager:
+        """Get the cache manager."""
+        if self._cache_manager is None:
+            self._cache_manager = import_string(self.cache_backend)()
+        return self._cache_manager
+
+    @property
+    def data_store(self) -> IDataStore:
+        """Get the data store."""
+        from pybpmn_server.datastore.data_store import DataStore
+
+        if self._data_store is None:
+            self._data_store = DataStore(self.database_settings)
+        return self._data_store
+
+    @property
+    def model_data_store(self) -> IModelsDatastore:
+        """Get the model data store."""
+        from pybpmn_server.datastore.model_data_store import ModelsDatastore
+
+        if self._model_data_store is None:
+            self._model_data_store = ModelsDatastore(self.definitions_path, self.database_settings)
+        return self._model_data_store
+
+    @property
+    def service_providers(self) -> dict[str, Any]:
+        """Get the service providers."""
+        if self._service_providers is None:
+            self._service_providers = {k: import_string(v) for k, v in self.service_config}
+        return self._service_providers
 
 
 settings = Settings()

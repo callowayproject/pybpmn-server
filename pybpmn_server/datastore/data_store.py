@@ -62,11 +62,11 @@ class DataStore(IDataStore):
     """Data store component for managing workflow data and instances."""
 
     def __init__(self, db_configuration: MongoDBSettings = None):
-        if not db_configuration and not settings.database:
+        if not db_configuration and not settings.database_settings:
             raise Exception("Database configuration is not set")
-        if not isinstance(settings.database, MongoDBSettings):
+        if not isinstance(settings.database_settings, MongoDBSettings):
             raise Exception("Database configuration is not of type MongoDBSettings")
-        self.db_config = db_configuration or settings.database
+        self.db_config = db_configuration or settings.database_settings
         self.db = MongoDB(self.db_config)
         self.locker = InstanceLocker(self)
 
@@ -94,10 +94,10 @@ class DataStore(IDataStore):
         """Save instance data."""
         save_object = instance.model_dump()
 
-        if self.save_logs:
-            save_object["logs"] = instance.logs
-        if self.save_source:
-            save_object["source"] = instance.source
+        # if self.save_logs:
+        #     save_object["logs"] = instance.logs
+        # if self.save_source:
+        #     save_object["source"] = instance.source
 
         if self.enable_save_points and instance.items:
             last_item = instance.items[-1]

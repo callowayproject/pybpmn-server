@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime  # NOQA: TC003
-from typing import Any, List, Literal, Optional
+from typing import TYPE_CHECKING, Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, TypeAdapter
-from ulid import ULID  # NOQA: TC002
 
 from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, TokenStatus, TokenType
+
+if TYPE_CHECKING:
+    from pybpmn_server.elements.interfaces import IDefinition
 
 
 class LoopData(BaseModel):
@@ -27,7 +29,7 @@ class LoopData(BaseModel):
 class TokenData(BaseModel):
     """Data object for a token."""
 
-    id: ULID
+    id: str
     type: TokenType
     start_node_id: str
     current_node_id: str
@@ -42,12 +44,12 @@ class TokenData(BaseModel):
 class ItemData(BaseModel):
     """Data object for an execution item."""
 
-    id: ULID = Field(description="System generated unique Id")
-    token_id: ULID = Field(description="Token Id this item belongs to")
+    id: str = Field(description="System generated unique Id")
+    token_id: str = Field(description="Token Id this item belongs to")
     element_id: str = Field(description="BPMN element Id")
-    element_name: str = Field(description="BPMN element name")
+    element_name: Optional[str] = Field(default="", description="BPMN element name")
     element_type: str = Field(description="BPMN element type")
-    instance_id: Optional[ULID] = Field(default=None, description="Instance Id this item belongs to")
+    instance_id: Optional[str] = Field(default=None, description="Instance Id this item belongs to")
     instance_data: Optional[dict[str, Any]] = Field(default_factory=dict, description="Instance data")
     instance_version: Optional[int] = Field(default=None, description="Instance version")
     data: Optional[dict[str, Any]] = Field(default_factory=dict, description="Item data")
@@ -79,7 +81,7 @@ class ItemData(BaseModel):
 class InstanceData(BaseModel):
     """Data object for an execution instance."""
 
-    id: ULID = Field(description="System generated unique Id")
+    id: str = Field(description="System generated unique Id")
     name: Optional[str] = Field(default=None)
     status: ExecutionStatus = Field(default=ExecutionStatus.running)
     version: int = Field(default=0)
@@ -120,18 +122,20 @@ class EventData(BaseModel):
     timer: Optional[TimerData] = None
     signal_id: Optional[str] = None
     message_id: Optional[str] = None
+    documentation: Optional[str] = Field(default=None)
 
 
 class ProcessData(BaseModel):
     """Process data object in a BPMN model."""
 
-    id: ULID = Field(description="System generated unique Id")
+    id: str = Field(description="System generated unique Id")
     name: Optional[str] = Field(default=None)
     is_executable: bool = Field(default=False)
     candidate_starter_groups: List[str] = Field(default_factory=list)
     candidate_starter_users: List[str] = Field(default_factory=list)
     history_time_to_live: Optional[str] = Field(default=None)
     is_startable_in_tasklist: bool = Field(default=True)
+    documentation: Optional[str] = Field(default=None)
 
 
 class BpmnModelData(BaseModel):
@@ -143,3 +147,68 @@ class BpmnModelData(BaseModel):
     processes: List[ProcessData] = Field(default_factory=list)
     events: List[EventData] = Field(default_factory=list)
     saved: Optional[datetime] = Field(default=None)
+
+    async def parse(self, definition: IDefinition) -> None:
+        """Parse the BPMN model definition."""
+        if not definition.parse_result:
+            await definition.load()
+
+        for process in definition.processes:
+            process_data = ProcessData(
+                id=process.id,
+                name=process.name,
+                is_executable=process.is_executable,
+                candidate_starter_groups=process.camunda_candidate_starter_groups,
+                candidate_starter_users=process.camunda_candidate_starter_users,
+                history_time_to_live=process.history_time_to_live,
+                is_startable_in_tasklist=process.is_startable_in_tasklist,
+                documentation=process.documentation,
+            )
+            self.processes.append(process_data)
+            for event in process.def_.start_events:
+                event_data = EventData(
+                    type=f"bpmn:{event.Meta.name}",
+                    element_id=event.id,
+                    name=event.name,
+                    lane=event.lane,
+                    candidate_groups=getattr(event, "camunda_candidate_groups", None),
+                    candidate_users=getattr(event, "camunda_candidate_users", None),
+                    process_id=process.id,
+                    documentation=event.documentation,
+                )
+                if event.timer_event_definition:
+                    event_data.subType = "Timer"
+
+
+"""
+    parse(definition: Definition) {
+
+        definition.nodes.forEach(n => {
+
+            if (n.type == 'bpmn:StartEvent') {
+
+                let timer = n.hasTimer();
+                if (timer) {
+                    event.timeDue = timer.timeDue();
+                    event.subType = 'Timer';
+                    event.expression = timer.timeCycle;
+                    if (!event.expression)
+                        event.expression = timer.duration;
+                    event.referenceDateTime = new Date().getTime();
+                }
+                let msg = n.hasMessage();
+                if (msg) {
+                    event.messageId = msg.messageId;
+                    event.subType = 'Message';
+                    //console.log('timer:' + timer.timeDueInSeconds());
+                }
+                let signal = n.hasSignal();
+                if (signal) {
+                    event.signalId = signal.signalId;
+                    event.subType = 'Signal';
+                }
+                this.events.push(event);
+            }
+        });
+    }
+"""

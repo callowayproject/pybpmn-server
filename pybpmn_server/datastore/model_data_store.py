@@ -16,11 +16,11 @@ class ModelsDatastore(IModelsDatastore):
     """ModelsDatastore for BPMN."""
 
     def __init__(self, definitions_path: Optional[Path] = None, db_configuration: MongoDBSettings = None):
-        if not db_configuration and not settings.database:
+        if not db_configuration and not settings.database_settings:
             raise Exception("Database configuration is not set")
-        if not isinstance(settings.database, MongoDBSettings):
+        if not isinstance(settings.database_settings, MongoDBSettings):
             raise Exception("Database configuration is not of type MongoDBSettings")
-        self.db_config = db_configuration or settings.database
+        self.db_config = db_configuration or settings.database_settings
         self.db = MongoDB(self.db_config)
         self.definitions_path = definitions_path or settings.definitions_path
 
@@ -58,6 +58,18 @@ class ModelsDatastore(IModelsDatastore):
     async def install(self) -> None:
         """The first time installation of the DB creates a new collection and adds an index."""
         await self.db.create_index(self.db_config.db, self.db_config.definition_collection, {"name": 1}, unique=True)
+
+    # async def update_timer(self, name: str) -> bool:
+    #     """Update a BPMN timer from the database."""
+    #     from pybpmn_server.elements.definition import Definition
+    #
+    #     source = await self.get_source(name)
+    #     model = BpmnModelData(name=name, source=source, svg="")
+    #     definition = Definition(name, source)
+    #     await definition.load()
+    #     query = {"name": name}
+    #     update_obj = {"$set": {"events": model.events}}
+    #     await self.db.update(self.db_config.db, self.db_config.definition_collection, query, update_obj, upsert=False)
 
     async def save_model(self, model: BpmnModelData) -> bool:
         """Save a BPMN model to the database."""
