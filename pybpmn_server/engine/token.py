@@ -39,10 +39,10 @@ from pybpmn_server.engine.interfaces import IToken
 from pybpmn_server.interfaces.enums import ItemStatus, NodeAction, TokenStatus, TokenType
 
 if TYPE_CHECKING:
+    from pybpmn_server.elements.interfaces import INode
     from pybpmn_server.engine.execution import Execution
     from pybpmn_server.engine.interfaces import IExecution, IItem
     from pybpmn_server.engine.loop import Loop
-    from pybpmn_server.elements.interfaces import INode
 
 
 class Token(IToken):
@@ -127,9 +127,9 @@ class Token(IToken):
         parent_token: Optional[IToken],
         origin_item: Optional[IItem],
         loop: Optional[Loop],
-        data: Any = None,
+        data: Optional[dict[str, Any]] = None,
         no_execute: bool = False,
-        items_key: Any = None,
+        items_key: Optional[str] = None,
     ) -> Token:
         """
         Starts a new token within the execution process and initializes or updates its attributes.
@@ -155,14 +155,15 @@ class Token(IToken):
         """
         token = Token(type_, execution, start_node, data_path, parent_token, origin_item)
 
+        if parent_token and parent_token.items_key:
+            token.items_key = parent_token.items_key
+
         if items_key is not None:
             if token.items_key is not None:
                 token.items_key += "."
             else:
                 token.items_key = ""
             token.items_key += str(items_key)
-        elif parent_token and parent_token.items_key:
-            token.items_key = parent_token.items_key
 
         if loop:
             token.loop = loop
@@ -191,13 +192,13 @@ class Token(IToken):
                 "id": self.id,
                 "type": self.type.value if isinstance(self.type, TokenType) else self.type,
                 "status": self.status,
-                "dataPath": self.data_path,
-                "loopId": loop_id,
-                "parentToken": parent_token_id,
-                "originItem": origin_item_id,
-                "startNodeId": self.start_node_id,
-                "currentNode": self.current_node.id,
-                "itemsKey": self.items_key,
+                "data_path": self.data_path,
+                "loop_id": loop_id,
+                "parent_token": parent_token_id,
+                "origin_item": origin_item_id,
+                "start_node_id": self.start_node_id,
+                "current_node_id": self.current_node.id,
+                "items_key": self.items_key,
             }
         )
 

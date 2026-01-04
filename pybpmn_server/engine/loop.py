@@ -15,8 +15,8 @@ from pybpmn_server.datastore.data_objects import LoopData
 from pybpmn_server.interfaces.enums import TokenStatus, TokenType
 
 if TYPE_CHECKING:
-    from pybpmn_server.engine.interfaces import IExecution, IToken
     from pybpmn_server.elements.interfaces import INode
+    from pybpmn_server.engine.interfaces import IExecution, IToken
 
 
 class Loop:
@@ -218,7 +218,7 @@ class Loop:
                 loop,
                 data,
                 False,
-                seq,
+                str(seq),
             )
             return False
         else:  # parallel

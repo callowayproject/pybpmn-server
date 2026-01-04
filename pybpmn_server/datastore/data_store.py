@@ -61,11 +61,7 @@ def _get_items_from_instances(
 class DataStore(IDataStore):
     """Data store component for managing workflow data and instances."""
 
-    def __init__(self, db_configuration: MongoDBSettings = None):
-        if not db_configuration and not settings.database_settings:
-            raise Exception("Database configuration is not set")
-        if not isinstance(settings.database_settings, MongoDBSettings):
-            raise Exception("Database configuration is not of type MongoDBSettings")
+    def __init__(self, db_configuration: Optional[MongoDBSettings] = None):
         self.db_config = db_configuration or settings.database_settings
         self.db = MongoDB(self.db_config)
         self.locker = InstanceLocker(self)

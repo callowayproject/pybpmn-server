@@ -24,14 +24,14 @@ class Item(IItem):
     def __init__(self, element: Element, token: IToken, status: ItemStatus = ItemStatus.start):
         super().__init__(element, token, status)
 
-        self.id: Optional[ULID] = ULID()
+        self.id: Optional[str] = str(ULID())
         self.seq: int = token.execution.get_new_sequence("item")
 
         self.message_id: Optional[str] = getattr(element, "message_id", None)
         self.signal_id: Optional[str] = getattr(element, "signal_id", None)
 
         self.user_name: Any = token.execution.user_name
-        self.item_key: str = token.items_key if token.items_key else ""
+        self.item_key: str = token.items_key or ""
 
         self.started_at: datetime = datetime.now(tz=timezone.utc)
         self.ended_at: Any = None

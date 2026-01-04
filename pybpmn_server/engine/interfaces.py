@@ -17,15 +17,16 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from ulid import ULID
 
 from pybpmn_server.datastore.data_objects import InstanceData, TokenData
-from pybpmn_server.interfaces.enums import ItemStatus, TokenStatus
+from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, NodeAction, TokenStatus
 
 if TYPE_CHECKING:
-    from pybpmn_server.common.default_configuration import Settings
+    import asyncio
+
+    from pybpmn_server.common.configuration import Settings
     from pybpmn_server.datastore.data_objects import ItemData
     from pybpmn_server.elements.interfaces import Element, INode
-    from pybpmn_server.interfaces.common import AppDelegateBase
-    from pybpmn_server.interfaces.enums import NodeAction, TokenType
-    from pybpmn_server.interfaces.server import IBPMNServer
+    from pybpmn_server.elements.process import Process
+    from pybpmn_server.interfaces.enums import TokenType
 
 
 class ScriptHandler(ABC):
@@ -68,7 +69,7 @@ class IToken(ABC):
         self._current_node = start_node
         self.parent_token = parent_token
         self.origin_item = origin_item
-        self.id = ULID()
+        self.id = str(ULID())
         self.process_id = start_node.process_id
         self.path: List[IItem] = []
         self.status: TokenStatus = TokenStatus.running
@@ -166,50 +167,57 @@ class IToken(ABC):
 class IExecution(ABC):
     """Interface for execution components in the BPMN engine."""
 
-    def __init__(self, server: IBPMNServer, name: str, source: str, state: Optional[InstanceData] = None):
-        self.instance = state or InstanceData(id=ULID(), name=name)
-        self.server = server
+    def __init__(
+        self,
+        name: str,
+        source: str,
+        configuration: Optional[Settings] = None,
+        state: Optional[InstanceData] = None,
+    ):
+        from pybpmn_server.common.configuration import settings
+        from pybpmn_server.elements.definition import Definition
+
+        self.instance = InstanceData(id=str(ULID()), name=name) if state is None else state
+        self.configuration = configuration or settings
         self.source = source
+        self.data_store = self.configuration.data_store
+        self.listener = self.configuration.listener
+        self.definition = Definition(name, source)
 
         self.tokens: Dict[Any, IToken] = {}
-        self.process: Any
-        self.promises: Any
-        self.listener: Any
+        self.process: Optional[Process] = None
         self.is_locked = False
-        self.errors: Any
-        self.item: Any
-        self.message_matching_key: Any
-        self.worker: Any
-        self.user_name: Any
-        self.id: Any
-        self.status: Any
-        self.action: NodeAction
-        self.options: Any
-        self.uids: Dict[str, Any]
-        self.ending: bool
-        self.cron: Any
-        self.cache: Any
-        self.engine: Any
-        self.definitions: Any
+        self.errors: Any = None
+        self.item: Any = None
+        self.message_matching_key: Optional[str] = None
+        self.worker: Any = None
+        self.promises: List[asyncio.Future] = []
+        self.user_name: str = ""
+        self.action: NodeAction = NodeAction.STOP
+        self.uids: Dict[str, int] = {}
+        self.ending: bool = False
+        self.operation: Optional[str] = None
+
+    @property
+    def id(self) -> str:
+        """
+        Get the unique identifier of the execution instance.
+        """
+        return self.instance.id
 
     @property
     def name(self) -> Optional[str]:
+        """
+        Get the name of the execution instance.
+        """
         return self.instance.name
 
     @property
-    @abstractmethod
-    def app_delegate(self) -> AppDelegateBase:
-        pass
-
-    @property
-    @abstractmethod
-    def configuration(self) -> Settings:
-        """Return the server configuration."""
-        pass
-
-    @property
-    @abstractmethod
-    def script_handler(self) -> ScriptHandler: ...
+    def status(self) -> ExecutionStatus:
+        """
+        Get the status of the execution instance.
+        """
+        return self.instance.status
 
     @abstractmethod
     def get_node_by_id(self, id_: str) -> INode: ...
@@ -243,7 +251,8 @@ class IExecution(ABC):
         execution_id: Any,
         input_data: Any,
         user_name: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
+        restart: bool = False,
+        recover: bool = False,
     ) -> IExecution: ...
 
     @abstractmethod
@@ -252,13 +261,12 @@ class IExecution(ABC):
         execution_id: Any,
         input_data: Any,
         user_name: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
+        restart: bool = False,
+        recover: bool = False,
     ) -> IExecution: ...
 
     @abstractmethod
-    async def signal_repeat_timer_event(
-        self, execution_id: Any, prev_item: Any, input_data: Any, options: Optional[Dict[str, Any]] = None
-    ) -> IExecution: ...
+    async def signal_repeat_timer_event(self, execution_id: Any, prev_item: Any, input_data: Any) -> IExecution: ...
 
     @abstractmethod
     def get_items(self, query: Optional[Any] = None) -> List[IItem]: ...

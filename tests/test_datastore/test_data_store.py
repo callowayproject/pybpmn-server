@@ -17,11 +17,11 @@ from pybpmn_server.interfaces.enums import TokenType
 class TestGetItemsFromInstances:
     def test_get_items_from_instances_basic(self):
         """Verify that items are correctly extracted from instances and augmented with instance information."""
-        item1_id = ULID()
-        item2_id = ULID()
-        token1_id = ULID()
-        token2_id = ULID()
-        instance_id = ULID()
+        item1_id = str(ULID())
+        item2_id = str(ULID())
+        token1_id = str(ULID())
+        token2_id = str(ULID())
+        instance_id = str(ULID())
         instance = InstanceDataAdapter.validate_python(
             {
                 "id": instance_id,
@@ -89,29 +89,20 @@ class TestGetItemsFromInstances:
 
 class TestDataStore:
     @pytest.fixture
-    def mock_settings(self) -> Generator[MongoDBSettings, None, None]:
+    def mock_settings(self) -> MongoDBSettings:
         """Return a mock settings object."""
-        with patch("pybpmn_server.datastore.data_store.settings") as mock:
-            mock.database = MongoDBSettings(
-                db_url="mongodb://localhost:27017",
-                db="test_db",
-                instance_collection="instances",
-                locks_collection="locks",
-                archive_collection="archive",
-            )
-            yield mock
+        return MongoDBSettings(
+            db_url="mongodb://localhost:27017",
+            db="test_db",
+            instance_collection="instances",
+            locks_collection="locks",
+            archive_collection="archive",
+        )
 
     @pytest.fixture
     def data_store(self, mock_settings) -> DataStore:
         """Return a DataStore instance."""
-        return DataStore()
-
-    def test_init_raises_if_no_database_settings(self):
-        """Ensure DataStore initialization fails if database settings are missing."""
-        with patch("pybpmn_server.datastore.data_store.settings") as mock_settings:
-            mock_settings.database = None
-            with pytest.raises(Exception, match="Database configuration is not set"):
-                DataStore()
+        return DataStore(mock_settings)
 
     @pytest.mark.asyncio
     async def test_save_calls_save_instance(self, data_store):
