@@ -28,6 +28,7 @@ class Process:
         self.event_sub_processes: List[Process] = []
         self.sub_process_events: List[IItem] = []
         self.scripts: Dict[str, List[str]] = {}
+        self.documentation: Optional[str] = " ".join(doc.content for doc in definition.documentation)
         self.candidate_starter_groups = getattr(definition, "camunda_candidate_starter_groups", None)
         self.candidate_starter_users = getattr(definition, "camunda_candidate_starter_users", None)
         self.history_time_to_live = getattr(definition, "camunda_history_time_to_live", None)
@@ -94,7 +95,7 @@ class Process:
         """
         starts = []
         for node in self.children_nodes:
-            is_start_event = node.type == "bpmn:StartEvent"
+            is_start_event = node.type == "bpmn:startEvent"
             is_invalid_subtype = node.sub_type in (
                 NodeSubtype.timer,
                 NodeSubtype.error,

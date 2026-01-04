@@ -1,4 +1,5 @@
 """Flow element representing a connection between nodes in a BPMN process."""
+
 from __future__ import annotations
 
 import json

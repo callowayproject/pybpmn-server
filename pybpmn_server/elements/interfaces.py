@@ -5,8 +5,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union, runtime_checkable
 
-if TYPE_CHECKING:
+from pybpmn_parser.parse import ParseResult
 
+if TYPE_CHECKING:
     from pybpmn_server.elements.behaviors.behavior import Behavior
     from pybpmn_server.engine.interfaces import IItem
     from pybpmn_server.interfaces.enums import ExecutionEvent, ItemStatus, NodeAction
@@ -23,11 +24,11 @@ class ILoopBehaviour(Protocol):
 class IDefinition(Protocol):
     name: Any
     processes: Dict[Any, Any]
-    root_elements: Any
     nodes: Dict[Any, Any]
     flows: List[Any]
-    source: Any
+    source: str
     access_rules: List[Any]
+    parse_result: Optional[ParseResult]
 
     async def load(self) -> Any: ...
     def load_process(self, process_element: Any, parent_process: Any) -> Any: ...

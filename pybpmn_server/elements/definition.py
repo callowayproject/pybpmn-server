@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Optional, TypeAlias
 from pybpmn_parser.bpmn.activities.sub_process import SubProcess as SubProcessDefinition
 from pybpmn_parser.bpmn.activities.sub_process import Transaction as TransactionDefinition
 from pybpmn_parser.bpmn.process.process import Process as ProcessDefinition
-from pybpmn_parser.parse import Parser
-from pyee.asyncio import AsyncIOEventEmitter
+from pybpmn_parser.parse import Parser, ParseResult
+from pymitter import EventEmitter
 
 from pybpmn_server.elements.flow import Flow
 from pybpmn_server.elements.interfaces import IDefinition, INode
@@ -26,20 +26,21 @@ class Definition(IDefinition):
 
     def __init__(self, name: str, source: str):
         self.elements_by_id: dict[str, Any] = {}
-        self.listener = AsyncIOEventEmitter()
+        self.listener = EventEmitter()
         self.name = name
         self.source = source
         self.processes: Dict[str, Process] = {}
         self.nodes: Dict[str, Any] = {}
         self.flows: List[Flow] = []
-        self.root_elements: List[Any] = []
         self.access_rules: List[Any] = []
         self.parser: Parser = Parser()
+        self.parse_result: Optional[ParseResult] = None
 
     async def load(self) -> Any:
         """Load definition from source."""
         if not self.source:
-            return None
+            self.parse_result = None
+            return self.parse_result
 
         parse_result = self.parser.parse_string(self.source)
 
@@ -53,11 +54,12 @@ class Definition(IDefinition):
             # Handle references (SequenceFlows, BoundaryEvents)
             # This is complex in TS because bpmn-moddle handles refs.
             # Here we need to manually link them.
-            self._link_references(parse_result.definition)
+            self._link_references()
 
             event = ExecutionEvent.process_loaded
-            await self.listener.emit(event, {"event": event, "context": self})
+            await self.listener.emit_async(event, {"event": event, "context": self})
 
+            self.parse_result = parse_result
             return parse_result.definition
         except Exception as exc:
             logger.error(f"Error in loading definition for {self.name}: {exc}")
@@ -91,18 +93,20 @@ class Definition(IDefinition):
         for ls in getattr(process_element, "lane_sets", []):
             for lane in ls.lanes:
                 for fnr in lane.flow_node_refs:
-                    target = self.nodes.get(fnr.id)
-                    if target:
+                    if target := self.nodes.get(fnr.id):
                         target.lane = lane.name
 
         return process
 
-    def _link_references(self, definition: Any) -> None:
+    def _link_references(self) -> None:
         """Link references to other nodes."""
         # TODO: re-implement this method using pybpmn-parser
         # In a real parser, this would be handled.
         # Here we need to find SequenceFlows and link them to nodes.
-        for el in definition["elements_by_id"].values():
+        if not self.parse_result:
+            return
+
+        for el in self.parse_result.elements_by_id.values():
             if not el:
                 continue
             if el["$type"] == "bpmn:SequenceFlow":
@@ -170,7 +174,7 @@ class Definition(IDefinition):
             for flow in self.flows
         ]
 
-        return json.dumps({"root": self.root_elements, "processes": processes, "elements": elements, "flows": flows})
+        return json.dumps({"processes": processes, "elements": elements, "flows": flows})
 
     def get_start_nodes(self, user_invokable: bool = False) -> List[Any]:
         """
