@@ -67,7 +67,7 @@ class Transaction(SubProcess):
 
     def get_items_for_token(self, token: IToken) -> List[IItem]:
         """Get the items this transaction belongs to."""
-        items = []
+        items: List[IItem] = []
         for t in token.get_children_tokens():
             items.extend(it for it in t.path if it.node.type != BpmnType.SequenceFlow)
             items.extend(self.get_items_for_token(t))

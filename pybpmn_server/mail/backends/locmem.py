@@ -5,8 +5,7 @@ Backend for test environment.
 import copy
 
 from pybpmn_server import mail
-from pybpmn_server.mail import Emailable
-from pybpmn_server.mail.backends.base import BaseEmailBackend
+from pybpmn_server.mail import BaseEmailBackend, Emailable
 
 
 class EmailBackend(BaseEmailBackend):

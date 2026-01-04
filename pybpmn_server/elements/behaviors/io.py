@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class IOParameter:
     """Represents an input/output parameter in a BPMN process."""
+
     def __init__(self, io_object: Dict[str, Any]):
         self.type: str = io_object.get("$type", "")
         self.name: str = io_object.get("name", "")

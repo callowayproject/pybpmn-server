@@ -14,8 +14,7 @@ from functools import singledispatchmethod
 from pathlib import Path
 from typing import Any, Optional, Sequence, TypeAlias
 
-from pybpmn_server.mail import get_connection
-from pybpmn_server.mail.backends.base import BaseEmailBackend
+from pybpmn_server.mail import BaseEmailBackend, get_connection
 
 # Default MIME type to use on attachments (if it is not explicitly given and cannot be guessed).
 DEFAULT_ATTACHMENT_MIME_TYPE = "application/octet-stream"
@@ -25,7 +24,7 @@ EmailAttachment = namedtuple("EmailAttachment", ["filename", "content", "mimetyp
 
 EmailAttachmentType: TypeAlias = EmailAttachment | MIMEPart | tuple[str, bytes, str]
 
-# TODO: Add testing to EmailMessage
+# TODO (pybpmn-server-281): Add testing to EmailMessage
 
 
 class EmailMessage:

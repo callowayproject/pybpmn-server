@@ -1,0 +1,4131 @@
+warning: in the working copy of 'schema/DC.xsd', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'schema/DI.xsd', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'schema/DMN16.xsd', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'schema/DMNDI15.xsd', CRLF will be replaced by LF the next time Git touches it
+[INFO] Installing environment for https://github.com/econchick/interrogate.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+ruff format..............................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+16 files reformatted, 115 files left unchanged
+ruff check...............................................................Failed
+- hook id: ruff-check
+- exit code: 1
+- files were modified by this hook
+E501 Line too long (120 > 119)
+  --> pybpmn_server/datastore/model_data_store.py:72:120
+   |
+70 |     #     query = {"name": name}
+71 |     #     update_obj = {"$set": {"events": model.events}}
+72 |     #     await self.db.update(self.db_config.db, self.db_config.definition_collection, query, update_obj, upsert=False)
+   |                                                                                                                        ^
+73 |
+74 |     async def save_model(self, model: BpmnModelData) -> bool:
+   |
+D104 Missing docstring in public package
+--> pybpmn_server/dmn/__init__.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/__init__.py:5:7
+  |
+5 | class DMNDecisionRunner:
+  |       ^^^^^^^^^^^^^^^^^
+6 |     def __init__(self, path, debug=None):
+7 |         self.path = path
+  |
+ANN001 Missing type annotation for function argument `path`
+ --> pybpmn_server/dmn/__init__.py:6:24
+  |
+5 | class DMNDecisionRunner:
+6 |     def __init__(self, path, debug=None):
+  |                        ^^^^
+7 |         self.path = path
+  |
+ANN001 Missing type annotation for function argument `debug`
+ --> pybpmn_server/dmn/__init__.py:6:30
+  |
+5 | class DMNDecisionRunner:
+6 |     def __init__(self, path, debug=None):
+  |                              ^^^^^
+7 |         self.path = path
+  |
+ANN201 Missing return type annotation for public function `decide`
+  --> pybpmn_server/dmn/__init__.py:19:9
+   |
+17 |         self.dmnEngine = DMNEngine(decision.decision_tables[0], debug=debug)
+18 |
+19 |     def decide(self, *inputArgs, **inputKwargs):
+   |         ^^^^^^
+20 |         return self.dmnEngine.decide(*inputArgs, **inputKwargs)
+   |
+help: Add return type annotation
+D102 Missing docstring in public method
+  --> pybpmn_server/dmn/__init__.py:19:9
+   |
+17 |         self.dmnEngine = DMNEngine(decision.decision_tables[0], debug=debug)
+18 |
+19 |     def decide(self, *inputArgs, **inputKwargs):
+   |         ^^^^^^
+20 |         return self.dmnEngine.decide(*inputArgs, **inputKwargs)
+   |
+N803 Argument name `inputArgs` should be lowercase
+  --> pybpmn_server/dmn/__init__.py:19:22
+   |
+17 |         self.dmnEngine = DMNEngine(decision.decision_tables[0], debug=debug)
+18 |
+19 |     def decide(self, *inputArgs, **inputKwargs):
+   |                      ^^^^^^^^^^
+20 |         return self.dmnEngine.decide(*inputArgs, **inputKwargs)
+   |
+N803 Argument name `inputKwargs` should be lowercase
+  --> pybpmn_server/dmn/__init__.py:19:34
+   |
+17 |         self.dmnEngine = DMNEngine(decision.decision_tables[0], debug=debug)
+18 |
+19 |     def decide(self, *inputArgs, **inputKwargs):
+   |                                  ^^^^^^^^^^^^^
+20 |         return self.dmnEngine.decide(*inputArgs, **inputKwargs)
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/dmn_engine.py:16:7
+   |
+16 | class DMNEngine:
+   |       ^^^^^^^^^
+17 |     def __init__(self, decision_table, debug=None):
+18 |         self.decision_table = decision_table
+   |
+ANN001 Missing type annotation for function argument `decision_table`
+  --> pybpmn_server/dmn/dmn_engine.py:17:24
+   |
+16 | class DMNEngine:
+17 |     def __init__(self, decision_table, debug=None):
+   |                        ^^^^^^^^^^^^^^
+18 |         self.decision_table = decision_table
+19 |         self.debug = debug
+   |
+ANN001 Missing type annotation for function argument `debug`
+  --> pybpmn_server/dmn/dmn_engine.py:17:40
+   |
+16 | class DMNEngine:
+17 |     def __init__(self, decision_table, debug=None):
+   |                                        ^^^^^
+18 |         self.decision_table = decision_table
+19 |         self.debug = debug
+   |
+ANN201 Missing return type annotation for public function `decide`
+  --> pybpmn_server/dmn/dmn_engine.py:21:9
+   |
+19 |         self.debug = debug
+20 |
+21 |     def decide(self, *args, **kwargs):
+   |         ^^^^^^
+22 |         for rule in self.decision_table.rules:
+23 |             self.logger.debug("Checking rule %s (%s)..." % (rule.id, rule.description))
+   |
+help: Add return type annotation
+D102 Missing docstring in public method
+  --> pybpmn_server/dmn/dmn_engine.py:21:9
+   |
+19 |         self.debug = debug
+20 |
+21 |     def decide(self, *args, **kwargs):
+   |         ^^^^^^
+22 |         for rule in self.decision_table.rules:
+23 |             self.logger.debug("Checking rule %s (%s)..." % (rule.id, rule.description))
+   |
+N802 Function name `__checkRule` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:31:9
+   |
+29 |                 return rule
+30 |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+   |         ^^^^^^^^^^^
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |
+ANN202 Missing return type annotation for private function `__checkRule`
+  --> pybpmn_server/dmn/dmn_engine.py:31:9
+   |
+29 |                 return rule
+30 |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+   |         ^^^^^^^^^^^
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |
+help: Add return type annotation: `bool`
+ANN001 Missing type annotation for function argument `rule`
+  --> pybpmn_server/dmn/dmn_engine.py:31:27
+   |
+29 |                 return rule
+30 |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+   |                           ^^^^
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |
+N803 Argument name `inputData` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:31:33
+   |
+29 |                 return rule
+30 |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+   |                                 ^^^^^^^^^^
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |
+N803 Argument name `inputKwargs` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:31:45
+   |
+29 |                 return rule
+30 |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+   |                                             ^^^^^^^^^^^^^
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |
+N806 Variable `inputEntry` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:32:18
+   |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+   |                  ^^^^^^^^^^
+33 |             input = self.decision_table.inputs[idx]
+   |
+A001 Variable `input` is shadowing a Python builtin
+  --> pybpmn_server/dmn/dmn_engine.py:33:13
+   |
+31 |     def __checkRule(self, rule, *inputData, **inputKwargs):
+32 |         for idx, inputEntry in enumerate(rule.input_entries):
+33 |             input = self.decision_table.inputs[idx]
+   |             ^^^^^
+34 |
+35 |             self.logger.debug(
+   |
+N806 Variable `parsedValue` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:39:27
+   |
+37 |             )
+38 |
+39 |             for operator, parsedValue in inputEntry.operators:
+   |                           ^^^^^^^^^^^
+40 |                 if parsedValue is not None:
+41 |                     inputVal = DMNEngine.__getInputVal(inputEntry, idx, *inputData, **inputKwargs)
+   |
+N806 Variable `inputVal` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:41:21
+   |
+39 |             for operator, parsedValue in inputEntry.operators:
+40 |                 if parsedValue is not None:
+41 |                     inputVal = DMNEngine.__getInputVal(inputEntry, idx, *inputData, **inputKwargs)
+   |                     ^^^^^^^^
+42 |                     if isinstance(parsedValue, Decimal) and not isinstance(inputVal, Decimal):
+43 |                         self.logger.warning("Attention, you are comparing a Decimal with %r" % (type(inputVal)))
+   |
+S307 Use of possibly insecure function; consider using `ast.literal_eval`
+  --> pybpmn_server/dmn/dmn_engine.py:48:28
+   |
+47 |                     self.logger.debug(" Evaludation expression: %s" % (expression))
+48 |                     if not eval(expression):
+   |                            ^^^^^^^^^^^^^^^^
+49 |                         return False  # Value does not match
+50 |                     else:
+   |
+N802 Function name `__getInputVal` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:61:9
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |         ^^^^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+ANN205 Missing return type annotation for staticmethod `__getInputVal`
+  --> pybpmn_server/dmn/dmn_engine.py:61:9
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |         ^^^^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+help: Add return type annotation
+N803 Argument name `inputEntry` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:61:23
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |                       ^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+ANN001 Missing type annotation for function argument `inputEntry`
+  --> pybpmn_server/dmn/dmn_engine.py:61:23
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |                       ^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+ANN001 Missing type annotation for function argument `idx`
+  --> pybpmn_server/dmn/dmn_engine.py:61:35
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |                                   ^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+N803 Argument name `inputData` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:61:40
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |                                        ^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+N803 Argument name `inputKwargs` should be lowercase
+  --> pybpmn_server/dmn/dmn_engine.py:61:52
+   |
+60 |     @staticmethod
+61 |     def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+   |                                                    ^^^^^^^^^^^^^
+62 |         """
+63 |         The input of the decision method can be args or kwargs.
+   |
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/dmn_engine.py:62:9
+   |
+60 |       @staticmethod
+61 |       def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+62 | /         """
+63 | |         The input of the decision method can be args or kwargs.
+64 | |         This function tries to extract the input data from args if passed,
+65 | |          otherwise from kwargs using the label of the decision input column as mapping
+66 | |
+67 | |         :param inputEntry:
+68 | |         :param idx:
+69 | |         :param inputData:
+70 | |         :param inputKwargs:
+71 | |         :return:
+72 | |         """
+   | |___________^
+73 |           return (
+74 |               inputData[idx] if inputData else inputKwargs[inputEntry.input.label]
+   |
+help: Insert single blank line
+D415 First line should end with a period, question mark, or exclamation point
+  --> pybpmn_server/dmn/dmn_engine.py:62:9
+   |
+60 |       @staticmethod
+61 |       def __getInputVal(inputEntry, idx, *inputData, **inputKwargs):
+62 | /         """
+63 | |         The input of the decision method can be args or kwargs.
+64 | |         This function tries to extract the input data from args if passed,
+65 | |          otherwise from kwargs using the label of the decision input column as mapping
+66 | |
+67 | |         :param inputEntry:
+68 | |         :param idx:
+69 | |         :param inputData:
+70 | |         :param inputKwargs:
+71 | |         :return:
+72 | |         """
+   | |___________^
+73 |           return (
+74 |               inputData[idx] if inputData else inputKwargs[inputEntry.input.label]
+   |
+help: Add closing punctuation
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/dmn_parser.py:1:1
+ANN205 Missing return type annotation for staticmethod `parse_decision_tables`
+  --> pybpmn_server/dmn/dmn_parser.py:39:9
+   |
+38 |     @staticmethod
+39 |     def parse_decision_tables(decision: Decision, decision_element: dict[str, Any]):
+   |         ^^^^^^^^^^^^^^^^^^^^^
+40 |         for decision_table_element in decision_element:
+41 |             assert decision_table_element.tag.endswith("decisionTable"), (
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/dmn/dmn_parser.py:39:9
+   |
+38 |     @staticmethod
+39 |     def parse_decision_tables(decision: Decision, decision_element: dict[str, Any]):
+   |         ^^^^^^^^^^^^^^^^^^^^^
+40 |         for decision_table_element in decision_element:
+41 |             assert decision_table_element.tag.endswith("decisionTable"), (
+   |
+N802 Function name `__parseInputsOutputs` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:54:9
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |         ^^^^^^^^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+ANN205 Missing return type annotation for staticmethod `__parseInputsOutputs`
+  --> pybpmn_server/dmn/dmn_parser.py:54:9
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |         ^^^^^^^^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+help: Add return type annotation: `None`
+ANN001 Missing type annotation for function argument `decision`
+  --> pybpmn_server/dmn/dmn_parser.py:54:30
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |                              ^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+N803 Argument name `decisionTable` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:54:40
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |                                        ^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+ANN001 Missing type annotation for function argument `decisionTable`
+  --> pybpmn_server/dmn/dmn_parser.py:54:40
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |                                        ^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+N803 Argument name `decisionTableElement` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:54:55
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |                                                       ^^^^^^^^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+ANN001 Missing type annotation for function argument `decisionTableElement`
+  --> pybpmn_server/dmn/dmn_parser.py:54:55
+   |
+53 |     @staticmethod
+54 |     def __parseInputsOutputs(decision, decisionTable, decisionTableElement):
+   |                                                       ^^^^^^^^^^^^^^^^^^^^
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+   |
+A001 Variable `input` is shadowing a Python builtin
+  --> pybpmn_server/dmn/dmn_parser.py:57:17
+   |
+55 |         for element in decisionTableElement:
+56 |             if element.tag.endswith("input"):
+57 |                 input = DMNParser.__parseInput(element)
+   |                 ^^^^^
+58 |                 decisionTable.inputs.append(input)
+59 |             elif element.tag.endswith("output"):
+   |
+N802 Function name `__parseInput` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:69:9
+   |
+68 |     @staticmethod
+69 |     def __parseInput(inputElement):
+   |         ^^^^^^^^^^^^
+70 |         typeRef = None
+71 |         for inputExpression in inputElement:
+   |
+ANN205 Missing return type annotation for staticmethod `__parseInput`
+  --> pybpmn_server/dmn/dmn_parser.py:69:9
+   |
+68 |     @staticmethod
+69 |     def __parseInput(inputElement):
+   |         ^^^^^^^^^^^^
+70 |         typeRef = None
+71 |         for inputExpression in inputElement:
+   |
+help: Add return type annotation
+N803 Argument name `inputElement` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:69:22
+   |
+68 |     @staticmethod
+69 |     def __parseInput(inputElement):
+   |                      ^^^^^^^^^^^^
+70 |         typeRef = None
+71 |         for inputExpression in inputElement:
+   |
+ANN001 Missing type annotation for function argument `inputElement`
+  --> pybpmn_server/dmn/dmn_parser.py:69:22
+   |
+68 |     @staticmethod
+69 |     def __parseInput(inputElement):
+   |                      ^^^^^^^^^^^^
+70 |         typeRef = None
+71 |         for inputExpression in inputElement:
+   |
+N806 Variable `typeRef` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:70:9
+   |
+68 |     @staticmethod
+69 |     def __parseInput(inputElement):
+70 |         typeRef = None
+   |         ^^^^^^^
+71 |         for inputExpression in inputElement:
+72 |             assert inputExpression.tag.endswith("inputExpression"), 'Element %r is not of type "inputExpression"' % (
+   |
+N806 Variable `inputExpression` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:71:13
+   |
+69 |     def __parseInput(inputElement):
+70 |         typeRef = None
+71 |         for inputExpression in inputElement:
+   |             ^^^^^^^^^^^^^^^
+72 |             assert inputExpression.tag.endswith("inputExpression"), 'Element %r is not of type "inputExpression"' % (
+73 |                 inputExpression.tag
+   |
+N806 Variable `typeRef` in function should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:76:13
+   |
+74 |             )
+75 |
+76 |             typeRef = inputExpression.attrib.get("typeRef", "")
+   |             ^^^^^^^
+77 |
+78 |         input = Input(
+   |
+A001 Variable `input` is shadowing a Python builtin
+  --> pybpmn_server/dmn/dmn_parser.py:78:9
+   |
+76 |             typeRef = inputExpression.attrib.get("typeRef", "")
+77 |
+78 |         input = Input(
+   |         ^^^^^
+79 |             inputElement.attrib["id"],
+80 |             inputElement.attrib.get("label", ""),
+   |
+N802 Function name `__parseOutput` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:87:9
+   |
+86 |     @staticmethod
+87 |     def __parseOutput(outputElement):
+   |         ^^^^^^^^^^^^^
+88 |         output = Output(
+89 |             outputElement.attrib["id"],
+   |
+ANN205 Missing return type annotation for staticmethod `__parseOutput`
+  --> pybpmn_server/dmn/dmn_parser.py:87:9
+   |
+86 |     @staticmethod
+87 |     def __parseOutput(outputElement):
+   |         ^^^^^^^^^^^^^
+88 |         output = Output(
+89 |             outputElement.attrib["id"],
+   |
+help: Add return type annotation
+N803 Argument name `outputElement` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:87:23
+   |
+86 |     @staticmethod
+87 |     def __parseOutput(outputElement):
+   |                       ^^^^^^^^^^^^^
+88 |         output = Output(
+89 |             outputElement.attrib["id"],
+   |
+ANN001 Missing type annotation for function argument `outputElement`
+  --> pybpmn_server/dmn/dmn_parser.py:87:23
+   |
+86 |     @staticmethod
+87 |     def __parseOutput(outputElement):
+   |                       ^^^^^^^^^^^^^
+88 |         output = Output(
+89 |             outputElement.attrib["id"],
+   |
+N802 Function name `__parseRule` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:97:9
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |         ^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+ANN205 Missing return type annotation for staticmethod `__parseRule`
+  --> pybpmn_server/dmn/dmn_parser.py:97:9
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |         ^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+help: Add return type annotation
+ANN001 Missing type annotation for function argument `decision`
+  --> pybpmn_server/dmn/dmn_parser.py:97:21
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |                     ^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+N803 Argument name `decisionTable` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:97:31
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |                               ^^^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+ANN001 Missing type annotation for function argument `decisionTable`
+  --> pybpmn_server/dmn/dmn_parser.py:97:31
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |                               ^^^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+N803 Argument name `ruleElement` should be lowercase
+  --> pybpmn_server/dmn/dmn_parser.py:97:46
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |                                              ^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+ANN001 Missing type annotation for function argument `ruleElement`
+  --> pybpmn_server/dmn/dmn_parser.py:97:46
+   |
+96 |     @staticmethod
+97 |     def __parseRule(decision, decisionTable, ruleElement):
+   |                                              ^^^^^^^^^^^
+98 |         rule = Rule(ruleElement.attrib["id"])
+   |
+N806 Variable `inputIdx` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:100:9
+    |
+ 98 |         rule = Rule(ruleElement.attrib["id"])
+ 99 |
+100 |         inputIdx = 0
+    |         ^^^^^^^^
+101 |         outputIdx = 0
+102 |         for child in ruleElement:
+    |
+N806 Variable `outputIdx` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:101:9
+    |
+100 |         inputIdx = 0
+101 |         outputIdx = 0
+    |         ^^^^^^^^^
+102 |         for child in ruleElement:
+103 |             # Load description
+    |
+N806 Variable `inputEntry` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:109:17
+    |
+107 |             # Load input entries
+108 |             elif child.tag.endswith("inputEntry"):
+109 |                 inputEntry = DMNParser.parse_input_output_element(decision, decisionTable, child, InputEntry, inputIdx)
+    |                 ^^^^^^^^^^
+110 |                 rule.input_entries.append(inputEntry)
+111 |                 inputIdx += 1
+    |
+N806 Variable `inputIdx` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:111:17
+    |
+109 |                 inputEntry = DMNParser.parse_input_output_element(decision, decisionTable, child, InputEntry, inputIdx)
+110 |                 rule.input_entries.append(inputEntry)
+111 |                 inputIdx += 1
+    |                 ^^^^^^^^
+112 |
+113 |             # Load output entries
+    |
+N806 Variable `outputEntry` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:115:17
+    |
+113 |             # Load output entries
+114 |             elif child.tag.endswith("outputEntry"):
+115 |                 outputEntry = DMNParser.parse_input_output_element(
+    |                 ^^^^^^^^^^^
+116 |                     decision, decisionTable, child, OutputEntry, outputIdx
+117 |                 )
+    |
+N806 Variable `outputIdx` in function should be lowercase
+   --> pybpmn_server/dmn/dmn_parser.py:119:17
+    |
+117 |                 )
+118 |                 rule.output_entries.append(outputEntry)
+119 |                 outputIdx += 1
+    |                 ^^^^^^^^^
+120 |
+121 |         return rule
+    |
+ANN205 Missing return type annotation for staticmethod `parse_input_output_element`
+   --> pybpmn_server/dmn/dmn_parser.py:124:9
+    |
+123 |     @staticmethod
+124 |     def parse_input_output_element(decision, decision_table: DecisionTable, element, cls: type, idx: int):
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+125 |         input_or_output = (
+126 |             decision_table.inputs if cls == InputEntry else decision_table.outputs if cls == OutputEntry else None
+    |
+help: Add return type annotation
+D102 Missing docstring in public method
+   --> pybpmn_server/dmn/dmn_parser.py:124:9
+    |
+123 |     @staticmethod
+124 |     def parse_input_output_element(decision, decision_table: DecisionTable, element, cls: type, idx: int):
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+125 |         input_or_output = (
+126 |             decision_table.inputs if cls == InputEntry else decision_table.outputs if cls == OutputEntry else None
+    |
+ANN001 Missing type annotation for function argument `decision`
+   --> pybpmn_server/dmn/dmn_parser.py:124:36
+    |
+123 |     @staticmethod
+124 |     def parse_input_output_element(decision, decision_table: DecisionTable, element, cls: type, idx: int):
+    |                                    ^^^^^^^^
+125 |         input_or_output = (
+126 |             decision_table.inputs if cls == InputEntry else decision_table.outputs if cls == OutputEntry else None
+    |
+ANN001 Missing type annotation for function argument `element`
+   --> pybpmn_server/dmn/dmn_parser.py:124:77
+    |
+123 |     @staticmethod
+124 |     def parse_input_output_element(decision, decision_table: DecisionTable, element, cls: type, idx: int):
+    |                                                                             ^^^^^^^
+125 |         input_or_output = (
+126 |             decision_table.inputs if cls == InputEntry else decision_table.outputs if cls == OutputEntry else None
+    |
+D104 Missing docstring in public package
+--> pybpmn_server/dmn/generated/__init__.py:1:1
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/alignment_kind.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/alignment_kind.py:7:5
+   |
+ 6 |   class AlignmentKind(Enum):
+ 7 | /     """
+ 8 | |     AlignmentKind enumerates the possible options for alignment for layout
+ 9 | |     purposes.
+10 | |     """
+   | |_______^
+11 |
+12 |       START = "start"
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/artifact.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/artifact.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Artifact(TArtifact):
+   |       ^^^^^^^^
+10 |     class Meta:
+11 |         name = "artifact"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/association.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/association.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Association(TAssociation):
+   |       ^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "association"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/authority_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/authority_requirement.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class AuthorityRequirement(TAuthorityRequirement):
+   |       ^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "authorityRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/bounds.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/bounds.py:9:5
+   |
+ 7 |   @dataclass
+ 8 |   class Bounds:
+ 9 | /     """
+10 | |     Bounds specifies a rectangular area in some x-y coordinate system that is
+11 | |     defined by a location (x and y) and a size (width and height).
+12 | |     """
+   | |_______^
+13 |
+14 |       class Meta:
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/business_context_element.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/business_context_element.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class BusinessContextElement(TBusinessContextElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "businessContextElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/business_knowledge_model.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/business_knowledge_model.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class BusinessKnowledgeModel(TBusinessKnowledgeModel):
+   |       ^^^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "businessKnowledgeModel"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/color.py:1:1
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/decision.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/decision.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Decision(TDecision):
+   |       ^^^^^^^^
+10 |     class Meta:
+11 |         name = "decision"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/decision_service.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/decision_service.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class DecisionService(TDecisionService):
+   |       ^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "decisionService"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/decision_table.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/decision_table.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class DecisionTable(TDecisionTable):
+   |       ^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "decisionTable"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/definitions.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/definitions.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Definitions(TDefinitions):
+   |       ^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "definitions"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/diagram.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/diagram.py:11:5
+   |
+ 9 |   @dataclass
+10 |   class Diagram(DiagramElement):
+11 | /     """
+12 | |     Attributes:
+13 | |         name: the name of the diagram.
+14 | |         documentation: the documentation of the diagram.
+15 | |         resolution: the resolution of the diagram expressed in user
+16 | |             units per inch.
+17 | |     """
+   | |_______^
+18 |
+19 |       name: Optional[str] = field(
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/diagram_element.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/diagram_element.py:12:5
+   |
+10 |   @dataclass
+11 |   class DiagramElement:
+12 | /     """DiagramElement is the abstract super type of all elements in diagrams,
+13 | |     including diagrams themselves.
+14 | |
+15 | |     When contained in a diagram, diagram elements are laid out relative
+16 | |     to the diagram's origin.
+17 | |
+18 | |     Attributes:
+19 | |         extension:
+20 | |         dmnstyle:
+21 | |         style: an optional locally-owned style for this diagram element.
+22 | |         shared_style: a reference to an optional shared style element
+23 | |             for this diagram element.
+24 | |         id:
+25 | |         other_attributes:
+26 | |     """
+   | |_______^
+27 |
+28 |       extension: Optional["DiagramElement.Extension"] = field(
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dimension.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/dimension.py:9:5
+   |
+ 7 |   @dataclass
+ 8 |   class Dimension:
+ 9 | /     """
+10 | |     Dimension specifies two lengths (width and height) along the x and y axes in
+11 | |     some x-y coordinate system.
+12 | |     """
+   | |_______^
+13 |
+14 |       class Meta:
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmndecision_service_divider_line.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmndecision_service_divider_line.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class DmndecisionServiceDividerLine(Edge):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "DMNDecisionServiceDividerLine"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmndi.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmndi.py:10:7
+   |
+ 9 | @dataclass
+10 | class Dmndi:
+   |       ^^^^^
+11 |     class Meta:
+12 |         name = "DMNDI"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmndiagram.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmndiagram.py:14:7
+   |
+13 | @dataclass
+14 | class Dmndiagram(Diagram):
+   |       ^^^^^^^^^^
+15 |     class Meta:
+16 |         name = "DMNDiagram"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmndiagram_element.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/dmndiagram_element.py:10:5
+   |
+ 8 |   @dataclass
+ 9 |   class DmndiagramElement(DiagramElement):
+10 | /     """This element should never be instantiated directly, but rather concrete
+11 | |     implementation should.
+12 | |
+13 | |     It is placed there only to be referred in the sequence
+14 | |     """
+   | |_______^
+15 |
+16 |       class Meta:
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmnedge.py:1:1
+S405 `xml.etree` methods are vulnerable to XML attacks
+ --> pybpmn_server/dmn/generated/dmnedge.py:3:6
+  |
+1 | from dataclasses import dataclass, field
+2 | from typing import Optional
+3 | from xml.etree.ElementTree import QName
+  |      ^^^^^^^^^^^^^^^^^^^^^
+4 |
+5 | from pybpmn_server.dmn.generated.dmnlabel import Dmnlabel
+  |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmnedge.py:12:7
+   |
+11 | @dataclass
+12 | class Dmnedge(Edge):
+   |       ^^^^^^^
+13 |     class Meta:
+14 |         name = "DMNEdge"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmnelement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmnelement.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Dmnelement(TDMNElement):
+   |       ^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "DMNElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmnlabel.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmnlabel.py:10:7
+   |
+ 9 | @dataclass
+10 | class Dmnlabel(Shape):
+   |       ^^^^^^^^
+11 |     class Meta:
+12 |         name = "DMNLabel"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmnshape.py:1:1
+S405 `xml.etree` methods are vulnerable to XML attacks
+ --> pybpmn_server/dmn/generated/dmnshape.py:3:6
+  |
+1 | from dataclasses import dataclass, field
+2 | from typing import Optional
+3 | from xml.etree.ElementTree import QName
+  |      ^^^^^^^^^^^^^^^^^^^^^
+4 |
+5 | from pybpmn_server.dmn.generated.dmndecision_service_divider_line import (
+  |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmnshape.py:15:7
+   |
+14 | @dataclass
+15 | class Dmnshape(Shape):
+   |       ^^^^^^^^
+16 |     class Meta:
+17 |         name = "DMNShape"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/dmnstyle.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/dmnstyle.py:12:7
+   |
+11 | @dataclass
+12 | class Dmnstyle(Style):
+   |       ^^^^^^^^
+13 |     class Meta:
+14 |         name = "DMNStyle"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/drg_element.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/drg_element.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class DrgElement(TDrgelement):
+   |       ^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "drgElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/edge.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/edge.py:11:5
+   |
+ 9 |   @dataclass
+10 |   class Edge(DiagramElement):
+11 | /     """
+12 | |     Attributes:
+13 | |         waypoint: an optional list of points relative to the origin of
+14 | |             the nesting diagram that specifies the connected line
+15 | |             segments of the edge
+16 | |     """
+   | |_______^
+17 |
+18 |       waypoint: list[Point] = field(
+   |
+help: Insert single blank line
+D415 First line should end with a period, question mark, or exclamation point
+  --> pybpmn_server/dmn/generated/edge.py:11:5
+   |
+ 9 |   @dataclass
+10 |   class Edge(DiagramElement):
+11 | /     """
+12 | |     Attributes:
+13 | |         waypoint: an optional list of points relative to the origin of
+14 | |             the nesting diagram that specifies the connected line
+15 | |             segments of the edge
+16 | |     """
+   | |_______^
+17 |
+18 |       waypoint: list[Point] = field(
+   |
+help: Add closing punctuation
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/element_collection.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/element_collection.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class ElementCollection(TElementCollection):
+   |       ^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "elementCollection"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/expression.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/expression.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Expression(TExpression):
+   |       ^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "expression"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/function_item.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/function_item.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class FunctionItem(TFunctionItem):
+   |       ^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "functionItem"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/group.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/group.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Group(TGroup):
+   |       ^^^^^
+10 |     class Meta:
+11 |         name = "group"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/import_mod.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/import_mod.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Import(TImport):
+   |       ^^^^^^
+10 |     class Meta:
+11 |         name = "import"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/information_item.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/information_item.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class InformationItem(TInformationItem):
+   |       ^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "informationItem"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/information_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/information_requirement.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class InformationRequirement(TInformationRequirement):
+   |       ^^^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "informationRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/input_data.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/input_data.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class InputData(TInputData):
+   |       ^^^^^^^^^
+10 |     class Meta:
+11 |         name = "inputData"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/invocable.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/invocable.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class Invocable(TInvocable):
+   |       ^^^^^^^^^
+10 |     class Meta:
+11 |         name = "invocable"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/item_definition.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/item_definition.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class ItemDefinition(TItemDefinition):
+   |       ^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "itemDefinition"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/knowledge_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/knowledge_requirement.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class KnowledgeRequirement(TKnowledgeRequirement):
+   |       ^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "knowledgeRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/knowledge_source.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/knowledge_source.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class KnowledgeSource(TKnowledgeSource):
+   |       ^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "knowledgeSource"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/literal_expression.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/literal_expression.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class LiteralExpression(TLiteralExpression):
+   |       ^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "literalExpression"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/named_element.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/named_element.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class NamedElement(TNamedElement):
+   |       ^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "namedElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/organization_unit.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/organization_unit.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class OrganizationUnit(TOrganizationUnit):
+   |       ^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "organizationUnit"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/performance_indicator.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/performance_indicator.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class PerformanceIndicator(TPerformanceIndicator):
+   |       ^^^^^^^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "performanceIndicator"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/point.py:1:1
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/shape.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/shape.py:12:5
+   |
+10 |   @dataclass
+11 |   class Shape(DiagramElement):
+12 | /     """
+13 | |     Attributes:
+14 | |         bounds: the optional bounds of the shape relative to the origin
+15 | |             of its nesting plane.
+16 | |     """
+   | |_______^
+17 |
+18 |       bounds: Optional[Bounds] = field(
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/style.py:1:1
+D205 1 blank line required between summary line and description
+  --> pybpmn_server/dmn/generated/style.py:9:5
+   |
+ 7 |   @dataclass
+ 8 |   class Style:
+ 9 | /     """This element should never be instantiated directly, but rather concrete
+10 | |     implementation should.
+11 | |
+12 | |     It is placed there only to be referred in the sequence
+13 | |     """
+   | |_______^
+14 |
+15 |       class Meta:
+   |
+help: Insert single blank line
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_artifact.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_artifact.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class TArtifact(TDMNElement):
+   |       ^^^^^^^^^
+10 |     class Meta:
+11 |         name = "tArtifact"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_association.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_association.py:12:7
+   |
+11 | @dataclass
+12 | class TAssociation(TArtifact):
+   |       ^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tAssociation"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_association_direction.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/generated/t_association_direction.py:6:7
+  |
+6 | class TAssociationDirection(Enum):
+  |       ^^^^^^^^^^^^^^^^^^^^^
+7 |     NONE = "None"
+8 |     ONE = "One"
+  |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_authority_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_authority_requirement.py:11:7
+   |
+10 | @dataclass
+11 | class TAuthorityRequirement(TDMNElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tAuthorityRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_builtin_aggregator.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/generated/t_builtin_aggregator.py:6:7
+  |
+6 | class TBuiltinAggregator(Enum):
+  |       ^^^^^^^^^^^^^^^^^^
+7 |     SUM = "SUM"
+8 |     COUNT = "COUNT"
+  |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_business_context_element.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_business_context_element.py:10:7
+   |
+ 9 | @dataclass
+10 | class TBusinessContextElement(TNamedElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tBusinessContextElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_business_knowledge_model.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_business_knowledge_model.py:13:7
+   |
+12 | @dataclass
+13 | class TBusinessKnowledgeModel(TInvocable):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+14 |     class Meta:
+15 |         name = "tBusinessKnowledgeModel"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_context.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_context.py:15:7
+   |
+14 | @dataclass
+15 | class TContext(TExpression):
+   |       ^^^^^^^^
+16 |     class Meta:
+17 |         name = "tContext"
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_context.py:30:7
+   |
+29 | @dataclass
+30 | class TInvocation(TExpression):
+   |       ^^^^^^^^^^^
+31 |     class Meta:
+32 |         name = "tInvocation"
+   |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:133:7
+    |
+132 | @dataclass
+133 | class TRelation(TExpression):
+    |       ^^^^^^^^^
+134 |     class Meta:
+135 |         name = "tRelation"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:154:7
+    |
+153 | @dataclass
+154 | class Context(TContext):
+    |       ^^^^^^^
+155 |     class Meta:
+156 |         name = "context"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:161:7
+    |
+160 | @dataclass
+161 | class Invocation(TInvocation):
+    |       ^^^^^^^^^^
+162 |     class Meta:
+163 |         name = "invocation"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:168:7
+    |
+167 | @dataclass
+168 | class Relation(TRelation):
+    |       ^^^^^^^^
+169 |     class Meta:
+170 |         name = "relation"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:175:7
+    |
+174 | @dataclass
+175 | class TFunctionDefinition(TExpression):
+    |       ^^^^^^^^^^^^^^^^^^^
+176 |     class Meta:
+177 |         name = "tFunctionDefinition"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:285:7
+    |
+284 | @dataclass
+285 | class FunctionDefinition(TFunctionDefinition):
+    |       ^^^^^^^^^^^^^^^^^^
+286 |     class Meta:
+287 |         name = "functionDefinition"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:292:7
+    |
+291 | @dataclass
+292 | class TList(TExpression):
+    |       ^^^^^
+293 |     class Meta:
+294 |         name = "tList"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:388:7
+    |
+387 | @dataclass
+388 | class List(TList):
+    |       ^^^^
+389 |     class Meta:
+390 |         name = "list"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:395:7
+    |
+394 | @dataclass
+395 | class TChildExpression:
+    |       ^^^^^^^^^^^^^^^^
+396 |     class Meta:
+397 |         name = "tChildExpression"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:497:7
+    |
+496 | @dataclass
+497 | class TConditional(TExpression):
+    |       ^^^^^^^^^^^^
+498 |     class Meta:
+499 |         name = "tConditional"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:530:7
+    |
+529 | @dataclass
+530 | class TFilter(TExpression):
+    |       ^^^^^^^
+531 |     class Meta:
+532 |         name = "tFilter"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:554:7
+    |
+553 | @dataclass
+554 | class TTypedChildExpression(TChildExpression):
+    |       ^^^^^^^^^^^^^^^^^^^^^
+555 |     class Meta:
+556 |         name = "tTypedChildExpression"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:568:7
+    |
+567 | @dataclass
+568 | class Conditional(TConditional):
+    |       ^^^^^^^^^^^
+569 |     class Meta:
+570 |         name = "conditional"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:575:7
+    |
+574 | @dataclass
+575 | class Filter(TFilter):
+    |       ^^^^^^
+576 |     class Meta:
+577 |         name = "filter"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:582:7
+    |
+581 | @dataclass
+582 | class TIterator(TExpression):
+    |       ^^^^^^^^^
+583 |     class Meta:
+584 |         name = "tIterator"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:605:7
+    |
+604 | @dataclass
+605 | class TFor(TIterator):
+    |       ^^^^
+606 |     class Meta:
+607 |         name = "tFor"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:621:7
+    |
+620 | @dataclass
+621 | class TQuantified(TIterator):
+    |       ^^^^^^^^^^^
+622 |     class Meta:
+623 |         name = "tQuantified"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:636:7
+    |
+635 | @dataclass
+636 | class Every(TQuantified):
+    |       ^^^^^
+637 |     class Meta:
+638 |         name = "every"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:643:7
+    |
+642 | @dataclass
+643 | class For(TFor):
+    |       ^^^
+644 |     class Meta:
+645 |         name = "for"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:650:7
+    |
+649 | @dataclass
+650 | class Some(TQuantified):
+    |       ^^^^
+651 |     class Meta:
+652 |         name = "some"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:657:7
+    |
+656 | @dataclass
+657 | class TBinding:
+    |       ^^^^^^^^
+658 |     class Meta:
+659 |         name = "tBinding"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:761:7
+    |
+760 | @dataclass
+761 | class TContextEntry(TDMNElement):
+    |       ^^^^^^^^^^^^^
+762 |     class Meta:
+763 |         name = "tContextEntry"
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/dmn/generated/t_context.py:864:7
+    |
+863 | @dataclass
+864 | class ContextEntry(TContextEntry):
+    |       ^^^^^^^^^^^^
+865 |     class Meta:
+866 |         name = "contextEntry"
+    |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_decision.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_decision.py:29:7
+   |
+28 | @dataclass
+29 | class TDecision(TDrgelement):
+   |       ^^^^^^^^^
+30 |     class Meta:
+31 |         name = "tDecision"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_decision_rule.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_decision_rule.py:12:7
+   |
+11 | @dataclass
+12 | class TDecisionRule(TDMNElement):
+   |       ^^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tDecisionRule"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_decision_service.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_decision_service.py:10:7
+   |
+ 9 | @dataclass
+10 | class TDecisionService(TInvocable):
+   |       ^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tDecisionService"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_decision_table.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_decision_table.py:17:7
+   |
+16 | @dataclass
+17 | class TDecisionTable(TExpression):
+   |       ^^^^^^^^^^^^^^
+18 |     class Meta:
+19 |         name = "tDecisionTable"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_decision_table_orientation.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/generated/t_decision_table_orientation.py:6:7
+  |
+6 | class TDecisionTableOrientation(Enum):
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+7 |     RULE_AS_ROW = "Rule-as-Row"
+8 |     RULE_AS_COLUMN = "Rule-as-Column"
+  |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_definitions.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_definitions.py:24:7
+   |
+23 | @dataclass
+24 | class TDefinitions(TNamedElement):
+   |       ^^^^^^^^^^^^
+25 |     class Meta:
+26 |         name = "tDefinitions"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_dmnelement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_dmnelement.py:8:7
+   |
+ 7 | @dataclass
+ 8 | class TDMNElement:
+   |       ^^^^^^^^^^^
+ 9 |     class Meta:
+10 |         name = "tDMNElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_dmnelement_reference.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_dmnelement_reference.py:8:7
+   |
+ 7 | @dataclass
+ 8 | class TDmnelementReference:
+   |       ^^^^^^^^^^^^^^^^^^^^
+ 9 |     class Meta:
+10 |         name = "tDMNElementReference"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_drgelement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_drgelement.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class TDrgelement(TNamedElement):
+   |       ^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "tDRGElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_element_collection.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_element_collection.py:10:7
+   |
+ 9 | @dataclass
+10 | class TElementCollection(TNamedElement):
+   |       ^^^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tElementCollection"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_expression.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_expression.py:10:7
+   |
+ 9 | @dataclass
+10 | class TExpression(TDMNElement):
+   |       ^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tExpression"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_function_item.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_function_item.py:11:7
+   |
+10 | @dataclass
+11 | class TFunctionItem(TDMNElement):
+   |       ^^^^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tFunctionItem"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_function_kind.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/generated/t_function_kind.py:6:7
+  |
+6 | class TFunctionKind(Enum):
+  |       ^^^^^^^^^^^^^
+7 |     FEEL = "FEEL"
+8 |     JAVA = "Java"
+  |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_group.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_group.py:10:7
+   |
+ 9 | @dataclass
+10 | class TGroup(TArtifact):
+   |       ^^^^^^
+11 |     class Meta:
+12 |         name = "tGroup"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_hit_policy.py:1:1
+D101 Missing docstring in public class
+ --> pybpmn_server/dmn/generated/t_hit_policy.py:6:7
+  |
+6 | class THitPolicy(Enum):
+  |       ^^^^^^^^^^
+7 |     UNIQUE = "UNIQUE"
+8 |     FIRST = "FIRST"
+  |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_import.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_import.py:10:7
+   |
+ 9 | @dataclass
+10 | class TImport(TNamedElement):
+   |       ^^^^^^^
+11 |     class Meta:
+12 |         name = "tImport"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_imported_values.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_imported_values.py:10:7
+   |
+ 9 | @dataclass
+10 | class TImportedValues(TImport):
+   |       ^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tImportedValues"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_information_item.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_information_item.py:10:7
+   |
+ 9 | @dataclass
+10 | class TInformationItem(TNamedElement):
+   |       ^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tInformationItem"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_information_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_information_requirement.py:11:7
+   |
+10 | @dataclass
+11 | class TInformationRequirement(TDMNElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tInformationRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_input_clause.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_input_clause.py:12:7
+   |
+11 | @dataclass
+12 | class TInputClause(TDMNElement):
+   |       ^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tInputClause"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_input_data.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_input_data.py:11:7
+   |
+10 | @dataclass
+11 | class TInputData(TDrgelement):
+   |       ^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tInputData"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_invocable.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_invocable.py:11:7
+   |
+10 | @dataclass
+11 | class TInvocable(TDrgelement):
+   |       ^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tInvocable"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_item_definition.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_item_definition.py:12:7
+   |
+11 | @dataclass
+12 | class TItemDefinition(TNamedElement):
+   |       ^^^^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tItemDefinition"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_knowledge_requirement.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_knowledge_requirement.py:11:7
+   |
+10 | @dataclass
+11 | class TKnowledgeRequirement(TDMNElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tKnowledgeRequirement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_knowledge_source.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_knowledge_source.py:12:7
+   |
+11 | @dataclass
+12 | class TKnowledgeSource(TDrgelement):
+   |       ^^^^^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tKnowledgeSource"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_literal_expression.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_literal_expression.py:11:7
+   |
+10 | @dataclass
+11 | class TLiteralExpression(TExpression):
+   |       ^^^^^^^^^^^^^^^^^^
+12 |     class Meta:
+13 |         name = "tLiteralExpression"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_named_element.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_named_element.py:10:7
+   |
+ 9 | @dataclass
+10 | class TNamedElement(TDMNElement):
+   |       ^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tNamedElement"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_organization_unit.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_organization_unit.py:10:7
+   |
+ 9 | @dataclass
+10 | class TOrganizationUnit(TBusinessContextElement):
+   |       ^^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tOrganizationUnit"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_output_clause.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_output_clause.py:12:7
+   |
+11 | @dataclass
+12 | class TOutputClause(TDMNElement):
+   |       ^^^^^^^^^^^^^
+13 |     class Meta:
+14 |         name = "tOutputClause"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_performance_indicator.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_performance_indicator.py:10:7
+   |
+ 9 | @dataclass
+10 | class TPerformanceIndicator(TBusinessContextElement):
+   |       ^^^^^^^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tPerformanceIndicator"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_rule_annotation.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_rule_annotation.py:8:7
+   |
+ 7 | @dataclass
+ 8 | class TRuleAnnotation:
+   |       ^^^^^^^^^^^^^^^
+ 9 |     class Meta:
+10 |         name = "tRuleAnnotation"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_rule_annotation_clause.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_rule_annotation_clause.py:8:7
+   |
+ 7 | @dataclass
+ 8 | class TRuleAnnotationClause:
+   |       ^^^^^^^^^^^^^^^^^^^^^
+ 9 |     class Meta:
+10 |         name = "tRuleAnnotationClause"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/t_text_annotation.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/t_text_annotation.py:10:7
+   |
+ 9 | @dataclass
+10 | class TTextAnnotation(TArtifact):
+   |       ^^^^^^^^^^^^^^^
+11 |     class Meta:
+12 |         name = "tTextAnnotation"
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/dmn/generated/text_annotation.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/generated/text_annotation.py:9:7
+   |
+ 8 | @dataclass
+ 9 | class TextAnnotation(TTextAnnotation):
+   |       ^^^^^^^^^^^^^^
+10 |     class Meta:
+11 |         name = "textAnnotation"
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:8:7
+   |
+ 7 | @dataclass
+ 8 | class InputEntry:
+   |       ^^^^^^^^^^
+ 9 |     id: str
+10 |     input: str
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:17:7
+   |
+16 | @dataclass
+17 | class OutputEntry:
+   |       ^^^^^^^^^^^
+18 |     id: str
+19 |     output: str
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:26:7
+   |
+25 | @dataclass
+26 | class Rule:
+   |       ^^^^
+27 |     id: str
+28 |     description: str = ""
+   |
+ANN201 Missing return type annotation for public function `output_as_dict`
+  --> pybpmn_server/dmn/model.py:32:9
+   |
+30 |     output_entries: list[OutputEntry] = field(default_factory=list)
+31 |
+32 |     def output_as_dict(self):
+   |         ^^^^^^^^^^^^^^
+33 |         out = {entry.output: entry.parsed_value for entry in self.output_entries}
+34 |         return out
+   |
+help: Add return type annotation
+D102 Missing docstring in public method
+  --> pybpmn_server/dmn/model.py:32:9
+   |
+30 |     output_entries: list[OutputEntry] = field(default_factory=list)
+31 |
+32 |     def output_as_dict(self):
+   |         ^^^^^^^^^^^^^^
+33 |         out = {entry.output: entry.parsed_value for entry in self.output_entries}
+34 |         return out
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:38:7
+   |
+37 | @dataclass
+38 | class DecisionTable:
+   |       ^^^^^^^^^^^^^
+39 |     id: str
+40 |     name: str
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:56:7
+   |
+55 | @dataclass
+56 | class Input:
+   |       ^^^^^
+57 |     id: str
+58 |     label: str
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/dmn/model.py:64:7
+   |
+63 | @dataclass
+64 | class Output:
+   |       ^^^^^^
+65 |     id: str
+66 |     label: str
+   |
+C901 `__init__` is too complex (11 > 10)
+  --> pybpmn_server/elements/behaviors/io.py:20:9
+   |
+18 |     """Represents an input/output parameter in a BPMN process."""
+19 |
+20 |     def __init__(self, io_object: Dict[str, Any]):
+   |         ^^^^^^^^
+21 |         self.type: str = io_object.get("$type", "")
+22 |         self.name: str = io_object.get("name", "")
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/elements/events.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/elements/events.py:13:7
+   |
+13 | class Event(Node):
+   |       ^^^^^
+14 |     def has_message(self) -> bool:
+15 |         return self.has_behaviour(BehaviorName.MessageEventDefinition)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:14:9
+   |
+13 | class Event(Node):
+14 |     def has_message(self) -> bool:
+   |         ^^^^^^^^^^^
+15 |         return self.has_behaviour(BehaviorName.MessageEventDefinition)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:17:9
+   |
+15 |         return self.has_behaviour(BehaviorName.MessageEventDefinition)
+16 |
+17 |     def has_signal(self) -> bool:
+   |         ^^^^^^^^^^
+18 |         return self.has_behaviour(BehaviorName.SignalEventDefinition)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:20:9
+   |
+18 |         return self.has_behaviour(BehaviorName.SignalEventDefinition)
+19 |
+20 |     def has_timer(self) -> bool:
+   |         ^^^^^^^^^
+21 |         return self.has_behaviour(BehaviorName.TimerEventDefinition)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:23:15
+   |
+21 |         return self.has_behaviour(BehaviorName.TimerEventDefinition)
+22 |
+23 |     async def start(self, item: IItem) -> NodeAction:
+   |               ^^^^^
+24 |         return await super().start(item)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:26:15
+   |
+24 |         return await super().start(item)
+25 |
+26 |     async def end(self, item: IItem, cancel: bool = False) -> None:
+   |               ^^^
+27 |         await super().end(item, cancel)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:30:9
+   |
+29 |     @property
+30 |     def can_be_invoked(self) -> bool:
+   |         ^^^^^^^^^^^^^^
+31 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:34:15
+   |
+33 |     @staticmethod
+34 |     async def terminate(item: IItem) -> None:
+   |               ^^^^^^^^^
+35 |         if not item.token.parent_token:
+36 |             return
+   |
+E501 Line too long (126 > 119)
+  --> pybpmn_server/elements/events.py:55:120
+   |
+53 |         p_token = item.token.parent_token
+54 |
+55 |         # In TS: if (pToken.type==TOKEN_TYPE.SubProcess && pToken.parentToken && pToken.parentToken.type==TOKEN_TYPE.Instance)
+   |                                                                                                                        ^^^^^^^
+56 |         if p_token.type == "SubProcess" and p_token.parent_token and p_token.parent_token.type == "Instance":
+57 |             await p_token.parent_token.terminate()
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/elements/events.py:69:7
+   |
+69 | class CatchEvent(Event):
+   |       ^^^^^^^^^^
+70 |     @property
+71 |     def is_catching(self) -> bool:
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:71:9
+   |
+69 | class CatchEvent(Event):
+70 |     @property
+71 |     def is_catching(self) -> bool:
+   |         ^^^^^^^^^^^
+72 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:75:9
+   |
+74 |     @property
+75 |     def requires_wait(self) -> bool:
+   |         ^^^^^^^^^^^^^
+76 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:79:9
+   |
+78 |     @property
+79 |     def can_be_invoked(self) -> bool:
+   |         ^^^^^^^^^^^^^^
+80 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:82:15
+   |
+80 |         return True
+81 |
+82 |     async def start(self, item: IItem) -> NodeAction:
+   |               ^^^^^
+83 |         return await super().start(item)
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/elements/events.py:86:7
+   |
+86 | class BoundaryEvent(Event):
+   |       ^^^^^^^^^^^^^
+87 |     def __init__(self, type_: str, def_: Any, id_: str, process: Any):
+88 |         super().__init__(type_, def_, id_, process)
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/events.py:96:9
+   |
+95 |     @property
+96 |     def is_catching(self) -> bool:
+   |         ^^^^^^^^^^^
+97 |         return True
+   |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:100:9
+    |
+ 99 |     @property
+100 |     def requires_wait(self) -> bool:
+    |         ^^^^^^^^^^^^^
+101 |         return True
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:104:9
+    |
+103 |     @property
+104 |     def can_be_invoked(self) -> bool:
+    |         ^^^^^^^^^^^^^^
+105 |         return True
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:107:15
+    |
+105 |         return True
+106 |
+107 |     async def start(self, item: IItem) -> NodeAction:
+    |               ^^^^^
+108 |         return await super().start(item)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:110:15
+    |
+108 |         return await super().start(item)
+109 |
+110 |     async def run(self, item: IItem) -> NodeAction:
+    |               ^^^
+111 |         ret = await super().run(item)
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/elements/events.py:122:7
+    |
+122 | class ThrowEvent(Event):
+    |       ^^^^^^^^^^
+123 |     @property
+124 |     def is_catching(self) -> bool:
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:124:9
+    |
+122 | class ThrowEvent(Event):
+123 |     @property
+124 |     def is_catching(self) -> bool:
+    |         ^^^^^^^^^^^
+125 |         return False
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:127:15
+    |
+125 |         return False
+126 |
+127 |     async def start(self, item: IItem) -> NodeAction:
+    |               ^^^^^
+128 |         return await super().start(item)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:130:15
+    |
+128 |         return await super().start(item)
+129 |
+130 |     async def run(self, item: IItem) -> NodeAction:
+    |               ^^^
+131 |         return NodeAction.END
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/elements/events.py:134:7
+    |
+134 | class EndEvent(Event):
+    |       ^^^^^^^^
+135 |     @property
+136 |     def is_catching(self) -> bool:
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:136:9
+    |
+134 | class EndEvent(Event):
+135 |     @property
+136 |     def is_catching(self) -> bool:
+    |         ^^^^^^^^^^^
+137 |         return False
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:139:15
+    |
+137 |         return False
+138 |
+139 |     async def end(self, item: IItem, cancel: bool = False) -> None:
+    |               ^^^
+140 |         sub_process_token = item.token.get_sub_process_token()
+141 |         if sub_process_token and item.status != ItemStatus.end:
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/elements/events.py:147:7
+    |
+147 | class StartEvent(Event):
+    |       ^^^^^^^^^^
+148 |     def __init__(self, type_: str, def_: Any, id_: str, process: Any):
+149 |         super().__init__(type_, def_, id_, process)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:155:15
+    |
+153 |         self.initiator = attrs.get("camunda:initiator")
+154 |
+155 |     async def start(self, item: IItem) -> NodeAction:
+    |               ^^^^^
+156 |         if self.initiator:
+157 |             item.token.data[self.initiator] = item.user_name
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/events.py:161:9
+    |
+160 |     @property
+161 |     def is_catching(self) -> bool:
+    |         ^^^^^^^^^^^
+162 |         return True
+    |
+D100 Missing docstring in public module
+--> pybpmn_server/elements/gateway.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/elements/gateway.py:13:7
+   |
+13 | class Gateway(Node):
+   |       ^^^^^^^
+14 |     async def get_outbounds(self, item: IItem) -> List[IItem]:
+15 |         default_flow_id = None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/gateway.py:14:15
+   |
+13 | class Gateway(Node):
+14 |     async def get_outbounds(self, item: IItem) -> List[IItem]:
+   |               ^^^^^^^^^^^^^
+15 |         default_flow_id = None
+16 |         if hasattr(self.def_, "default"):
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/gateway.py:43:9
+   |
+41 |             return await super().get_outbounds(item)
+42 |
+43 |     def get_potential_path(self, node: INode, path: Optional[Dict[str, INode]] = None) -> Dict[str, INode]:
+   |         ^^^^^^^^^^^^^^^^^^
+44 |         if path is None:
+45 |             path = {}
+   |
+PGH003 Use specific rule codes when ignoring type issues
+  --> pybpmn_server/elements/gateway.py:47:37
+   |
+45 |             path = {}
+46 |         for flow in node.outbounds:
+47 |             to_node = flow.to_node  # type: ignore
+   |                                     ^^^^^^^^^^^^^^
+48 |             if to_node.id not in path:
+49 |                 path[to_node.id] = to_node
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/gateway.py:53:9
+   |
+51 |         return path
+52 |
+53 |     def can_reach(self, node: INode, target: INode) -> bool:
+   |         ^^^^^^^^^
+54 |         if node.id == target.id:
+55 |             return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/gateway.py:59:9
+   |
+57 |         return target.id in path
+58 |
+59 |     def get_related_tokens(self, item: IItem) -> List[IToken]:
+   |         ^^^^^^^^^^^^^^^^^^
+60 |         related = []
+61 |         execution = item.token.execution
+   |
+E501 Line too long (187 > 119)
+  --> pybpmn_server/elements/gateway.py:69:120
+   |
+67 | …
+68 | …
+69 | …{token.current_node.id if token.current_node else 'None'} from {branch} child of {parent} path: {p}"
+   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+70 | …
+   |
+SIM102 Use a single `if` statement instead of nested `if` statements
+  --> pybpmn_server/elements/gateway.py:72:13
+   |
+70 |               )
+71 |
+72 | /             if token.current_item:
+73 | |                 if token.id != item.token.id and token.current_item.status not in (
+74 | |                     ItemStatus.end,
+75 | |                     ItemStatus.terminated,
+76 | |                 ):
+77 | |                     if token.current_node:
+   | |__________________________________________^
+78 |                           can_reach = self.can_reach(token.current_node, self)
+79 |                           execution.log(
+   |
+help: Combine `if` statements using `and`
+SIM102 Use a single `if` statement instead of nested `if` statements
+  --> pybpmn_server/elements/gateway.py:73:17
+   |
+72 |               if token.current_item:
+73 | /                 if token.id != item.token.id and token.current_item.status not in (
+74 | |                     ItemStatus.end,
+75 | |                     ItemStatus.terminated,
+76 | |                 ):
+77 | |                     if token.current_node:
+   | |__________________________________________^
+78 |                           can_reach = self.can_reach(token.current_node, self)
+79 |                           execution.log(
+   |
+help: Combine `if` statements using `and`
+E501 Line too long (139 > 119)
+  --> pybpmn_server/elements/gateway.py:80:120
+   |
+78 | …     can_reach = self.can_reach(token.current_node, self)
+79 | …     execution.log(
+80 | …         f"            ..canReach: {can_reach} - token status: {token.status} - item status {token.current_item.status}"
+   |                                                                                                      ^^^^^^^^^^^^^^^^^^^^
+81 | …     )
+82 | …     if can_reach:
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/elements/gateway.py:93:9
+   |
+91 |         return related
+92 |
+93 |     def analyze_converging_tokens(self, item: IItem) -> Dict[str, List[IToken]]:
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+94 |         waiting_tokens = []
+95 |         pending_tokens = []
+   |
+E501 Line too long (188 > 119)
+   --> pybpmn_server/elements/gateway.py:103:120
+    |
+101 | …
+102 | …
+103 | …... child token {t.id} in current gateway => add to waiting_tokens current_node={t.current_node.id}"
+    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+104 | …
+105 | …
+    |
+E501 Line too long (196 > 119)
+   --> pybpmn_server/elements/gateway.py:108:120
+    |
+106 | …
+107 | …
+108 | …adding to pending_tokens {t.id} node {t.current_node.id if t.current_node else 'None'} target {self.id}"
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+109 | …
+110 | …
+    |
+E501 Line too long (181 > 119)
+   --> pybpmn_server/elements/gateway.py:114:120
+    |
+112 | …
+113 | …
+114 | …waiting_tokens token id:{t.id} current_node.id:{t.current_node.id if t.current_node else 'None'}"
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+115 | …
+    |
+E501 Line too long (150 > 119)
+   --> pybpmn_server/elements/gateway.py:118:120
+    |
+117 | …
+118 | …Flows: pending_tokens:{len(pending_tokens)} waiting_tokens:{len(waiting_tokens)}"
+    |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+119 | …
+    |
+C901 `start` is too complex (14 > 10)
+   --> pybpmn_server/elements/gateway.py:123:15
+    |
+121 |         return {"pending_tokens": pending_tokens, "waiting_tokens": waiting_tokens}
+122 |
+123 |     async def start(self, item: IItem) -> NodeAction:
+    |               ^^^^^
+124 |         item.token.log(f"Gateway({item.element.name}|{item.element.id}).start: node.type={item.node.type}")
+125 |         if len(self.inbounds) > 1:
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/gateway.py:123:15
+    |
+121 |         return {"pending_tokens": pending_tokens, "waiting_tokens": waiting_tokens}
+122 |
+123 |     async def start(self, item: IItem) -> NodeAction:
+    |               ^^^^^
+124 |         item.token.log(f"Gateway({item.element.name}|{item.element.id}).start: node.type={item.node.type}")
+125 |         if len(self.inbounds) > 1:
+    |
+E501 Line too long (144 > 119)
+   --> pybpmn_server/elements/gateway.py:127:120
+    |
+125 | …
+126 | …
+127 | …tart: Starting a converging gateway this.inbounds.length={len(self.inbounds)}"
+    |                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+128 | …
+    |
+E501 Line too long (147 > 119)
+   --> pybpmn_server/elements/gateway.py:134:120
+    |
+132 | …
+133 | …
+134 | ….id}).start: cancel other pending_tokens.length={len(result['pending_tokens'])}"
+    |                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+135 | …
+136 | …
+    |
+E501 Line too long (171 > 119)
+   --> pybpmn_server/elements/gateway.py:143:120
+    |
+141 | …
+142 | …
+143 | … result.pending_tokens.length = {len(result['pending_tokens'])} > 0 return NODE_ACTION.WAIT"
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+144 | …
+145 | …
+    |
+E501 Line too long (150 > 119)
+   --> pybpmn_server/elements/gateway.py:151:120
+    |
+150 | …
+151 | …start: let us converge now waiting_tokens.length={len(result['waiting_tokens'])}"
+    |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+152 | …
+153 | …
+    |
+E501 Line too long (162 > 119)
+   --> pybpmn_server/elements/gateway.py:167:120
+    |
+165 | …
+166 | …
+167 | …art: converged! restart the parent token from this item! parentToken={parent_token.id}"
+    |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+168 | …
+169 | …
+    |
+PGH003 Use specific rule codes when ignoring type issues
+   --> pybpmn_server/elements/gateway.py:171:86
+    |
+169 |                     parent_token.status = TokenStatus.running
+170 |                     if converging_gateway_current_node:
+171 |                         parent_token.current_node = converging_gateway_current_node  # type: ignore
+    |                                                                                      ^^^^^^^^^^^^^^
+172 |                     item.token = parent_token
+    |
+PGH003 Use specific rule codes when ignoring type issues
+   --> pybpmn_server/elements/gateway.py:174:64
+    |
+172 |                     item.token = parent_token
+173 |
+174 |                     await parent_token.current_node.run(item)  # type: ignore
+    |                                                                ^^^^^^^^^^^^^^
+175 |                     await parent_token.current_node.continue_(item)  # type: ignore
+176 |                     await parent_token.go_next()
+    |
+PGH003 Use specific rule codes when ignoring type issues
+   --> pybpmn_server/elements/gateway.py:175:70
+    |
+174 |                     await parent_token.current_node.run(item)  # type: ignore
+175 |                     await parent_token.current_node.continue_(item)  # type: ignore
+    |                                                                      ^^^^^^^^^^^^^^
+176 |                     await parent_token.go_next()
+    |
+E501 Line too long (130 > 119)
+   --> pybpmn_server/elements/gateway.py:179:120
+    |
+178 |                     old_current_token.log(
+179 |                         f"Gateway({item.element.name}|{item.element.id}).start: ending current child token {old_current_token.id}"
+    |                                                                                                                        ^^^^^^^^^^^
+180 |                     )
+181 |                     if old_current_token.current_item:
+    |
+E501 Line too long (123 > 119)
+   --> pybpmn_server/elements/gateway.py:186:120
+    |
+185 |                     item.token.log(
+186 |                         f"Gateway({item.element.name}|{item.element.id}).start: all token terminate return NODE_ACTION.END"
+    |                                                                                                                        ^^^^
+187 |                     )
+188 |                     return NodeAction.END
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/elements/gateway.py:199:7
+    |
+199 | class XORGateway(Gateway):
+    |       ^^^^^^^^^^
+200 |     async def get_outbounds(self, item: IItem) -> List[IItem]:
+201 |         outbounds = await super().get_outbounds(item)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/gateway.py:200:15
+    |
+199 | class XORGateway(Gateway):
+200 |     async def get_outbounds(self, item: IItem) -> List[IItem]:
+    |               ^^^^^^^^^^^^^
+201 |         outbounds = await super().get_outbounds(item)
+202 |         if len(outbounds) > 1:
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/elements/gateway.py:208:7
+    |
+208 | class EventBasedGateway(Gateway):
+    |       ^^^^^^^^^^^^^^^^^
+209 |     def __init__(self, id_: str, process: Any, type_: str, def_: Any):
+210 |         super().__init__(type_, def_, id_, process)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/gateway.py:213:15
+    |
+211 |         self.working = False
+212 |
+213 |     async def restored(self, item: IItem) -> None:
+    |               ^^^^^^^^
+214 |         super().resume(item)
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/gateway.py:216:15
+    |
+214 |         super().resume(item)
+215 |
+216 |     async def run(self, item: IItem) -> NodeAction:
+    |               ^^^
+217 |         return NodeAction.END
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/elements/gateway.py:219:15
+    |
+217 |         return NodeAction.END
+218 |
+219 |     async def cancel_all_branched(self, ending_item: IItem) -> None:
+    |               ^^^^^^^^^^^^^^^^^^^
+220 |         if self.working:
+221 |             return
+    |
+E501 Line too long (125 > 119)
+   --> pybpmn_server/elements/gateway.py:232:120
+    |
+230 |             if is_waiting and current_item_not_ending and is_origin_item:
+231 |                 ending_item.token.log(
+232 |                     f"..EventBasedGateway:<{self.id}>-- cancelling {token.current_node.id if token.current_node else 'None'}"
+    |                                                                                                                        ^^^^^^
+233 |                 )
+234 |                 await token.terminate()
+    |
+E501 Line too long (127 > 119)
+   --> pybpmn_server/elements/tasks.py:156:120
+    |
+154 |         #     item.token.log(f"invoking business rule:{self.decision_ref}")
+155 |         #
+156 |         #     # TODO (pybpmn-server-cag): Store the business rules in the database and import them when importing the base file
+    |                                                                                                                        ^^^^^^^^
+157 |         #     file_path = f"{path}/{self.decision_ref}.dmn.xml"
+158 |         #     dmn = await DMNEngine().load(file_path)
+    |
+D100 Missing docstring in public module
+--> pybpmn_server/elements/transaction.py:1:1
+D100 Missing docstring in public module
+--> pybpmn_server/engine/script_handler.py:1:1
+D102 Missing docstring in public method
+  --> pybpmn_server/engine/script_handler.py:21:15
+   |
+19 |     """
+20 |
+21 |     async def evaluate_input_expression(self, item: IItem, exp: Any, date_format: bool = False) -> Any:
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+22 |         if not exp:
+23 |             return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/engine/script_handler.py:38:15
+   |
+36 |         return val
+37 |
+38 |     async def evaluate_expression(self, scope: Union[IItem, IToken], expression: str) -> Any:
+   |               ^^^^^^^^^^^^^^^^^^^
+39 |         if not expression:
+40 |             return None
+   |
+S307 Use of possibly insecure function; consider using `ast.literal_eval`
+  --> pybpmn_server/engine/script_handler.py:49:24
+   |
+47 |             globals_dict = self._get_globals(scope)
+48 |             if "\n" not in script and "return " not in script:
+49 |                 return eval(script, globals_dict)
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+50 |             else:
+51 |                 locs: Dict[str, Any] = {}
+   |
+S102 Use of `exec` detected
+  --> pybpmn_server/engine/script_handler.py:57:17
+   |
+55 |                 exec_script += "result = __temp_func__()"
+56 |
+57 |                 exec(exec_script, globals_dict, locs)
+   |                 ^^^^
+58 |                 return locs.get("result")
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/engine/script_handler.py:65:15
+   |
+63 |             raise exc
+64 |
+65 |     async def execute_script(self, scope: Union[IItem, IExecution], script: str) -> Any:
+   |               ^^^^^^^^^^^^^^
+66 |         if not script:
+67 |             return None
+   |
+PERF401 Use a list comprehension to create a transformed list
+  --> pybpmn_server/engine/script_handler.py:81:21
+   |
+79 |             for line in script.split("\n"):
+80 |                 if line.strip():
+81 |                     exec_lines.append(f"    {line}")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |
+83 |             if not exec_lines:
+   |
+help: Replace for loop with list comprehension
+S102 Use of `exec` detected
+  --> pybpmn_server/engine/script_handler.py:88:13
+   |
+86 |             exec_script = "def __temp_func__():\n" + "\n".join(exec_lines) + "\nresult = __temp_func__()"
+87 |
+88 |             exec(exec_script, globals_dict, locs)
+   |             ^^^^
+89 |             return locs.get("result")
+   |
+D102 Missing docstring in public method
+   --> pybpmn_server/engine/script_handler.py:128:15
+    |
+126 |         return g
+127 |
+128 |     async def run_python(self, item: Any, code: str, input_data: Any = None) -> Any:
+    |               ^^^^^^^^^^
+129 |         python_cmd = os.environ.get("PYTHON_CMD", "python3")
+130 |         data_json = json.dumps(getattr(item, "data", {}))
+    |
+D101 Missing docstring in public class
+  --> pybpmn_server/interfaces/common.py:16:7
+   |
+16 | class IMongoDBDatabaseConfiguration(Protocol):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 |     MongoDB: Dict[str, str]
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/interfaces/common.py:20:7
+   |
+20 | class ISQLiteDatabaseConfiguration(Protocol):
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 |     SQLite: Dict[str, str]
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:49:15
+   |
+48 |     @abstractmethod
+49 |     async def get_services_provider(self, execution: IExecution) -> IServiceProvider:
+   |               ^^^^^^^^^^^^^^^^^^^^^
+50 |         pass  # Simplified Promise
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:53:9
+   |
+52 |     @abstractmethod
+53 |     def send_email(self, to: Any, msg: Any, body: Any) -> Any:
+   |         ^^^^^^^^^^
+54 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:57:9
+   |
+56 |     @abstractmethod
+57 |     def execution_started(self, execution: IExecution) -> Any:
+   |         ^^^^^^^^^^^^^^^^^
+58 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:61:15
+   |
+60 |     @abstractmethod
+61 |     async def start_up(self, settings: Settings) -> None:
+   |               ^^^^^^^^
+62 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:65:9
+   |
+64 |     @abstractmethod
+65 |     def message_thrown(self, message_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any:
+   |         ^^^^^^^^^^^^^^
+66 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:69:9
+   |
+68 |     @abstractmethod
+69 |     def signal_thrown(self, signal_id: str, data: Any, message_matching_key: Any, item: IItem) -> Any:
+   |         ^^^^^^^^^^^^^
+70 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:73:9
+   |
+72 |     @abstractmethod
+73 |     def issue_message(self, message_id: str, data: Any) -> Any:
+   |         ^^^^^^^^^^^^^
+74 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:77:9
+   |
+76 |     @abstractmethod
+77 |     def issue_signal(self, message_id: str, data: Any) -> Any:
+   |         ^^^^^^^^^^^^
+78 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/interfaces/common.py:81:9
+   |
+80 |     @abstractmethod
+81 |     def service_called(self, kwargs: Dict[str, Any], execution: IExecution, item: IItem) -> Any:
+   |         ^^^^^^^^^^^^^^
+82 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/bpmn_server.py:50:9
+   |
+49 |     @property
+50 |     def engine_instance(self) -> IEngine:
+   |         ^^^^^^^^^^^^^^^
+51 |         return self.engine
+   |
+TC001 Move application import `pybpmn_server.common.configuration.Settings` into a type-checking block
+  --> pybpmn_server/server/cache_manager.py:10:48
+   |
+ 8 | from typing import TYPE_CHECKING, Any, Dict, List, Optional
+ 9 |
+10 | from pybpmn_server.common.configuration import Settings
+   |                                                ^^^^^^^^
+11 | from pybpmn_server.interfaces.enums import ExecutionEvent
+12 | from pybpmn_server.server.interfaces import ICacheManager
+   |
+help: Move into type-checking block
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:29:9
+   |
+27 |         super().__init__(server)
+28 |
+29 |     def list(self) -> List[IExecution]:
+   |         ^^^^
+30 |         return []
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:32:9
+   |
+30 |         return []
+31 |
+32 |     def get_instance(self, _: str) -> Optional[IExecution]:
+   |         ^^^^^^^^^^^^
+33 |         return None
+   |
+ANN201 Missing return type annotation for public function `add`
+  --> pybpmn_server/server/cache_manager.py:35:9
+   |
+33 |         return None
+34 |
+35 |     def add(self, _: IExecution):
+   |         ^^^
+36 |         return None
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:35:9
+   |
+33 |         return None
+34 |
+35 |     def add(self, _: IExecution):
+   |         ^^^
+36 |         return None
+   |
+ANN201 Missing return type annotation for public function `remove`
+  --> pybpmn_server/server/cache_manager.py:38:9
+   |
+36 |         return None
+37 |
+38 |     def remove(self, _: str):
+   |         ^^^^^^
+39 |         return None
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:38:9
+   |
+36 |         return None
+37 |
+38 |     def remove(self, _: str):
+   |         ^^^^^^
+39 |         return None
+   |
+ANN201 Missing return type annotation for public function `shutdown`
+  --> pybpmn_server/server/cache_manager.py:41:15
+   |
+39 |         return None
+40 |
+41 |     async def shutdown(self):
+   |               ^^^^^^^^
+42 |         pass
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:41:15
+   |
+39 |         return None
+40 |
+41 |     async def shutdown(self):
+   |               ^^^^^^^^
+42 |         pass
+   |
+ANN201 Missing return type annotation for public function `restart`
+  --> pybpmn_server/server/cache_manager.py:44:9
+   |
+42 |         pass
+43 |
+44 |     def restart(self):
+   |         ^^^^^^^
+45 |         pass
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:44:9
+   |
+42 |         pass
+43 |
+44 |     def restart(self):
+   |         ^^^^^^^
+45 |         pass
+   |
+ANN202 Missing return type annotation for private function `on_process_end`
+  --> pybpmn_server/server/cache_manager.py:59:13
+   |
+57 |         self.live_instances: Dict[str, IExecution] = {}
+58 |
+59 |         def on_process_end(data: Dict[str, Any]):
+   |             ^^^^^^^^^^^^^^
+60 |             context = data.get("context")
+61 |             if context and hasattr(context, "instance"):
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:66:9
+   |
+64 |         settings.listener.on(ExecutionEvent.process_end, on_process_end)
+65 |
+66 |     def list(self) -> List[IExecution]:
+   |         ^^^^
+67 |         return list(self.live_instances.values())
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:69:9
+   |
+67 |         return list(self.live_instances.values())
+68 |
+69 |     def get_instance(self, instance_id: str) -> Optional[IExecution]:
+   |         ^^^^^^^^^^^^
+70 |         return self.live_instances.get(instance_id)
+   |
+ANN201 Missing return type annotation for public function `add`
+  --> pybpmn_server/server/cache_manager.py:72:9
+   |
+70 |         return self.live_instances.get(instance_id)
+71 |
+72 |     def add(self, execution: IExecution):
+   |         ^^^
+73 |         self.live_instances[execution.id] = execution
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:72:9
+   |
+70 |         return self.live_instances.get(instance_id)
+71 |
+72 |     def add(self, execution: IExecution):
+   |         ^^^
+73 |         self.live_instances[execution.id] = execution
+   |
+ANN201 Missing return type annotation for public function `remove`
+  --> pybpmn_server/server/cache_manager.py:75:9
+   |
+73 |         self.live_instances[execution.id] = execution
+74 |
+75 |     def remove(self, instance_id: str):
+   |         ^^^^^^
+76 |         if instance_id in self.live_instances:
+77 |             del self.live_instances[instance_id]
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:75:9
+   |
+73 |         self.live_instances[execution.id] = execution
+74 |
+75 |     def remove(self, instance_id: str):
+   |         ^^^^^^
+76 |         if instance_id in self.live_instances:
+77 |             del self.live_instances[instance_id]
+   |
+ANN201 Missing return type annotation for public function `shutdown`
+  --> pybpmn_server/server/cache_manager.py:79:15
+   |
+77 |             del self.live_instances[instance_id]
+78 |
+79 |     async def shutdown(self):
+   |               ^^^^^^^^
+80 |         logger.info("Shutdown..")
+81 |         instances = self.live_instances
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/cache_manager.py:79:15
+   |
+77 |             del self.live_instances[instance_id]
+78 |
+79 |     async def shutdown(self):
+   |               ^^^^^^^^
+80 |         logger.info("Shutdown..")
+81 |         instances = self.live_instances
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:59:15
+   |
+57 |     calls_counter: int
+58 |
+59 |     async def start(
+   |               ^^^^^
+60 |         self,
+61 |         name: Any,
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:67:15
+   |
+65 |         options: Optional[Any] = None,
+66 |     ) -> IExecution: ...
+67 |     async def get(self, instance_query: Any) -> IExecution: ...
+   |               ^^^
+68 |     async def invoke(
+69 |         self,
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:68:15
+   |
+66 |     ) -> IExecution: ...
+67 |     async def get(self, instance_query: Any) -> IExecution: ...
+68 |     async def invoke(
+   |               ^^^^^^
+69 |         self,
+70 |         item_query: Any,
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:75:15
+   |
+73 |         options: Optional[Dict[str, Any]] = None,
+74 |     ) -> IExecution: ...
+75 |     async def assign(
+   |               ^^^^^^
+76 |         self,
+77 |         item_query: Any,
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:83:15
+   |
+81 |         options: Optional[Dict[str, Any]] = None,
+82 |     ) -> IExecution: ...
+83 |     async def start_repeat_timer_event(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^
+84 |         self, instance_id: Any, prev_item: IItem, data: Dict[str, Any], options: Optional[Dict[str, Any]] = None
+85 |     ) -> IExecution: ...
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:86:15
+   |
+84 |         self, instance_id: Any, prev_item: IItem, data: Dict[str, Any], options: Optional[Dict[str, Any]] = None
+85 |     ) -> IExecution: ...
+86 |     async def start_event(
+   |               ^^^^^^^^^^^
+87 |         self,
+88 |         instance_id: Any,
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:94:15
+   |
+92 |         options: Optional[Dict[str, Any]] = None,
+93 |     ) -> IExecution: ...
+94 |     async def throw_message(
+   |               ^^^^^^^^^^^^^
+95 |         self, message_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]
+96 |     ) -> IExecution: ...
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:97:15
+   |
+95 |         self, message_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]
+96 |     ) -> IExecution: ...
+97 |     async def throw_signal(self, signal_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]) -> Any: ...
+   |               ^^^^^^^^^^^^
+98 |     async def restart(self, item_query: Any, data: Any, user_name: Any, options: Any) -> IExecution: ...
+99 |     async def upgrade(self, model: str, after_node_ids: List[str]) -> Union[List[str], Dict[str, Any]]: ...
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:98:15
+   |
+96 |     ) -> IExecution: ...
+97 |     async def throw_signal(self, signal_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]) -> Any: ...
+98 |     async def restart(self, item_query: Any, data: Any, user_name: Any, options: Any) -> IExecution: ...
+   |               ^^^^^^^
+99 |     async def upgrade(self, model: str, after_node_ids: List[str]) -> Union[List[str], Dict[str, Any]]: ...
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/server/interfaces.py:99:15
+   |
+97 |     async def throw_signal(self, signal_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]) -> Any: ...
+98 |     async def restart(self, item_query: Any, data: Any, user_name: Any, options: Any) -> IExecution: ...
+99 |     async def upgrade(self, model: str, after_node_ids: List[str]) -> Union[List[str], Dict[str, Any]]: ...
+   |               ^^^^^^^
+   |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:105:9
+    |
+103 |     """Manages scheduling and timer events for the server."""
+104 |
+105 |     def check_timers(self, duration: Any) -> Any: ...
+    |         ^^^^^^^^^^^^
+106 |     def start(self) -> Any: ...
+107 |     def start_timers(self) -> Any: ...
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:106:9
+    |
+105 |     def check_timers(self, duration: Any) -> Any: ...
+106 |     def start(self) -> Any: ...
+    |         ^^^^^
+107 |     def start_timers(self) -> Any: ...
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:107:9
+    |
+105 |     def check_timers(self, duration: Any) -> Any: ...
+106 |     def start(self) -> Any: ...
+107 |     def start_timers(self) -> Any: ...
+    |         ^^^^^^^^^^^^
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:113:9
+    |
+111 |     """Manages instance-level caching within the BPMN server."""
+112 |
+113 |     def list(self) -> Any: ...
+    |         ^^^^
+114 |     def add(self, execution: IExecution) -> Any: ...
+115 |     def remove(self, instance_id: Any) -> Any: ...
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:114:9
+    |
+113 |     def list(self) -> Any: ...
+114 |     def add(self, execution: IExecution) -> Any: ...
+    |         ^^^
+115 |     def remove(self, instance_id: Any) -> Any: ...
+116 |     def shutdown(self) -> Any: ...
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:115:9
+    |
+113 |     def list(self) -> Any: ...
+114 |     def add(self, execution: IExecution) -> Any: ...
+115 |     def remove(self, instance_id: Any) -> Any: ...
+    |         ^^^^^^
+116 |     def shutdown(self) -> Any: ...
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/server/interfaces.py:116:9
+    |
+114 |     def add(self, execution: IExecution) -> Any: ...
+115 |     def remove(self, instance_id: Any) -> Any: ...
+116 |     def shutdown(self) -> Any: ...
+    |         ^^^^^^^^
+    |
+D100 Missing docstring in public module
+--> pybpmn_server/server/listener.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/server/listener.py:11:7
+   |
+11 | class Listener(AsyncIOEventEmitter):
+   |       ^^^^^^^^
+12 |     async def do_event(
+13 |         self, event: str, execution: IExecution, item: Any = None, event_details: Dict[str, Any] = None
+   |
+ANN201 Missing return type annotation for public function `do_event`
+  --> pybpmn_server/server/listener.py:12:15
+   |
+11 | class Listener(AsyncIOEventEmitter):
+12 |     async def do_event(
+   |               ^^^^^^^^
+13 |         self, event: str, execution: IExecution, item: Any = None, event_details: Dict[str, Any] = None
+14 |     ):
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/listener.py:12:15
+   |
+11 | class Listener(AsyncIOEventEmitter):
+12 |     async def do_event(
+   |               ^^^^^^^^
+13 |         self, event: str, execution: IExecution, item: Any = None, event_details: Dict[str, Any] = None
+14 |     ):
+   |
+RUF013 PEP 484 prohibits implicit `Optional`
+  --> pybpmn_server/server/listener.py:13:83
+   |
+11 | class Listener(AsyncIOEventEmitter):
+12 |     async def do_event(
+13 |         self, event: str, execution: IExecution, item: Any = None, event_details: Dict[str, Any] = None
+   |                                                                                   ^^^^^^^^^^^^^^
+14 |     ):
+15 |         if event_details is None:
+   |
+help: Convert to `T | None`
+ANN201 Missing return type annotation for public function `delegate_event`
+  --> pybpmn_server/server/listener.py:23:15
+   |
+21 |         await self.emit("all", {"event": event, "context": execution, "event_details": event_details})
+22 |
+23 |     async def delegate_event(self, event: str, execution: IExecution, event_details: Dict[str, Any]):
+   |               ^^^^^^^^^^^^^^
+24 |         app = execution.app_delegate
+   |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+  --> pybpmn_server/server/listener.py:23:15
+   |
+21 |         await self.emit("all", {"event": event, "context": execution, "event_details": event_details})
+22 |
+23 |     async def delegate_event(self, event: str, execution: IExecution, event_details: Dict[str, Any]):
+   |               ^^^^^^^^^^^^^^
+24 |         app = execution.app_delegate
+   |
+D100 Missing docstring in public module
+--> pybpmn_server/stubs.py:1:1
+D101 Missing docstring in public class
+  --> pybpmn_server/stubs.py:10:7
+   |
+10 | class NodeStub(INode):
+   |       ^^^^^^^^
+11 |     def __init__(self, node_id: str, name: str = "", type_: str = "bpmn:Task"):
+12 |         self.id = node_id
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:22:9
+   |
+20 |         self.loop_definition = None
+21 |
+22 |     def describe(self) -> List[List[str]]:
+   |         ^^^^^^^^
+23 |         return []
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:25:9
+   |
+23 |         return []
+24 |
+25 |     def restored(self, item: Any) -> None:
+   |         ^^^^^^^^
+26 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:28:9
+   |
+26 |         pass
+27 |
+28 |     def resume(self, item: Any) -> None:
+   |         ^^^^^^
+29 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:31:9
+   |
+29 |         pass
+30 |
+31 |     def has_behaviour(self, name: Any) -> bool:
+   |         ^^^^^^^^^^^^^
+32 |         return False
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:34:9
+   |
+32 |         return False
+33 |
+34 |     def get_behaviour(self, name: Any) -> Any:
+   |         ^^^^^^^^^^^^^
+35 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:37:9
+   |
+35 |         return None
+36 |
+37 |     def add_behaviour(self, name: Any, behaviour: Any) -> None:
+   |         ^^^^^^^^^^^^^
+38 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:40:15
+   |
+38 |         pass
+39 |
+40 |     async def execute(self, item: Any) -> Any:
+   |               ^^^^^^^
+41 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:43:15
+   |
+41 |         return None
+42 |
+43 |     async def end(self, item: Any, cancel: bool = False) -> None:
+   |               ^^^
+44 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:46:15
+   |
+44 |         pass
+45 |
+46 |     async def get_outbounds(self, item: Any) -> List[Any]:
+   |               ^^^^^^^^^^^^^
+47 |         return []
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/stubs.py:50:7
+   |
+50 | class ModelsDatastoreStub(IModelsDatastore):
+   |       ^^^^^^^^^^^^^^^^^^^
+51 |     def __init__(self, server: Any):
+52 |         self.server = server
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:54:15
+   |
+52 |         self.server = server
+53 |
+54 |     async def get(self, query: Any) -> List[Dict[str, Any]]:
+   |               ^^^
+55 |         return []
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:57:15
+   |
+55 |         return []
+56 |
+57 |     async def get_list(self, query: Any) -> List[str]:
+   |               ^^^^^^^^
+58 |         return []
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:60:15
+   |
+58 |         return []
+59 |
+60 |     async def get_source(self, name: Any, owner: Any = None) -> str:
+   |               ^^^^^^^^^^
+61 |         return ""
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:63:15
+   |
+61 |         return ""
+62 |
+63 |     async def get_svg(self, name: Any, owner: Any = None) -> str:
+   |               ^^^^^^^
+64 |         return ""
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:66:15
+   |
+64 |         return ""
+65 |
+66 |     async def save(self, name: Any, bpmn: Any, svg: Optional[Any] = None, owner: Optional[Any] = None) -> bool:
+   |               ^^^^
+67 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:69:15
+   |
+67 |         return True
+68 |
+69 |     async def load(self, name: Any, owner: Any = None) -> Any:
+   |               ^^^^
+70 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:72:15
+   |
+70 |         return None
+71 |
+72 |     async def load_model(self, name: Any, owner: Any = None) -> Any:
+   |               ^^^^^^^^^^
+73 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:75:15
+   |
+73 |         return None
+74 |
+75 |     async def find_events(self, query: Any, owner: Any = None) -> List[Any]:
+   |               ^^^^^^^^^^^
+76 |         return []
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:78:15
+   |
+76 |         return []
+77 |
+78 |     async def rebuild(self, model: Optional[Any] = None) -> None:
+   |               ^^^^^^^
+79 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:81:9
+   |
+79 |         pass
+80 |
+81 |     def install(self) -> None:
+   |         ^^^^^^^
+82 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:84:9
+   |
+82 |         return None
+83 |
+84 |     def import_(self, data: Any) -> None:
+   |         ^^^^^^^
+85 |         return None
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:87:15
+   |
+85 |         return None
+86 |
+87 |     async def save_model(self, model: Any) -> bool:
+   |               ^^^^^^^^^^
+88 |         return True
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:90:15
+   |
+88 |         return True
+89 |
+90 |     async def delete_model(self, name: Any, owner: Any = None) -> None:
+   |               ^^^^^^^^^^^^
+91 |         pass
+   |
+D102 Missing docstring in public method
+  --> pybpmn_server/stubs.py:93:15
+   |
+91 |         pass
+92 |
+93 |     async def rename_model(self, name: Any, new_name: Any, owner: Any = None) -> bool:
+   |               ^^^^^^^^^^^^
+94 |         return True
+   |
+D101 Missing docstring in public class
+  --> pybpmn_server/stubs.py:97:7
+   |
+97 | class DataStoreStub(IDataStore):
+   |       ^^^^^^^^^^^^^
+98 |     def __init__(self, server: Any):
+99 |         self.server = server
+   |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:105:15
+    |
+103 |         self.locker = None
+104 |
+105 |     async def save(self, instance: Any, options: Any) -> None:
+    |               ^^^^
+106 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:108:15
+    |
+106 |         pass
+107 |
+108 |     async def load_instance(self, instance_id: Any, options: Any) -> Dict[str, Any]:
+    |               ^^^^^^^^^^^^^
+109 |         return {"instance": None, "items": []}
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:111:15
+    |
+109 |         return {"instance": None, "items": []}
+110 |
+111 |     async def find_item(self, query: Any) -> Any:
+    |               ^^^^^^^^^
+112 |         return None
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:114:15
+    |
+112 |         return None
+113 |
+114 |     async def find_instance(self, query: Any, options: Any) -> Any:
+    |               ^^^^^^^^^^^^^
+115 |         return None
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:117:15
+    |
+115 |         return None
+116 |
+117 |     async def find_instances(self, query: Any, option: Any) -> List[Any]:
+    |               ^^^^^^^^^^^^^^
+118 |         return []
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:120:15
+    |
+118 |         return []
+119 |
+120 |     async def find_items(self, query: Any) -> List[Any]:
+    |               ^^^^^^^^^^
+121 |         return []
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:123:15
+    |
+121 |         return []
+122 |
+123 |     async def delete_instances(self, query: Optional[Any] = None) -> None:
+    |               ^^^^^^^^^^^^^^^^
+124 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:126:9
+    |
+124 |         pass
+125 |
+126 |     def install(self) -> None:
+    |         ^^^^^^^
+127 |         return None
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:129:9
+    |
+127 |         return None
+128 |
+129 |     def archive(self, query: Any) -> None:
+    |         ^^^^^^^
+130 |         return None
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:132:15
+    |
+130 |         return None
+131 |
+132 |     async def find(self, params: Any) -> Any:
+    |               ^^^^
+133 |         return FindResult(data=[], total_count=0)
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/stubs.py:136:7
+    |
+136 | class DefaultAppDelegateStub(AppDelegateBase):
+    |       ^^^^^^^^^^^^^^^^^^^^^^
+137 |     def __init__(self, server: Any):
+138 |         self.server = server
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:141:15
+    |
+139 |         self.moddle_options = None
+140 |
+141 |     async def get_services_provider(self, execution: IExecution) -> IServiceProvider:
+    |               ^^^^^^^^^^^^^^^^^^^^^
+142 |         return {}  # type: ignore
+    |
+PGH003 Use specific rule codes when ignoring type issues
+   --> pybpmn_server/stubs.py:142:20
+    |
+141 |     async def get_services_provider(self, execution: IExecution) -> IServiceProvider:
+142 |         return {}  # type: ignore
+    |                    ^^^^^^^^^^^^^^
+143 |
+144 |     def send_email(self, to: Any, msg: Any, body: Any) -> None:
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:144:9
+    |
+142 |         return {}  # type: ignore
+143 |
+144 |     def send_email(self, to: Any, msg: Any, body: Any) -> None:
+    |         ^^^^^^^^^^
+145 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:147:9
+    |
+145 |         pass
+146 |
+147 |     def execution_started(self, execution: IExecution) -> None:
+    |         ^^^^^^^^^^^^^^^^^
+148 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:150:9
+    |
+148 |         pass
+149 |
+150 |     def start_up(self, options: Any) -> None:
+    |         ^^^^^^^^
+151 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:153:9
+    |
+151 |         pass
+152 |
+153 |     def message_thrown(self, message_id: str, data: Any, message_matching_key: Any, item: IItem) -> None:
+    |         ^^^^^^^^^^^^^^
+154 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:156:9
+    |
+154 |         pass
+155 |
+156 |     def signal_thrown(self, signal_id: str, data: Any, message_matching_key: Any, item: IItem) -> None:
+    |         ^^^^^^^^^^^^^
+157 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:159:9
+    |
+157 |         pass
+158 |
+159 |     def issue_message(self, message_id: str, data: Any) -> None:
+    |         ^^^^^^^^^^^^^
+160 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:162:9
+    |
+160 |         pass
+161 |
+162 |     def issue_signal(self, message_id: str, data: Any) -> None:
+    |         ^^^^^^^^^^^^
+163 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:165:9
+    |
+163 |         pass
+164 |
+165 |     def service_called(self, input_data: Dict[str, Any], execution: IExecution, item: IItem) -> Any:
+    |         ^^^^^^^^^^^^^^
+166 |         return None
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/stubs.py:169:7
+    |
+169 | class NoCacheManagerStub(ICacheManager):
+    |       ^^^^^^^^^^^^^^^^^^
+170 |     def __init__(self, server: Any):
+171 |         self.server = server
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:173:9
+    |
+171 |         self.server = server
+172 |
+173 |     def list(self) -> List[Any]:
+    |         ^^^^
+174 |         return []
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:176:9
+    |
+174 |         return []
+175 |
+176 |     def add(self, execution: IExecution) -> None:
+    |         ^^^
+177 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:179:9
+    |
+177 |         pass
+178 |
+179 |     def remove(self, instance_id: Any) -> None:
+    |         ^^^^^^
+180 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:182:9
+    |
+180 |         pass
+181 |
+182 |     def shutdown(self) -> None:
+    |         ^^^^^^^^
+183 |         pass
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/stubs.py:198:7
+    |
+198 | class ExecutionStub(IExecution):
+    |       ^^^^^^^^^^^^^
+199 |     def __init__(self):
+200 |         self.tokens = {}
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:207:9
+    |
+205 |         self.logs = []
+206 |
+207 |     def get_uuid(self) -> str:
+    |         ^^^^^^^^
+208 |         import uuid
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:212:9
+    |
+210 |         return str(uuid.uuid4())
+211 |
+212 |     def get_new_sequence(self, scope: str) -> int:
+    |         ^^^^^^^^^^^^^^^^
+213 |         self._next_id += 1
+214 |         return self._next_id
+    |
+ANN201 Missing return type annotation for public function `log`
+   --> pybpmn_server/stubs.py:216:9
+    |
+214 |         return self._next_id
+215 |
+216 |     def log(self, *msg: Any):
+    |         ^^^
+217 |         self.logs.append(("LOG", msg))
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:216:9
+    |
+214 |         return self._next_id
+215 |
+216 |     def log(self, *msg: Any):
+    |         ^^^
+217 |         self.logs.append(("LOG", msg))
+    |
+ANN201 Missing return type annotation for public function `log_s`
+   --> pybpmn_server/stubs.py:219:9
+    |
+217 |         self.logs.append(("LOG", msg))
+218 |
+219 |     def log_s(self, *msg: Any):
+    |         ^^^^^
+220 |         self.logs.append(("LOG_S", msg))
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:219:9
+    |
+217 |         self.logs.append(("LOG", msg))
+218 |
+219 |     def log_s(self, *msg: Any):
+    |         ^^^^^
+220 |         self.logs.append(("LOG_S", msg))
+    |
+ANN201 Missing return type annotation for public function `log_e`
+   --> pybpmn_server/stubs.py:222:9
+    |
+220 |         self.logs.append(("LOG_S", msg))
+221 |
+222 |     def log_e(self, *msg: Any):
+    |         ^^^^^
+223 |         self.logs.append(("LOG_E", msg))
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:222:9
+    |
+220 |         self.logs.append(("LOG_S", msg))
+221 |
+222 |     def log_e(self, *msg: Any):
+    |         ^^^^^
+223 |         self.logs.append(("LOG_E", msg))
+    |
+ANN201 Missing return type annotation for public function `info`
+   --> pybpmn_server/stubs.py:225:9
+    |
+223 |         self.logs.append(("LOG_E", msg))
+224 |
+225 |     def info(self, msg: Any):
+    |         ^^^^
+226 |         self.logs.append(("INFO", msg))
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:225:9
+    |
+223 |         self.logs.append(("LOG_E", msg))
+224 |
+225 |     def info(self, msg: Any):
+    |         ^^^^
+226 |         self.logs.append(("INFO", msg))
+    |
+ANN201 Missing return type annotation for public function `error`
+   --> pybpmn_server/stubs.py:228:9
+    |
+226 |         self.logs.append(("INFO", msg))
+227 |
+228 |     def error(self, msg: Any):
+    |         ^^^^^
+229 |         self.logs.append(("ERROR", msg))
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:228:9
+    |
+226 |         self.logs.append(("INFO", msg))
+227 |
+228 |     def error(self, msg: Any):
+    |         ^^^^^
+229 |         self.logs.append(("ERROR", msg))
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:231:9
+    |
+229 |         self.logs.append(("ERROR", msg))
+230 |
+231 |     def get_data(self, data_path: str) -> Any:
+    |         ^^^^^^^^
+232 |         return {}
+    |
+ANN201 Missing return type annotation for public function `append_data`
+   --> pybpmn_server/stubs.py:234:9
+    |
+232 |         return {}
+233 |
+234 |     def append_data(
+    |         ^^^^^^^^^^^
+235 |         self, input_data: Any, item: IItem, data_path: Optional[Any] = None, assignment: Optional[Any] = None
+236 |     ):
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:234:9
+    |
+232 |         return {}
+233 |
+234 |     def append_data(
+    |         ^^^^^^^^^^^
+235 |         self, input_data: Any, item: IItem, data_path: Optional[Any] = None, assignment: Optional[Any] = None
+236 |     ):
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:239:9
+    |
+237 |         pass
+238 |
+239 |     def get_node_by_id(self, id: Any) -> Any:
+    |         ^^^^^^^^^^^^^^
+240 |         return None
+    |
+A002 Function argument `id` is shadowing a Python builtin
+   --> pybpmn_server/stubs.py:239:30
+    |
+237 |         pass
+238 |
+239 |     def get_node_by_id(self, id: Any) -> Any:
+    |                              ^^
+240 |         return None
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:242:9
+    |
+240 |         return None
+241 |
+242 |     def get_token(self, id: Any) -> Any:
+    |         ^^^^^^^^^
+243 |         return self.tokens.get(id)
+    |
+A002 Function argument `id` is shadowing a Python builtin
+   --> pybpmn_server/stubs.py:242:25
+    |
+240 |         return None
+241 |
+242 |     def get_token(self, id: Any) -> Any:
+    |                         ^^
+243 |         return self.tokens.get(id)
+    |
+ANN201 Missing return type annotation for public function `terminate`
+   --> pybpmn_server/stubs.py:245:9
+    |
+243 |         return self.tokens.get(id)
+244 |
+245 |     def terminate(self):
+    |         ^^^^^^^^^
+246 |         pass
+    |
+help: Add return type annotation: `None`
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:245:9
+    |
+243 |         return self.tokens.get(id)
+244 |
+245 |     def terminate(self):
+    |         ^^^^^^^^^
+246 |         pass
+    |
+D101 Missing docstring in public class
+   --> pybpmn_server/stubs.py:249:7
+    |
+249 | class CronStub(ICron):
+    |       ^^^^^^^^
+250 |     def check_timers(self, duration: Any) -> None:
+251 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:250:9
+    |
+249 | class CronStub(ICron):
+250 |     def check_timers(self, duration: Any) -> None:
+    |         ^^^^^^^^^^^^
+251 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:253:9
+    |
+251 |         pass
+252 |
+253 |     def start(self) -> None:
+    |         ^^^^^
+254 |         pass
+    |
+D102 Missing docstring in public method
+   --> pybpmn_server/stubs.py:256:9
+    |
+254 |         pass
+255 |
+256 |     def start_timers(self) -> None:
+    |         ^^^^^^^^^^^^
+257 |         pass
+    |
+Found 501 errors (7 fixed, 494 remaining).
+No fixes available (25 hidden fixes can be enabled with the `--unsafe-fixes` option).
+check for added large files..............................................Failed
+- hook id: check-added-large-files
+- exit code: 1
+BPMN Server data model.pdf (766 KB) exceeds 500 KB.
+check for case conflicts.................................................Passed
+check that executables have shebangs.................(no files to check)Skipped
+check json...............................................................Passed
+check for merge conflicts................................................Passed
+check that scripts with shebangs are executable..........................Passed
+check for broken symlinks............................(no files to check)Skipped
+check toml...........................................(no files to check)Skipped
+check yaml...........................................(no files to check)Skipped
+debug statements (python)................................................Passed
+fix end of files.........................................................Failed
+- hook id: end-of-file-fixer
+- exit code: 1
+- files were modified by this hook
+Fixing data-model.txt
+fix utf-8 byte order marker..............................................Passed
+pyupgrade................................................................Failed
+- hook id: pyupgrade
+- exit code: 1
+- files were modified by this hook
+Rewriting pybpmn_server/dmn/dmn_engine.py
+Detect secrets...........................................................Passed
+mypy.....................................................................Failed
+- hook id: mypy
+- exit code: 1
+tests/test_resolve_name.py:22: error: "SimpleObj" has no attribute "_notavailable"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:13: error: "type[StringIntegerDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:16: error: "StringIntegerDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:20: error: "StringIntegerDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:24: error: "StringIntegerDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:28: error: "StringIntegerDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_integer_decision.py:32: error: "StringIntegerDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_decision.py:13: error: "type[StringDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_decision.py:16: error: "StringDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_decision.py:20: error: "StringDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_decision.py:24: error: "StringDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/string_decision.py:28: error: "StringDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/kwargs_parameter.py:13: error: "type[StringDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/kwargs_parameter.py:16: error: "StringDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/integer_decision_comparison.py:13: error: "type[IntegerDecisionComparisonTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/integer_decision_comparison.py:16: error: "IntegerDecisionComparisonTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/integer_decision_comparison.py:20: error: "IntegerDecisionComparisonTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/integer_decision_comparison.py:24: error: "IntegerDecisionComparisonTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:14: error: "type[BoolDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:17: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:21: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:25: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:29: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/date_decision.py:33: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/bool_decision.py:13: error: "type[BoolDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/bool_decision.py:16: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/bool_decision.py:20: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/bool_decision.py:24: error: "BoolDecisionTestClass" has no attribute "runner"  [attr-defined]
+pybpmn_server/elements/behaviors/message_signal.py:44: error: "IExecution" has no attribute "app_delegate"  [attr-defined]
+pybpmn_server/elements/behaviors/message_signal.py:95: error: "IExecution" has no attribute "app_delegate"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:63: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:68: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:71: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:74: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:112: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/io.py:123: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/common/cron_utils.py:44: error: Argument 1 to "Cron" has incompatible type "str"; expected "Settings | None"  [arg-type]
+pybpmn_server/common/cron_utils.py:45: error: "Cron" not callable  [operator]
+pybpmn_server/engine/loop.py:119: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/process.py:129: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/flow.py:57: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/timer.py:65: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/timer.py:73: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/timer.py:82: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/behaviors/timer.py:148: error: "IExecution" has no attribute "server"  [attr-defined]
+pybpmn_server/elements/behaviors/timer.py:152: error: "IExecution" has no attribute "server"  [attr-defined]
+pybpmn_server/common/configuration.py:138: error: Cannot instantiate abstract class "DataStore" with abstract attribute "db_configuration"  [abstract]
+pybpmn_server/common/configuration.py:154: error: Unpacking a string is disallowed  [misc]
+pybpmn_server/common/configuration.py:154: error: Cannot determine type of "k"  [has-type]
+pybpmn_server/common/configuration.py:154: error: Cannot determine type of "v"  [has-type]
+pybpmn_server/server/cron.py:46: error: "Cron" has no attribute "definitions"  [attr-defined]
+pybpmn_server/server/cron.py:52: error: Dict entry 0 has incompatible type "str": "dict[str, bool]"; expected "str": "str"  [dict-item]
+pybpmn_server/server/cron.py:53: error: "Cron" has no attribute "data_store"  [attr-defined]
+pybpmn_server/server/cron.py:58: error: "Cron" has no attribute "logger"  [attr-defined]
+pybpmn_server/server/cron.py:64: error: "Cron" has no attribute "server"  [attr-defined]
+pybpmn_server/server/cron.py:67: error: "Cron" has no attribute "definitions"  [attr-defined]
+pybpmn_server/server/cron.py:71: error: "Cron" has no attribute "server"  [attr-defined]
+pybpmn_server/elements/node.py:107: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/engine/item.py:69: error: "IExecution" has no attribute "options"  [attr-defined]
+pybpmn_server/elements/tasks.py:57: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/tasks.py:92: error: "IExecution" has no attribute "app_delegate"  [attr-defined]
+pybpmn_server/elements/tasks.py:207: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/tasks.py:209: error: "IExecution" has no attribute "script_handler"  [attr-defined]
+pybpmn_server/elements/tasks.py:428: error: "IExecution" has no attribute "engine"  [attr-defined]
+pybpmn_server/engine/execution.py:577: error: Argument 1 to "Execution" has incompatible type "BPMNServer"; expected "str"  [arg-type]
+pybpmn_server/server/cache_manager.py:27: error: Too many arguments for "__init__" of "object"  [call-arg]
+pybpmn_server/engine/engine.py:28: error: Missing return statement  [return]
+pybpmn_server/engine/engine.py:151: error: "ICacheManager" has no attribute "get_instance"  [attr-defined]
+pybpmn_server/engine/engine.py:156: error: "Engine" has no attribute "server"  [attr-defined]
+pybpmn_server/engine/engine.py:304: error: Argument 4 to "signal_event" of "Execution" has incompatible type "dict[str, Any]"; expected "bool"  [arg-type]
+pybpmn_server/engine/engine.py:327: error: "Engine" has no attribute "definitions"  [attr-defined]
+pybpmn_server/engine/engine.py:362: error: "Engine" has no attribute "definitions"  [attr-defined]
+pybpmn_server/engine/engine.py:378: error: Argument 1 to "append" of "list" has incompatible type "dict[str, str]"; expected "str"  [arg-type]
+pybpmn_server/engine/engine.py:386: error: "Engine" has no attribute "server"  [attr-defined]
+pybpmn_server/engine/engine.py:393: error: "Engine" has no attribute "server"  [attr-defined]
+pybpmn_server/engine/default_app_delegate.py:106: error: "IExecution" has no attribute "engine"  [attr-defined]
+pybpmn_server/engine/default_app_delegate.py:133: error: "IExecution" has no attribute "engine"  [attr-defined]
+pybpmn_server/server/bpmn_server.py:30: error: Argument 1 to "Cron" has incompatible type "BPMNServer"; expected "Settings | None"  [arg-type]
+pybpmn_server/server/bpmn_server.py:33: error: Argument 1 to "CacheManager" has incompatible type "BPMNServer"; expected "Settings | None"  [arg-type]
+pybpmn_server/server/bpmn_server.py:34: error: Cannot instantiate abstract class "DataStore" with abstract attribute "db_configuration"  [abstract]
+pybpmn_server/server/bpmn_server.py:51: error: Incompatible return value type (got "Engine", expected "IEngine")  [return-value]
+pybpmn_server/server/bpmn_server.py:51: note: Following member(s) of "Engine" have conflicts:
+pybpmn_server/server/bpmn_server.py:51: note:     Expected:
+pybpmn_server/server/bpmn_server.py:51: note:         def invoke(self, item_query: Any, data: dict[str, Any], user_name: str | None = ..., options: dict[str, Any] | None = ...) -> Coroutine[Any, Any, IExecution]
+pybpmn_server/server/bpmn_server.py:51: note:     Got:
+pybpmn_server/server/bpmn_server.py:51: note:         def invoke(self, item_query: Any, data: Any = ..., user_name: str | None = ..., restart: bool = ..., recover: bool = ..., no_wait: bool = ...) -> Coroutine[Any, Any, Execution]
+pybpmn_server/server/bpmn_server.py:51: note:     Expected:
+pybpmn_server/server/bpmn_server.py:51: note:         def start(self, name: Any, data: Any | None = ..., start_node_id: str | None = ..., user_name: str | None = ..., options: Any | None = ...) -> Coroutine[Any, Any, IExecution]
+pybpmn_server/server/bpmn_server.py:51: note:     Got:
+pybpmn_server/server/bpmn_server.py:51: note:         def start(self, name: str, source: str, data: dict[str, Any] | None = ..., start_node_id: str | None = ..., user_name: str | None = ..., parent_item_id: str | None = ..., no_wait: bool = ...) -> Coroutine[Any, Any, Execution]
+pybpmn_server/stubs.py:15: error: Property "process_id" defined in "INode" is read-only  [misc]
+pybpmn_server/stubs.py:20: error: Property "loop_definition" defined in "INode" is read-only  [misc]
+pybpmn_server/stubs.py:57: error: Return type "Coroutine[Any, Any, list[str]]" of "get_list" incompatible with return type "Coroutine[Any, Any, list[dict[str, Any]]]" in supertype "pybpmn_server.datastore.interfaces.IModelsDatastore"  [override]
+pybpmn_server/stubs.py:105: error: Signature of "save" incompatible with supertype "pybpmn_server.datastore.interfaces.IDataStore"  [override]
+pybpmn_server/stubs.py:105: note:      Superclass:
+pybpmn_server/stubs.py:105: note:          def save(self, instance: Any) -> Coroutine[Any, Any, None]
+pybpmn_server/stubs.py:105: note:      Subclass:
+pybpmn_server/stubs.py:105: note:          def save(self, instance: Any, options: Any) -> Coroutine[Any, Any, None]
+pybpmn_server/stubs.py:108: error: Signature of "load_instance" incompatible with supertype "pybpmn_server.datastore.interfaces.IDataStore"  [override]
+pybpmn_server/stubs.py:108: note:      Superclass:
+pybpmn_server/stubs.py:108: note:          def load_instance(self, instance_id: str) -> Coroutine[Any, Any, dict[str, Any] | None]
+pybpmn_server/stubs.py:108: note:      Subclass:
+pybpmn_server/stubs.py:108: note:          def load_instance(self, instance_id: Any, options: Any) -> Coroutine[Any, Any, dict[str, Any]]
+pybpmn_server/stubs.py:203: error: Property "id" defined in "IExecution" is read-only  [misc]
+pybpmn_server/server/server_component.py:44: error: Incompatible return value type (got "Engine", expected "IEngine")  [return-value]
+pybpmn_server/server/server_component.py:44: note: Following member(s) of "Engine" have conflicts:
+pybpmn_server/server/server_component.py:44: note:     Expected:
+pybpmn_server/server/server_component.py:44: note:         def invoke(self, item_query: Any, data: dict[str, Any], user_name: str | None = ..., options: dict[str, Any] | None = ...) -> Coroutine[Any, Any, IExecution]
+pybpmn_server/server/server_component.py:44: note:     Got:
+pybpmn_server/server/server_component.py:44: note:         def invoke(self, item_query: Any, data: Any = ..., user_name: str | None = ..., restart: bool = ..., recover: bool = ..., no_wait: bool = ...) -> Coroutine[Any, Any, Execution]
+pybpmn_server/server/server_component.py:44: note:     Expected:
+pybpmn_server/server/server_component.py:44: note:         def start(self, name: Any, data: Any | None = ..., start_node_id: str | None = ..., user_name: str | None = ..., options: Any | None = ...) -> Coroutine[Any, Any, IExecution]
+pybpmn_server/server/server_component.py:44: note:     Got:
+pybpmn_server/server/server_component.py:44: note:         def start(self, name: str, source: str, data: dict[str, Any] | None = ..., start_node_id: str | None = ..., user_name: str | None = ..., parent_item_id: str | None = ..., no_wait: bool = ...) -> Coroutine[Any, Any, Execution]
+pybpmn_server/server/listener.py:24: error: "IExecution" has no attribute "app_delegate"  [attr-defined]
+pybpmn_server/api/api.py:67: error: Argument 2 to "start" of "Engine" has incompatible type "dict[str, Any]"; expected "str"  [arg-type]
+pybpmn_server/api/api.py:67: error: Argument 5 to "start" of "Engine" has incompatible type "dict[str, Any]"; expected "str | None"  [arg-type]
+pybpmn_server/api/api.py:83: error: Argument 4 to "invoke" of "Engine" has incompatible type "dict[str, Any]"; expected "bool"  [arg-type]
+pybpmn_server/api/api.py:214: error: Incompatible return value type (got "list[dict[str, Any]]", expected "list[str]")  [return-value]
+pybpmn_server/api/api.py:219: error: Too many arguments for "find_events" of "ModelsDatastore"  [call-arg]
+pybpmn_server/api/api.py:226: error: Too many arguments for "find_events" of "ModelsDatastore"  [call-arg]
+pybpmn_server/api/api.py:232: error: Too many arguments for "delete_model" of "ModelsDatastore"  [call-arg]
+pybpmn_server/api/api.py:239: error: Too many arguments for "rename_model" of "ModelsDatastore"  [call-arg]
+pybpmn_server/dmn/dmn_parser.py:41: error: "str" has no attribute "tag"  [attr-defined]
+pybpmn_server/dmn/dmn_parser.py:42: error: "str" has no attribute "tag"  [attr-defined]
+pybpmn_server/dmn/dmn_parser.py:46: error: "str" has no attribute "attrib"  [attr-defined]
+pybpmn_server/dmn/dmn_parser.py:137: error: Item "InputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_parser.py:137: error: Item "OutputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_parser.py:139: error: Item "InputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_parser.py:139: error: Item "OutputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_parser.py:142: error: Item "InputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_parser.py:142: error: Item "OutputEntry" of "InputEntry | OutputEntry" has no attribute "typeRef"  [union-attr]
+pybpmn_server/dmn/dmn_engine.py:23: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:26: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:28: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:35: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:43: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:47: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:54: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+pybpmn_server/dmn/dmn_engine.py:57: error: "DMNEngine" has no attribute "logger"  [attr-defined]
+tests/test_dmn/long_or_double_decision_conparison.py:15: error: "type[LongOrDoubleDecisionTestClass]" has no attribute "runner"  [attr-defined]
+tests/test_dmn/long_or_double_decision_conparison.py:18: error: "LongOrDoubleDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/long_or_double_decision_conparison.py:22: error: "LongOrDoubleDecisionTestClass" has no attribute "runner"  [attr-defined]
+tests/test_dmn/long_or_double_decision_conparison.py:26: error: "LongOrDoubleDecisionTestClass" has no attribute "runner"  [attr-defined]
+Found 118 errors in 31 files (checked 131 source files)
+pydoclint................................................................Failed
+- hook id: pydoclint
+- exit code: 1
+pybpmn_server/dmn/generated/diagram.py
+    10: DOC001: Class `Diagram`: Potential formatting errors in docstring. Error message: No specification for "Attributes": ""
+    10: DOC601: Class `Diagram`: Class docstring contains fewer class attributes than actual class attributes.  (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+    10: DOC603: Class `Diagram`: Class docstring attributes are different from actual class attributes. (Or could be other formatting issues: https://jsh9.github.io/pydoclint/violation_codes.html#notes-on-doc103 ). Attributes in the class definition but not in the docstring: [documentation: Optional[str], name: Optional[str], resolution: Optional[float]]. (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+pybpmn_server/dmn/generated/edge.py
+    10: DOC001: Class `Edge`: Potential formatting errors in docstring. Error message: No specification for "Attributes": ""
+    10: DOC601: Class `Edge`: Class docstring contains fewer class attributes than actual class attributes.  (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+    10: DOC603: Class `Edge`: Class docstring attributes are different from actual class attributes. (Or could be other formatting issues: https://jsh9.github.io/pydoclint/violation_codes.html#notes-on-doc103 ). Attributes in the class definition but not in the docstring: [waypoint: list[Point]]. (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+pybpmn_server/dmn/generated/shape.py
+    11: DOC001: Class `Shape`: Potential formatting errors in docstring. Error message: No specification for "Attributes": ""
+    11: DOC601: Class `Shape`: Class docstring contains fewer class attributes than actual class attributes.  (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+    11: DOC603: Class `Shape`: Class docstring attributes are different from actual class attributes. (Or could be other formatting issues: https://jsh9.github.io/pydoclint/violation_codes.html#notes-on-doc103 ). Attributes in the class definition but not in the docstring: [bounds: Optional[Bounds]]. (Please read https://jsh9.github.io/pydoclint/checking_class_attributes.html on how to correctly document class attributes.)
+interrogate..............................................................Failed
+- hook id: interrogate
+- exit code: 1
+RESULT: FAILED (minimum: 90.0%, actual: 39.0%)
+Validate GitHub Actions..............................(no files to check)Skipped
+Validate GitHub Workflows............................(no files to check)Skipped

@@ -145,17 +145,18 @@ class BusinessRuleTask(Node[BusinessRuleTaskDef]):
 
     async def run(self, item: IItem) -> NodeAction:
         """Run the business rule task."""
-        from pybpmn_server.dmn.dmn_engine import DMNEngine
-
-        if self.decision_ref:
-            config = item.token.execution.server.configuration
-            path = config.definitions_path
-            item.token.log(f"invoking business rule:{self.decision_ref}")
-
-            # TODO: Store the business rules in the database and import them when importing the base file
-            file_path = f"{path}/{self.decision_ref}.dmn.xml"
-            dmn = await DMNEngine().load(file_path)
-            item.output = dmn.evaluate(item.input)
+        # TODO (pybpmn-server-1ay): refactor to use DMN engine
+        # from pybpmn_server.dmn.dmn_engine import DMNEngine
+        #
+        # if self.decision_ref:
+        #     config = item.token.execution.server.configuration
+        #     path = config.definitions_path
+        #     item.token.log(f"invoking business rule:{self.decision_ref}")
+        #
+        #     # TODO (pybpmn-server-cag): Store the business rules in the database and import them when importing the base file
+        #     file_path = f"{path}/{self.decision_ref}.dmn.xml"
+        #     dmn = await DMNEngine().load(file_path)
+        #     item.output = dmn.evaluate(item.input)
 
         return NodeAction.END
 

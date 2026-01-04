@@ -1,0 +1,149 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+
+Table users {
+  id uuid [primary key]
+  username varchar
+  role varchar
+  created_at timestamp
+}
+
+Table groups {
+  id uuid [primary key]
+  name varchar
+}
+
+Table group_membership {
+  id uuid [primary key]
+  user_id uuid [not null, ref: > users.id]
+  group_id uuid [not null, ref: > groups.id]
+}
+
+Table instances {
+  id uuid [pk]
+  parent_item_id uuid [null, ref:> id]
+  name varchar
+  status varchar
+  version int
+  data JSON
+  started_at datetime
+  ended_at datetime
+  saved_at datetime
+}
+
+Table items {
+  id uuid [pk]
+  instance_id uuid [not null, ref: > instances.id]
+  element_id varchar
+  token_id uuid [not null]
+  item_key varchar
+  name varchar
+  type varchar [not null]
+  user_name varchar [not null]
+  priority varchar
+  seq int [not null]
+  status varchar [not null]
+  status_details JSON
+  assignee uuid [ref: > users.id]
+  due_date datetime
+  time_due datetime
+  started_at datetime
+  ended_at datetime
+  follow_up_date datetime
+  signal_id varchar
+  message_id varchar
+  output JSON
+  vars JSON
+}
+
+Table item_candidate_groups{
+  id uuid [pk]
+  item_id uuid [not null, ref: > items.id]
+  group_id uuid [not null, ref: > groups.id]
+}
+
+Table item_candidate_users {
+  id uuid [pk]
+  item_id uuid [not null, ref: > items.id]
+  user_id uuid [not null, ref: > users.id]
+}
+
+Table loops{
+  id uuid [pk]
+  instance_id uuid [not null, ref: > instances.id]
+  completed int [not null]
+  data_path varchar
+  end_flag bool
+  items JSON
+  node_id varchar [not null]
+  owner_token_id uuid [not null]
+  sequence int [not null]
+}
+
+Table tokens {
+  id uuid [pk]
+  instance_id uuid [not null, ref: > instances.id]
+  type varchar
+  current_node varchar
+  data_path varchar
+  items_key varchar
+  loop_id varchar
+  origin_item varchar
+  parent_token uuid [ref: > id]
+  start_node_id varchar
+  status varchar
+}
+
+Table models {
+  id uuid [pk]
+  name varchar [not null]
+  saved datetime [not null]
+  source string [not null]
+  svg string
+  owner string
+}
+
+Table events{
+  id uuid [pk]
+  model_id uuid [not null, ref: > models.id]
+  process_id varchar
+  element_id varchar
+  type varchar
+  subType varchar
+  lane varchar
+  name varchar
+}
+
+Table event_candidate_groups{
+  id uuid [pk]
+  event_id uuid [not null, ref: > events.id]
+  group_id uuid [not null, ref: > groups.id]
+}
+
+Table event_candidate_users {
+  id uuid [pk]
+  event_id uuid [not null, ref: > events.id]
+  user_id uuid [not null, ref: > users.id]
+}
+
+Table processes {
+  id uuid [pk]
+  process_id varchar
+  name string
+  history_time_to_live string
+  is_executable boolean
+  is_startable_in_task_list boolean
+}
+
+Table process_candidate_groups{
+  id uuid [pk]
+  process_id uuid [not null, ref: > processes.id]
+  group_id uuid [not null, ref: > groups.id]
+}
+
+Table process_candidate_users {
+  id uuid [pk]
+  process_id uuid [not null, ref: > processes.id]
+  user_id uuid [not null, ref: > users.id]
+}

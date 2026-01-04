@@ -69,7 +69,7 @@ class Definition(IDefinition):
         """Load process definition."""
         process = Process(process_element, parent_process)
 
-        # TODO: Process extension elements. Especially execution and task listeners
+        # TODO (pybpmn-server-bgb): Process extension elements. Especially execution and task listeners
         # if process_element.extension_elements:
         #     for ext in process_element.extension_elements.process_element.extension_elements.values():
         #         if ext.get("event"):
@@ -100,7 +100,7 @@ class Definition(IDefinition):
 
     def _link_references(self) -> None:
         """Link references to other nodes."""
-        # TODO: re-implement this method using pybpmn-parser
+        # TODO (pybpmn-server-f77): re-implement this method using pybpmn-parser
         # In a real parser, this would be handled.
         # Here we need to find SequenceFlows and link them to nodes.
         if not self.parse_result:

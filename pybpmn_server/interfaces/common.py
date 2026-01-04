@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Protocol, TypeAlias, Mapping
+from typing import TYPE_CHECKING, Any, Callable, Dict, Mapping, Protocol, TypeAlias
 
 if TYPE_CHECKING:
+    from pymitter import EventEmitter
+
+    from pybpmn_server.common.configuration import Settings
+    from pybpmn_server.datastore.interfaces import IDataStore
     from pybpmn_server.engine.interfaces import IExecution, IItem
 
 
@@ -32,9 +36,14 @@ class AppDelegateBase(ABC):
     4.  Execute scripts
     """
 
-    def __init__(self, server: Any, moddle_options: Optional[Dict[str, Any]] = None):
-        self.server = server
-        self.moddle_options = moddle_options
+    def __init__(self, listener: EventEmitter, data_store: IDataStore) -> None:
+        self.listener = listener
+        self.service_providers: IServiceProvider = {}
+        self.data_store = data_store
+        self.listener.on("all", self._on_all_event)
+
+    @abstractmethod
+    async def _on_all_event(self, data: Dict[str, Any]) -> None: ...
 
     @abstractmethod
     async def get_services_provider(self, execution: IExecution) -> IServiceProvider:
@@ -49,7 +58,7 @@ class AppDelegateBase(ABC):
         pass
 
     @abstractmethod
-    def start_up(self, options: Any) -> Any:
+    async def start_up(self, settings: Settings) -> None:
         pass
 
     @abstractmethod

@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union
 
 if TYPE_CHECKING:
-    from pybpmn_server.common.default_configuration import Settings
+    from pybpmn_server.common.configuration import Settings
     from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
     from pybpmn_server.engine.interfaces import IExecution, IItem, ScriptHandler
     from pybpmn_server.interfaces.common import AppDelegateBase

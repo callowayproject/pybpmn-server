@@ -1,0 +1,831 @@
+{
+  "src/server/Listener.ts": {
+    "type": "internal",
+    "path": "src/server/Listener.ts",
+    "dependencies": [
+      "src/interfaces/index.ts",
+      "events"
+    ]
+  },
+  "events": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "src/interfaces/index.ts": {
+    "type": "internal",
+    "path": "src/interfaces/index.ts",
+    "dependencies": [
+      "src/interfaces/server.ts",
+      "src/interfaces/elements.ts",
+      "src/interfaces/datastore.ts",
+      "src/interfaces/common.ts",
+      "src/interfaces/User.ts",
+      "src/interfaces/DataObjects.ts",
+      "src/interfaces/Enums.ts",
+      "src/interfaces/engine.ts"
+    ]
+  },
+  "src/server/BPMNServer.ts": {
+    "type": "internal",
+    "path": "src/server/BPMNServer.ts",
+    "dependencies": [
+      "src/common/Logger.ts",
+      "fs",
+      "process",
+      "src/index.ts",
+      "src/server/Cron.ts",
+      "eventemitter3",
+      "src/server/Engine.ts"
+    ]
+  },
+  "src/common/Logger.ts": {
+    "type": "internal",
+    "path": "src/common/Logger.ts",
+    "dependencies": [
+      "fs",
+      "src/index.ts"
+    ]
+  },
+  "src/index.ts": {
+    "type": "internal",
+    "path": "src/index.ts",
+    "dependencies": [
+      "src/interfaces/index.ts",
+      "src/engine/index.ts",
+      "src/server/index.ts",
+      "src/API/index.ts",
+      "src/elements/index.ts",
+      "src/datastore/index.ts",
+      "src/common/index.ts"
+    ]
+  },
+  "src/server/Engine.ts": {
+    "type": "internal",
+    "path": "src/server/Engine.ts",
+    "dependencies": [
+      "child_process",
+      "src/server/ServerComponent.ts",
+      "src/index.ts",
+      "src/datastore/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/server/Cron.ts": {
+    "type": "internal",
+    "path": "src/server/Cron.ts",
+    "dependencies": [
+      "src/common/Logger.ts",
+      "src/index.ts",
+      "cron-parser",
+      "src/server/ServerComponent.ts",
+      "iso8601-duration"
+    ]
+  },
+  "eventemitter3": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "process": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "fs": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "src/server/CacheManager.ts": {
+    "type": "internal",
+    "path": "src/server/CacheManager.ts",
+    "dependencies": [
+      "src/server/ServerComponent.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/server/ServerComponent.ts": {
+    "type": "internal",
+    "path": "src/server/ServerComponent.ts",
+    "dependencies": [
+      "src/interfaces/index.ts",
+      "src/server/index.ts"
+    ]
+  },
+  "src/datastore/index.ts": {
+    "type": "internal",
+    "path": "src/datastore/index.ts",
+    "dependencies": [
+      "src/datastore/QueryTranslator.ts",
+      "src/datastore/ModelsDatastoreDB.ts",
+      "src/datastore/MongoDB.ts",
+      "src/datastore/ModelsData.ts",
+      "src/datastore/ModelsDatastore.ts",
+      "src/datastore/DataStore.ts",
+      "src/datastore/InstanceLocker.ts"
+    ]
+  },
+  "child_process": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "iso8601-duration": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "cron-parser": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/server/index.ts": {
+    "type": "internal",
+    "path": "src/server/index.ts",
+    "dependencies": [
+      "src/server/CacheManager.ts",
+      "src/server/BPMNServer.ts",
+      "src/server/Cron.ts",
+      "src/server/Engine.ts",
+      "src/server/ServerComponent.ts"
+    ]
+  },
+  "src/datastore/ModelsDatastore.ts": {
+    "type": "internal",
+    "path": "src/datastore/ModelsDatastore.ts",
+    "dependencies": [
+      "src/datastore/ModelsDatastoreDB.ts",
+      "fs",
+      "src/server/index.ts",
+      "path",
+      "src/elements/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/index.ts": {
+    "type": "internal",
+    "path": "src/elements/index.ts",
+    "dependencies": [
+      "src/elements/Flow.ts",
+      "src/elements/Node.ts",
+      "src/elements/Tasks.ts",
+      "src/elements/Gateway.ts",
+      "src/elements/Process.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/Transaction.ts",
+      "src/elements/Definition.ts",
+      "src/elements/NodeLoader.ts",
+      "src/elements/Element.ts",
+      "src/elements/Events.ts"
+    ]
+  },
+  "src/datastore/ModelsDatastoreDB.ts": {
+    "type": "internal",
+    "path": "src/datastore/ModelsDatastoreDB.ts",
+    "dependencies": [
+      "src/datastore/QueryTranslator.ts",
+      "src/datastore/MongoDB.ts",
+      "fs",
+      "src/server/index.ts",
+      "src/datastore/ModelsData.ts",
+      "src/elements/index.ts",
+      "src/server/ServerComponent.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "path": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "src/datastore/DataStore.ts": {
+    "type": "internal",
+    "path": "src/datastore/DataStore.ts",
+    "dependencies": [
+      "src/datastore/QueryTranslator.ts",
+      "src/datastore/index.ts",
+      "src/engine/Execution.ts",
+      "src/datastore/MongoDB.ts",
+      "src/engine/index.ts",
+      "src/datastore/Aggregate.ts",
+      "mongodb",
+      "src/server/ServerComponent.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/engine/index.ts": {
+    "type": "internal",
+    "path": "src/engine/index.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/ScriptHandler.ts",
+      "src/engine/Token.ts",
+      "src/engine/Model.ts",
+      "src/engine/Loop.ts",
+      "src/engine/DataHandler.ts",
+      "src/engine/Item.ts",
+      "src/engine/DefaultAppDelegate.ts"
+    ]
+  },
+  "src/engine/Execution.ts": {
+    "type": "internal",
+    "path": "src/engine/Execution.ts",
+    "dependencies": [
+      "@lukeed/uuid",
+      "src/engine/Token.ts",
+      "src/server/index.ts",
+      "src/engine/Model.ts",
+      "src/engine/Loop.ts",
+      "src/index.ts",
+      "src/elements/index.ts",
+      "src/engine/Item.ts"
+    ]
+  },
+  "mongodb": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/datastore/QueryTranslator.ts": {
+    "type": "internal",
+    "path": "src/datastore/QueryTranslator.ts",
+    "dependencies": []
+  },
+  "src/datastore/Aggregate.ts": {
+    "type": "internal",
+    "path": "src/datastore/Aggregate.ts",
+    "dependencies": [
+      "src/interfaces/index.ts",
+      "mongodb",
+      "src/engine/index.ts",
+      "src/engine/Execution.ts"
+    ]
+  },
+  "src/datastore/MongoDB.ts": {
+    "type": "internal",
+    "path": "src/datastore/MongoDB.ts",
+    "dependencies": [
+      "mongodb"
+    ]
+  },
+  "src/datastore/ModelsData.ts": {
+    "type": "internal",
+    "path": "src/datastore/ModelsData.ts",
+    "dependencies": [
+      "src/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/datastore/InstanceLocker.ts": {
+    "type": "internal",
+    "path": "src/datastore/InstanceLocker.ts",
+    "dependencies": [
+      "src/datastore/index.ts"
+    ]
+  },
+  "src/common/DefaultConfiguration.ts": {
+    "type": "internal",
+    "path": "src/common/DefaultConfiguration.ts",
+    "dependencies": [
+      "vm",
+      "src/datastore/ModelsDatastore.ts",
+      "src/index.ts",
+      "src/common/index.ts",
+      "src/engine/DefaultAppDelegate.ts"
+    ]
+  },
+  "src/engine/DefaultAppDelegate.ts": {
+    "type": "internal",
+    "path": "src/engine/DefaultAppDelegate.ts",
+    "dependencies": [
+      "src/elements/js-bpmn-moddle.ts",
+      "src/index.ts"
+    ]
+  },
+  "src/common/index.ts": {
+    "type": "internal",
+    "path": "src/common/index.ts",
+    "dependencies": [
+      "src/common/timer.ts",
+      "src/common/Logger.ts",
+      "src/common/DefaultConfiguration.ts"
+    ]
+  },
+  "vm": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "src/common/timer.ts": {
+    "type": "internal",
+    "path": "src/common/timer.ts",
+    "dependencies": []
+  },
+  "src/elements/Node.ts": {
+    "type": "internal",
+    "path": "src/elements/Node.ts",
+    "dependencies": [
+      "src/engine/Token.ts",
+      "src/elements/index.ts",
+      "src/elements/behaviours/BehaviourLoader.ts",
+      "src/index.ts",
+      "src/interfaces/Enums.ts",
+      "src/engine/Item.ts"
+    ]
+  },
+  "src/engine/Token.ts": {
+    "type": "internal",
+    "path": "src/engine/Token.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/Loop.ts",
+      "src/index.ts",
+      "src/elements/index.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/engine.ts"
+    ]
+  },
+  "src/interfaces/Enums.ts": {
+    "type": "internal",
+    "path": "src/interfaces/Enums.ts",
+    "dependencies": [
+      "src/elements/index.ts"
+    ]
+  },
+  "src/engine/Item.ts": {
+    "type": "internal",
+    "path": "src/engine/Item.ts",
+    "dependencies": [
+      "src/elements/index.ts",
+      "src/engine/Token.ts",
+      "src/index.ts",
+      "src/engine/Execution.ts"
+    ]
+  },
+  "src/elements/behaviours/BehaviourLoader.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/BehaviourLoader.ts",
+    "dependencies": [
+      "src/elements/behaviours/TransEvents.ts",
+      "src/elements/Node.ts",
+      "src/elements/behaviours/Script.ts",
+      "src/elements/behaviours/Error.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/behaviours/Escalation.ts",
+      "src/index.ts",
+      "src/engine/Item.ts",
+      "iso8601-duration"
+    ]
+  },
+  "src/elements/Process.ts": {
+    "type": "internal",
+    "path": "src/elements/Process.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/Token.ts",
+      "src/elements/index.ts",
+      "src/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/Definition.ts": {
+    "type": "internal",
+    "path": "src/elements/Definition.ts",
+    "dependencies": [
+      "src/interfaces/index.ts",
+      "src/interfaces/elements.ts",
+      "src/elements/index.ts",
+      "src/server/BPMNServer.ts",
+      "src/elements/NodeLoader.ts",
+      "bpmn-moddle"
+    ]
+  },
+  "bpmn-moddle": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/elements/NodeLoader.ts": {
+    "type": "internal",
+    "path": "src/elements/NodeLoader.ts",
+    "dependencies": [
+      "src/elements/index.ts",
+      "src/interfaces/Enums.ts",
+      "src/elements/index.ts"
+    ]
+  },
+  "src/interfaces/elements.ts": {
+    "type": "internal",
+    "path": "src/interfaces/elements.ts",
+    "dependencies": [
+      "src/index.ts"
+    ]
+  },
+  "src/elements/behaviours/MessageSignal.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/MessageSignal.ts",
+    "dependencies": [
+      "src/engine/Item.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/index.ts",
+      "src/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Script.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Script.ts",
+    "dependencies": [
+      "src/elements/behaviours/index.ts",
+      "src/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Loop.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Loop.ts",
+    "dependencies": [
+      "src/engine/Item.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Terminate.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Terminate.ts",
+    "dependencies": [
+      "src/engine/Item.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Form.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Form.ts",
+    "dependencies": [
+      "src/elements/behaviours/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Behaviour.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Behaviour.ts",
+    "dependencies": [
+      "src/elements/behaviours/Script.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/elements/index.ts",
+      "src/engine/Item.ts",
+      "iso8601-duration"
+    ]
+  },
+  "src/elements/behaviours/TransEvents.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/TransEvents.ts",
+    "dependencies": [
+      "src/elements/Node.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/elements/index.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Escalation.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Escalation.ts",
+    "dependencies": [
+      "src/engine/Item.ts",
+      "src/elements/behaviours/index.ts",
+      "src/interfaces/index.ts",
+      "src/index.ts"
+    ]
+  },
+  "src/elements/behaviours/IOBehaviour.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/IOBehaviour.ts",
+    "dependencies": [
+      "src/engine/Item.ts",
+      "src/elements/behaviours/index.ts",
+      "src/elements/index.ts",
+      "src/engine/ScriptHandler.ts"
+    ]
+  },
+  "src/engine/ScriptHandler.ts": {
+    "type": "internal",
+    "path": "src/engine/ScriptHandler.ts",
+    "dependencies": [
+      "child_process",
+      "src/engine/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/behaviours/Timer.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Timer.ts",
+    "dependencies": [
+      "src/elements/behaviours/index.ts",
+      "src/engine/index.ts",
+      "src/server/index.ts",
+      "src/index.ts",
+      "src/server/Cron.ts",
+      "src/elements/index.ts",
+      "src/interfaces/index.ts",
+      "dayjs"
+    ]
+  },
+  "src/elements/behaviours/index.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/index.ts",
+    "dependencies": [
+      "src/elements/behaviours/MessageSignal.ts",
+      "src/elements/behaviours/Script.ts",
+      "src/elements/behaviours/Timer.ts",
+      "src/elements/behaviours/Terminate.ts",
+      "src/elements/behaviours/BehaviourLoader.ts",
+      "src/elements/behaviours/IOBehaviour.ts",
+      "src/elements/behaviours/Form.ts",
+      "src/elements/behaviours/Behaviour.ts",
+      "src/elements/behaviours/Loop.ts"
+    ]
+  },
+  "dayjs": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/elements/behaviours/Error.ts": {
+    "type": "internal",
+    "path": "src/elements/behaviours/Error.ts",
+    "dependencies": [
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/elements/index.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/Element.ts": {
+    "type": "internal",
+    "path": "src/elements/Element.ts",
+    "dependencies": [
+      "src/interfaces/elements.ts",
+      "src/engine/Execution.ts",
+      "src/engine/Token.ts",
+      "src/engine/index.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/engine/Item.ts"
+    ]
+  },
+  "src/elements/Flow.ts": {
+    "type": "internal",
+    "path": "src/elements/Flow.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/Token.ts",
+      "src/engine/index.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/Events.ts": {
+    "type": "internal",
+    "path": "src/elements/Events.ts",
+    "dependencies": [
+      "src/elements/index.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/Transaction.ts": {
+    "type": "internal",
+    "path": "src/elements/Transaction.ts",
+    "dependencies": [
+      "src/elements/Node.ts",
+      "src/engine/Token.ts",
+      "src/elements/Process.ts",
+      "src/elements/index.ts",
+      "src/interfaces/Enums.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/engine.ts"
+    ]
+  },
+  "src/interfaces/engine.ts": {
+    "type": "internal",
+    "path": "src/interfaces/engine.ts",
+    "dependencies": [
+      "src/interfaces/Enums.ts",
+      "src/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/elements/Tasks.ts": {
+    "type": "internal",
+    "path": "src/elements/Tasks.ts",
+    "dependencies": [
+      "src/elements/Node.ts",
+      "src/engine/Token.ts",
+      "src/elements/Process.ts",
+      "src/dmn/DMNEngine.ts",
+      "src/index.ts",
+      "src/interfaces/Enums.ts",
+      "src/engine/Item.ts",
+      "src/interfaces/engine.ts"
+    ]
+  },
+  "src/elements/Gateway.ts": {
+    "type": "internal",
+    "path": "src/elements/Gateway.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/Token.ts",
+      "src/elements/index.ts",
+      "src/elements/behaviours/index.ts",
+      "src/index.ts",
+      "src/engine/Item.ts"
+    ]
+  },
+  "src/dmn/DMNEngine.ts": {
+    "type": "internal",
+    "path": "src/dmn/DMNEngine.ts",
+    "dependencies": [
+      "src/dmn/DMNParser.ts",
+      "feelin"
+    ]
+  },
+  "src/elements/js-bpmn-moddle.ts": {
+    "type": "internal",
+    "path": "src/elements/js-bpmn-moddle.ts",
+    "dependencies": []
+  },
+  "src/scripts/generate-toc.js": {
+    "type": "internal",
+    "path": "src/scripts/generate-toc.js",
+    "dependencies": [
+      "fs",
+      "markdown-toc",
+      "package.json"
+    ]
+  },
+  "markdown-toc": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "package.json": {
+    "type": "internal",
+    "path": "package.json",
+    "dependencies": []
+  },
+  "src/scripts/example.ts": {
+    "type": "internal",
+    "path": "src/scripts/example.ts",
+    "dependencies": []
+  },
+  "src/scripts/copy-readme.ts": {
+    "type": "internal",
+    "path": "src/scripts/copy-readme.ts",
+    "dependencies": [
+      "fs"
+    ]
+  },
+  "src/scripts/convertTomd.js": {
+    "type": "internal",
+    "path": "src/scripts/convertTomd.js",
+    "dependencies": [
+      "fs",
+      "readline"
+    ]
+  },
+  "readline": {
+    "type": "node_builtin",
+    "path": null,
+    "dependencies": []
+  },
+  "src/scripts/tsToApi.ts": {
+    "type": "internal",
+    "path": "src/scripts/tsToApi.ts",
+    "dependencies": [
+      "fs",
+      "path",
+      "typescript"
+    ]
+  },
+  "typescript": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/API/AccessManager.ts": {
+    "type": "internal",
+    "path": "src/API/AccessManager.ts",
+    "dependencies": [
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/API/API.ts": {
+    "type": "internal",
+    "path": "src/API/API.ts",
+    "dependencies": [
+      "src/index.ts"
+    ]
+  },
+  "src/API/index.ts": {
+    "type": "internal",
+    "path": "src/API/index.ts",
+    "dependencies": [
+      "src/API/API.ts",
+      "src/API/SecureUser.ts"
+    ]
+  },
+  "src/API/SecureUser.ts": {
+    "type": "internal",
+    "path": "src/API/SecureUser.ts",
+    "dependencies": [
+      "src/datastore/QueryTranslator.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/dmn/DMNParser.ts": {
+    "type": "internal",
+    "path": "src/dmn/DMNParser.ts",
+    "dependencies": [
+      "fs",
+      "xml2js",
+      "feelin"
+    ]
+  },
+  "feelin": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/engine/Loop.ts": {
+    "type": "internal",
+    "path": "src/engine/Loop.ts",
+    "dependencies": [
+      "src/engine/Execution.ts",
+      "src/engine/Token.ts",
+      "src/engine/index.ts",
+      "src/elements/index.ts",
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/engine/Model.ts": {
+    "type": "internal",
+    "path": "src/engine/Model.ts",
+    "dependencies": [
+      "src/elements/index.ts",
+      "src/index.ts"
+    ]
+  },
+  "src/engine/DataHandler.ts": {
+    "type": "internal",
+    "path": "src/engine/DataHandler.ts",
+    "dependencies": []
+  },
+  "@lukeed/uuid": {
+    "type": "external",
+    "path": null,
+    "dependencies": []
+  },
+  "src/interfaces/datastore.ts": {
+    "type": "internal",
+    "path": "src/interfaces/datastore.ts",
+    "dependencies": [
+      "src/interfaces/index.ts"
+    ]
+  },
+  "src/interfaces/DataObjects.ts": {
+    "type": "internal",
+    "path": "src/interfaces/DataObjects.ts",
+    "dependencies": [
+      "src/interfaces/Enums.ts"
+    ]
+  },
+  "src/interfaces/common.ts": {
+    "type": "internal",
+    "path": "src/interfaces/common.ts",
+    "dependencies": [
+      "src/index.ts"
+    ]
+  },
+  "src/interfaces/server.ts": {
+    "type": "internal",
+    "path": "src/interfaces/server.ts",
+    "dependencies": [
+      "src/index.ts",
+      "events",
+      "eventemitter3"
+    ]
+  },
+  "src/interfaces/User.ts": {
+    "type": "internal",
+    "path": "src/interfaces/User.ts",
+    "dependencies": []
+  }
+}

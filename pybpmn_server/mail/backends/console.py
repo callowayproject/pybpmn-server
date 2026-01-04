@@ -6,8 +6,7 @@ import sys
 import threading
 from email.charset import Charset
 
-from pybpmn_server.mail import Emailable
-from pybpmn_server.mail.backends.base import BaseEmailBackend
+from pybpmn_server.mail import BaseEmailBackend, Emailable
 
 
 class EmailBackend(BaseEmailBackend):
