@@ -16,12 +16,12 @@ dynamic = ["version"]
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
-    "croniter>=6.0.0",
+    "cron-converter>=1.3.1",
     "isodate>=0.7.2",
     "pybpmn-parser",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
-    "pyee>=13.0.0",
+    "pymitter>=1.1.1",
     "pymongo>=4.0.0",
     "python-ulid>=3.1.0",
     "xmltodict>=0.13.0",
