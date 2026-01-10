@@ -2,15 +2,16 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Self
 
-from pydantic import Field
+from opentelemetry.sdk.trace.export import SpanExporter
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymitter import EventEmitter
 
 from pybpmn_server.common.utils import import_string
 from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
-from pybpmn_server.engine.interfaces import ScriptHandler
+from pybpmn_server.engine.interfaces import IEngine, ScriptHandler
 from pybpmn_server.server.interfaces import ICacheManager
 
 logger = logging.getLogger(__name__)
@@ -107,6 +108,17 @@ class Settings(BaseSettings):
     _service_providers: Optional[dict[str, Any]] = None
 
     _listener: Optional[EventEmitter] = None
+    _span_exporter: Optional[SpanExporter] = None
+
+    _engine: IEngine = None
+
+    @model_validator(mode="after")
+    def finalize_configuration(self) -> Self:
+        """Finalize the configuration."""
+        from pybpmn_server.common.tracing import configure
+
+        self._span_exporter = configure()
+        return self
 
     @property
     def listener(self) -> EventEmitter:
@@ -151,8 +163,18 @@ class Settings(BaseSettings):
     def service_providers(self) -> dict[str, Any]:
         """Get the service providers."""
         if self._service_providers is None:
-            self._service_providers = {k: import_string(v) for k, v in self.service_config}
+            self._service_providers = {k: import_string(v) for k, v in self.service_config.items()}
         return self._service_providers
+
+    @property
+    def engine(self) -> IEngine:
+        """Get the engine."""
+        from pybpmn_server.engine.engine import Engine
+
+        if self._engine is None:
+            self._engine = Engine(self)
+
+        return self._engine
 
 
 settings = Settings()

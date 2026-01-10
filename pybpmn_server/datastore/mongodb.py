@@ -28,7 +28,7 @@ def profile(mongo_db: MongoDB, operation: str) -> Generator[None, None, None]:
 
     if can_profile and start_time:
         duration = (time.time() - start_time) * 1000
-        print(f"{operation}: {duration:.3f}ms")
+        logger.debug(f"{operation}: {duration:.3f}ms")
 
 
 class MongoDB:

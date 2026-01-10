@@ -4,20 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from pymitter import EventEmitter
-
 from pybpmn_server.common.configuration import settings as default_settings
-from pybpmn_server.datastore.data_store import DataStore
-from pybpmn_server.datastore.model_data_store import ModelsDatastore
 from pybpmn_server.engine.default_app_delegate import DefaultAppDelegate
-from pybpmn_server.engine.engine import Engine
-from pybpmn_server.engine.script_handler import DefaultScriptHandler
-from pybpmn_server.server.cache_manager import CacheManager
-from pybpmn_server.server.cron import Cron
 
 if TYPE_CHECKING:
     from pybpmn_server.common.configuration import Settings
-    from pybpmn_server.server.interfaces import IEngine
+    from pybpmn_server.engine.interfaces import IEngine
 
 
 class BPMNServer:
@@ -25,16 +17,16 @@ class BPMNServer:
 
     def __init__(self, configuration: Optional[Settings] = None):
         self.error: Any = None
-        self.listener = EventEmitter()
         self.configuration = configuration or default_settings
-        self.cron = Cron(self)
-        self.engine = Engine()
+        self.listener = self.configuration.listener
+        self.cron = self.configuration.cron
+        self.engine = self.configuration.engine
 
-        self.cache = CacheManager(self)
-        self.data_store = DataStore(self.configuration.database_settings)
-        self.definitions = ModelsDatastore(self.configuration.definitions_path, self.configuration.database_settings)
+        self.cache = self.configuration.cache
+        self.data_store = self.configuration.data_store
+        self.model_data_store = self.configuration.model_data_store
         self.app_delegate = DefaultAppDelegate(self.listener, self.data_store)
-        self.script_handler = DefaultScriptHandler()
+        self.script_handler = self.configuration.script_handler
         # TODO (pybpmn-server-h00): Refactor app delegate startup calling
         # self.app_delegate.start_up(self.configuration)
 
@@ -48,6 +40,7 @@ class BPMNServer:
 
     @property
     def engine_instance(self) -> IEngine:
+        """Get the engine instance."""
         return self.engine
 
 

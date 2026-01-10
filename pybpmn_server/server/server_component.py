@@ -4,10 +4,10 @@ from typing import Any
 
 from pybpmn_server.common.configuration import Settings
 from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
-from pybpmn_server.engine.interfaces import ScriptHandler
+from pybpmn_server.engine.interfaces import IEngine, ScriptHandler
 from pybpmn_server.interfaces.common import AppDelegateBase
 from pybpmn_server.server.bpmn_server import BPMNServer
-from pybpmn_server.server.interfaces import ICacheManager, ICron, IEngine
+from pybpmn_server.server.interfaces import ICacheManager, ICron
 
 
 class ServerComponent:
@@ -51,7 +51,7 @@ class ServerComponent:
     @property
     def definitions(self) -> IModelsDatastore:
         """Return the server definitions datastore."""
-        return self.server.definitions
+        return self.server.model_data_store
 
     @property
     def listener(self) -> Any:

@@ -197,13 +197,13 @@ class APIModel(APIComponent):
         user = self.get_user(user)
         if user.tenant_id:
             query["owner"] = user.models_owner
-        return await self.server.definitions.get(query)
+        return await self.server.model_data_store.get(query)
 
     async def save(self, name: str, source: str, svg: str, user: Optional[SecureUser] = None) -> bool:
         """Saves a model."""
         user = self.get_user(user)
         if user.can_modify_model(name):
-            return await self.server.definitions.save(name, source, svg, user.models_owner)
+            return await self.server.model_data_store.save(name, source, svg, user.models_owner)
         return False
 
     async def list(self, query: Any, user: Optional[SecureUser] = None) -> List[str]:
@@ -211,43 +211,43 @@ class APIModel(APIComponent):
         user = self.get_user(user)
         if user.tenant_id:
             query["owner"] = user.models_owner
-        return await self.server.definitions.get_list(query)
+        return await self.server.model_data_store.get_list(query)
 
     async def find_events(self, query: Any, user: Optional[SecureUser] = None) -> List[Any]:
         """Finds events based on the given query and user permissions."""
         user = self.get_user(user)
-        return await self.server.definitions.find_events(query, user.models_owner)
+        return await self.server.model_data_store.find_events(query, user.models_owner)
 
     async def find_start_events(self, query: Any, user: Optional[SecureUser] = None) -> List[Any]:
         """Finds start events based on the given query and user permissions."""
         user = self.get_user(user)
         query["events.subType"] = None
         query = user.qualify_start_events(query)
-        return await self.server.definitions.find_events(query, user.models_owner)
+        return await self.server.model_data_store.find_events(query, user.models_owner)
 
     async def delete(self, name: str, user: Optional[SecureUser] = None) -> None:
         """Deletes a model."""
         user = self.get_user(user)
         if user.can_delete_model(name):
-            return await self.server.definitions.delete_model(name, user.models_owner)
+            return await self.server.model_data_store.delete_model(name, user.models_owner)
         return None
 
     async def rename(self, name: str, new_name: str, user: Optional[SecureUser] = None) -> bool:
         """Renames a model."""
         user = self.get_user(user)
         if user.can_modify_model(name):
-            return await self.server.definitions.rename_model(name, new_name, user.models_owner)
+            return await self.server.model_data_store.rename_model(name, new_name, user.models_owner)
         return False
 
     async def get_source(self, name: str, user: Optional[SecureUser] = None) -> str:
         """Retrieves the source of a model."""
         user = self.get_user(user)
-        return await self.server.definitions.get_source(name, user.models_owner)
+        return await self.server.model_data_store.get_source(name, user.models_owner)
 
     async def load(self, name: str, user: Optional[SecureUser] = None) -> IDefinition:
         """Loads a model."""
         user = self.get_user(user)
-        return await self.server.definitions.load(name, user.models_owner)
+        return await self.server.model_data_store.load(name, user.models_owner)
 
     async def export(self, query: Any, folder: str, user: Optional[SecureUser] = None) -> None:
         """Exports models based on the given query and user permissions."""
