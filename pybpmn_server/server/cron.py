@@ -109,8 +109,7 @@ class Cron(ICron):
         cron_instance = Cron(expression)
         it = cron_instance.schedule(base_date)
         next_run = it.next()
-        delay = (next_run - now).total_seconds()
-        return delay
+        return (next_run - now).total_seconds()
 
     @staticmethod
     def time_due(expression: str, reference_date_time: Optional[float]) -> Optional[float]:

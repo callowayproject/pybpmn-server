@@ -7,11 +7,11 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from pybpmn_server.common.configuration import Settings
 from pybpmn_server.interfaces.enums import ExecutionEvent
 from pybpmn_server.server.interfaces import ICacheManager
 
 if TYPE_CHECKING:
+    from pybpmn_server.common.configuration import Settings
     from pybpmn_server.engine.interfaces import IExecution
     from pybpmn_server.server.bpmn_server import BPMNServer
 
@@ -69,14 +69,14 @@ class CacheManager(ICacheManager):
     def get_instance(self, instance_id: str) -> Optional[IExecution]:
         return self.live_instances.get(instance_id)
 
-    def add(self, execution: IExecution):
+    def add(self, execution: IExecution) -> None:
         self.live_instances[execution.id] = execution
 
-    def remove(self, instance_id: str):
+    def remove(self, instance_id: str) -> None:
         if instance_id in self.live_instances:
             del self.live_instances[instance_id]
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         logger.info("Shutdown..")
         instances = self.live_instances
         list_to_shutdown = list(instances.values())

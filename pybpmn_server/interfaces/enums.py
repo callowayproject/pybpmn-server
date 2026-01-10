@@ -171,6 +171,10 @@ class ItemStatus(StrEnum):
 
 
 class ExecutionStatus(StrEnum):
+    """
+    Represents various statuses that a execution can perform in a system.
+    """
+
     running = "running"
     wait = "wait"
     end = "end"
@@ -178,6 +182,10 @@ class ExecutionStatus(StrEnum):
 
 
 class TokenStatus(StrEnum):
+    """
+    Represents various statuses that a token can perform in a system.
+    """
+
     running = "running"
     wait = "wait"
     end = "end"
@@ -186,6 +194,10 @@ class TokenStatus(StrEnum):
 
 
 class FlowAction(StrEnum):
+    """
+    Represents various actions that a flow can perform in a system.
+    """
+
     take = "take"
     discard = "discard"
 
