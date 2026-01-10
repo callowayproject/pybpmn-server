@@ -1,62 +1,103 @@
+"""
+Represents a Gateway node in a workflow, handling the logic for diverging and converging flows.
+
+Gateways determine the flow of execution within a workflow based on specific rules and conditions.
+They process outbound paths, evaluate potential paths, manage related tokens, and handle the
+convergence of multiple flows.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from opentelemetry import trace
+
 from pybpmn_server.elements.node import Node
-from pybpmn_server.interfaces.enums import BpmnType, ItemStatus, NodeAction, TokenStatus
+from pybpmn_server.interfaces.enums import BpmnType, FlowAction, ItemStatus, NodeAction, TokenStatus
 
 if TYPE_CHECKING:
     from pybpmn_server.elements.interfaces import INode
     from pybpmn_server.engine.interfaces import IItem, IToken
 
+tracer = trace.get_tracer(__name__)
+
 
 class Gateway(Node):
+    """
+    Represents a Gateway node in a workflow, handling the logic for diverging and converging flows.
+
+    Gateways determine the flow of execution within a workflow based on specific rules and conditions.
+    They process outbound paths, evaluate potential paths, manage related tokens, and handle the
+    convergence of multiple flows.
+    """
+
     async def get_outbounds(self, item: IItem) -> List[IItem]:
+        """
+        Fetches outbound items for the given item based on the current configuration.
+
+        This method determines the default flow and processes potential outbounds for the given item.
+        If no appropriate outbound items are found, the default flow is selected as a fallback.
+
+        Args:
+            item: The item for which outbound items are to be determined.
+
+        Returns:
+            A list of outbound items determined for the given item.
+        """
+        from pybpmn_server.engine.item import Item as ItemClass
+
         default_flow_id = None
         if hasattr(self.def_, "default"):
             default_flow_id = getattr(self.def_.default, "id", None)
         elif isinstance(self.def_, dict) and "default" in self.def_:
             default_flow_id = self.def_["default"]
 
-        if default_flow_id:
-            default_flow = None
-            outbounds: List[IItem] = []
-            from ..engine.item import Item as ItemClass
-
-            for flow in self.outbounds:
-                if flow.id == default_flow_id:
-                    default_flow = flow
-                else:
-                    flow_item = ItemClass(flow, item.token)
-                    if await flow.run(flow_item) == "take":  # FLOW_ACTION.take
-                        outbounds.append(flow_item)
-
-            if len(outbounds) == 0 and default_flow:
-                flow_item = ItemClass(default_flow, item.token)
-                outbounds.append(flow_item)
-
-            item.token.log(f"..return outbounds {len(outbounds)}")
-            return outbounds
-        else:
+        if not default_flow_id:
             return await super().get_outbounds(item)
+        default_flow = None
+        outbounds: List[IItem] = []
+
+        for flow in self.outbounds:
+            if flow.id == default_flow_id:
+                default_flow = flow
+            else:
+                flow_item = ItemClass(flow, item.token)
+                if await flow.run(flow_item) == FlowAction.take:
+                    outbounds.append(flow_item)
+
+        if not outbounds and default_flow:
+            flow_item = ItemClass(default_flow, item.token)
+            outbounds.append(flow_item)
+
+        item.token.log(f"..return outbounds {len(outbounds)}")
+        return outbounds
 
     def get_potential_path(self, node: INode, path: Optional[Dict[str, INode]] = None) -> Dict[str, INode]:
+        """
+        Recursively explores potential paths from a given node, considering all outbound flows.
+        """
         if path is None:
             path = {}
         for flow in node.outbounds:
-            to_node = flow.to_node  # type: ignore
+            to_node = flow.to_node
             if to_node.id not in path:
                 path[to_node.id] = to_node
                 self.get_potential_path(to_node, path)
         return path
 
     def can_reach(self, node: INode, target: INode) -> bool:
+        """
+        Checks if a given node can reach a target node through potential paths.
+        """
         if node.id == target.id:
             return True
         path = self.get_potential_path(node)
         return target.id in path
 
     def get_related_tokens(self, item: IItem) -> List[IToken]:
+        """
+        Retrieves tokens related to the current token, considering its execution context and path.
+        """
         related = []
         execution = item.token.execution
         execution.log(f"Gateway.get_related_tokens: for {item.token.id}")
@@ -66,31 +107,53 @@ class Gateway(Node):
             parent = token.parent_token.id if token.parent_token else "-"
             p = "->".join([it.node.id for it in token.path])
             execution.log(
-                f"        ..token: {token.id} - {token.status} - {token.type} current: {token.current_node.id if token.current_node else 'None'} from {branch} child of {parent} path: {p}"
+                f"        ..token: {token.id} - {token.status} - {token.type} current: "
+                f"{token.current_node.id if token.current_node else 'None'} from {branch} child of {parent} path: {p}"
             )
 
-            if token.current_item:
-                if token.id != item.token.id and token.current_item.status not in (
+            if token.current_item and (
+                token.id != item.token.id
+                and token.current_item.status
+                not in (
                     ItemStatus.end,
                     ItemStatus.terminated,
-                ):
-                    if token.current_node:
-                        can_reach = self.can_reach(token.current_node, self)
-                        execution.log(
-                            f"            ..canReach: {can_reach} - token status: {token.status} - item status {token.current_item.status}"
-                        )
-                        if can_reach:
-                            if token.items_key is not None and item.token.items_key is not None:
-                                if (f"{item.token.items_key}.{token.items_key}").startswith(f"{token.items_key}."):
-                                    related.append(token)
-                            else:
-                                related.append(token)
-
+                )
+                and token.current_node
+            ):
+                can_reach = self.can_reach(token.current_node, self)
+                execution.log(
+                    f"            ..canReach: {can_reach} - token status: {token.status} - item status "
+                    f"{token.current_item.status}"
+                )
+                if can_reach:
+                    if (
+                        token.items_key is None
+                        or item.token.items_key is None
+                        or (f"{item.token.items_key}.{token.items_key}").startswith(f"{token.items_key}.")
+                    ):
+                        related.append(token)
         for t in related:
             execution.log(f"    .. related token: {t.id} {t.status} {t.items_key}")
         return related
 
     def analyze_converging_tokens(self, item: IItem) -> Dict[str, List[IToken]]:
+        """
+        Analyzes and categorizes tokens related to the current gateway.
+
+        It divides them into pending and waiting tokens based on their status and current node.
+
+        Args:
+            item: The item containing the token and element associated with the
+                gateway. This token and the element's properties are used to determine
+                the category of related tokens.
+
+        Returns:
+            A dictionary containing two lists:
+                - pending_tokens: Tokens that are not on the current gateway node or have a
+                  status other than "end" or "terminated".
+                - waiting_tokens: Tokens that are on the current gateway node and are still
+                  waiting for processing.
+        """
         waiting_tokens = []
         pending_tokens = []
         token = item.token
@@ -100,26 +163,31 @@ class Gateway(Node):
             if t.status not in (TokenStatus.end, TokenStatus.terminated):
                 if t.current_node and t.current_node.id == self.id:
                     token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... child token {t.id} in current gateway => add to waiting_tokens current_node={t.current_node.id}"
+                        f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... child token {t.id} "
+                        f"in current gateway => add to waiting_tokens current_node={t.current_node.id}"
                     )
                     waiting_tokens.append(t)
                 else:
                     token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... adding to pending_tokens {t.id} node {t.current_node.id if t.current_node else 'None'} target {self.id}"
+                        f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... adding to pending_tokens "
+                        f"{t.id} node {t.current_node.id if t.current_node else 'None'} target {self.id}"
                     )
                     pending_tokens.append(t)
 
         for t in waiting_tokens:
             token.log(
-                f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... waiting_tokens token id:{t.id} current_node.id:{t.current_node.id if t.current_node else 'None'}"
+                f"Gateway({item.element.name}|{item.element.id}).convergeFlows: ... waiting_tokens token id:{t.id} "
+                f"current_node.id:{t.current_node.id if t.current_node else 'None'}"
             )
 
         token.log(
-            f"Gateway({item.element.name}|{item.element.id}).convergeFlows: pending_tokens:{len(pending_tokens)} waiting_tokens:{len(waiting_tokens)}"
+            f"Gateway({item.element.name}|{item.element.id}).convergeFlows: pending_tokens:{len(pending_tokens)} "
+            f"waiting_tokens:{len(waiting_tokens)}"
         )
 
         return {"pending_tokens": pending_tokens, "waiting_tokens": waiting_tokens}
 
+    @tracer.start_as_current_span("gateway.start")
     async def start(self, item: IItem) -> NodeAction:
         item.token.log(f"Gateway({item.element.name}|{item.element.id}).start: node.type={item.node.type}")
         if len(self.inbounds) > 1:
@@ -168,11 +236,11 @@ class Gateway(Node):
                     )
                     parent_token.status = TokenStatus.running
                     if converging_gateway_current_node:
-                        parent_token.current_node = converging_gateway_current_node  # type: ignore
+                        parent_token.current_node = converging_gateway_current_node
                     item.token = parent_token
 
-                    await parent_token.current_node.run(item)  # type: ignore
-                    await parent_token.current_node.continue_(item)  # type: ignore
+                    await parent_token.current_node.run(item)
+                    await parent_token.current_node.continue_(item)
                     await parent_token.go_next()
 
                     old_current_token.log(

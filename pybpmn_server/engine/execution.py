@@ -8,6 +8,10 @@ import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from opentelemetry import trace
+
+from pybpmn_server.common.configuration import Settings
+from pybpmn_server.common.configuration import settings as default_settings
 from pybpmn_server.elements.tasks import CallActivity
 from pybpmn_server.engine import data_handler
 from pybpmn_server.engine.interfaces import IExecution, IToken
@@ -16,9 +20,9 @@ from pybpmn_server.interfaces.enums import ExecutionEvent, ExecutionStatus, Toke
 if TYPE_CHECKING:
     from pybpmn_server.datastore.data_objects import InstanceData, ItemData
     from pybpmn_server.elements.interfaces import INode
-    from pybpmn_server.server.bpmn_server import BPMNServer
 
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer(__name__)
 
 
 class Execution(IExecution):
@@ -96,6 +100,7 @@ class Execution(IExecution):
         for t in self.tokens.values():
             t.stop()
 
+    @tracer.start_as_current_span("execution.execute")
     async def execute(
         self,
         start_node_id: Optional[str] = None,
@@ -106,6 +111,19 @@ class Execution(IExecution):
         Execute the process instance with an optional start node, input data, options, and user name.
         """
         from pybpmn_server.engine.token import Token, TokenType
+
+        trace.get_current_span().set_attributes(
+            {
+                "execution_id": self.id,
+                "type": "execution",
+                "label": "Start Process",
+                "user_name": user_name or "",
+                "action": "execute",
+                "name": self.name or self.id,
+                "start_node_id": start_node_id or "",
+                "input_data": input_data or "",
+            }
+        )
 
         input_data = input_data or {}
         self.operation = "execute"
@@ -541,7 +559,9 @@ class Execution(IExecution):
         return None
 
     @staticmethod
-    async def restore(server: BPMNServer, state: InstanceData, item_id: Optional[Any] = None) -> Execution:
+    async def restore(
+        state: InstanceData, configuration: Optional[Settings] = None, item_id: Optional[Any] = None
+    ) -> Execution:
         """
         Restores an execution from a given state, optionally starting from a specific item ID.
 
@@ -557,6 +577,7 @@ class Execution(IExecution):
         from pybpmn_server.engine.loop import Loop
         from pybpmn_server.engine.token import Token
 
+        configuration = configuration or default_settings
         state_tokens = state.tokens
         state_items = state.items
         state_loops = state.loops
@@ -570,11 +591,9 @@ class Execution(IExecution):
             else:
                 logger.error(f"***Error*** No savePoint found for item {item_id}")
 
-        source = state.source
-        if not source:
-            source = await server.definitions.get_source(state.name)
+        source = state.source or await configuration.model_data_store.get_source(state.name)
 
-        execution = Execution(server, state.name, source, state)
+        execution = Execution(state.name, source, configuration, state)
         await execution.definition.load()
 
         token_loops = []

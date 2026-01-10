@@ -5,8 +5,11 @@ A workflow process node and its associated behaviors, events, and execution logi
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar
+
+from opentelemetry import trace
 
 from pybpmn_server.elements.behaviors.behavior_loader import BehaviorName
 from pybpmn_server.elements.interfaces import Element, ILoopBehaviour, INode
@@ -24,6 +27,8 @@ if TYPE_CHECKING:
     from pybpmn_server.engine.interfaces import IItem, IToken
 
 T = TypeVar("T")
+tracer = trace.get_tracer(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Node(INode, Generic[T]):
@@ -44,7 +49,10 @@ class Node(INode, Generic[T]):
         """
         Create a Node instance from an Element.
         """
-        return cls(element.id, element.def_, element.type, getattr(element, "process", None))
+        if isinstance(element, INode):
+            return element
+        else:
+            raise ValueError(f"Element {element.id} is not a valid node: {type(element)}")
 
     @property
     def process_id(self) -> Optional[str]:
@@ -62,6 +70,7 @@ class Node(INode, Generic[T]):
             if isinstance(ret_val, dict) and "error" in ret_val:
                 item.token.execution.error(f"Validation failed with error: {ret_val['error']}")
 
+    @tracer.start_as_current_span("node.do_event")
     async def do_event(
         self,
         item: IItem,
@@ -92,6 +101,9 @@ class Node(INode, Generic[T]):
             as well as the result of the item's event execution. Includes outputs such as escalation
             processing results or error handling feedback.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "event": str(event), "new_status": str(new_status)}
+        )
         item.token.log(
             f"Node({self.name}|{self.id}).do_event: executing script for event: {event} new_status: {new_status}"
         )
@@ -118,6 +130,7 @@ class Node(INode, Generic[T]):
         item.token.log(f"Node({self.name}|{self.id}).do_event: executing script for event: {event} ended")
         return rets
 
+    @tracer.start_as_current_span("node.set_input")
     async def set_input(self, item: IItem, input_data: Any) -> None:
         """
         Sets the input data for the item and triggers the transformation event.
@@ -127,10 +140,14 @@ class Node(INode, Generic[T]):
                 state for the execution.
             input_data: The input data to be set for the item.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "input": input_data}
+        )
         item.token.log(f"Node({self.name}|{self.id}).set_input: input {json.dumps(input_data, default=str)}")
         data = await self.get_input(item, input_data)
         item.token.append_data(data, item)
 
+    @tracer.start_as_current_span("node.get_input")
     async def get_input(self, item: IItem, input_data: Any) -> Any:
         """
         Retrieves the input data for the item after transformation.
@@ -143,6 +160,9 @@ class Node(INode, Generic[T]):
         Returns:
             Any: The transformed input data for the item.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "input": input_data}
+        )
         item.token.log(f"Node({self.name}|{self.id}).get_input: input {json.dumps(input_data, default=str)}")
         item.input = input_data
         await self.do_event(item, ExecutionEvent.transform_input, None)
@@ -161,6 +181,7 @@ class Node(INode, Generic[T]):
         """
         return item.output
 
+    @tracer.start_as_current_span("node.enter")
     def enter(self, item: IItem) -> None:
         """
         Enters the node and logs the event.
@@ -168,6 +189,9 @@ class Node(INode, Generic[T]):
         Args:
             item: The item instance entering the node. It encapsulates the current context and state for the execution.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "item_id": item.id}
+        )
         item.token.log(f"Node({self.name}|{self.id}).enter: item={item.id}")
         item.started_at = datetime.now()
 
@@ -217,6 +241,7 @@ class Node(INode, Generic[T]):
         """
         return False
 
+    @tracer.start_as_current_span("node.execute")
     async def execute(self, item: IItem) -> Optional[NodeAction]:
         """
         Executes the node's behavior and logs the execution details.
@@ -228,18 +253,19 @@ class Node(INode, Generic[T]):
         Returns:
             The action to be taken after execution, or None if no action is required.
         """
-        item.token.log(f"Node({self.name}|{self.id}).execute: item={item.id} token:{item.token.id}")
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "item_id": item.id, "token_id": item.token.id}
+        )
+        item.token.log(f"Node({self.name}|{self.id}).execute: item={item.id} token:{item.token.id} execute enter ...")
 
-        item.token.log(f"Node({self.name}|{self.id}).execute: execute enter ...")
         await self.do_event(item, ExecutionEvent.node_enter, ItemStatus.enter)
-
         self.enter(item)
 
         behaviours = list(self.behaviours.values())
         for b in behaviours:
             await b.enter(item)
 
-        item.token.info(f'{{"seq":{item.seq},"type":\'{self.type}\',"id":\'{self.id}\',"action":\'Started\'}}')
+        logger.debug(f'{{"seq":{item.seq},"type":\'{self.type}\',"id":\'{self.id}\',"action":\'Started\'}}')
         item.token.log(f"Node({self.name}|{self.id}).execute: execute start ...")
 
         await self.do_event(item, ExecutionEvent.node_start, ItemStatus.start)
@@ -253,7 +279,7 @@ class Node(INode, Generic[T]):
                 ret = b_ret
 
         if ret in (NodeAction.ERROR, NodeAction.ABORT):
-            item.token.info(f'{{"seq":{item.seq},"type":\'{self.type}\',"id":\'{self.id}\',"action":\'Aborted\'}}')
+            logger.debug(f'{{"seq":{item.seq},"type":\'{self.type}\',"id":\'{self.id}\',"action":\'Aborted\'}}')
             item.token.log(f"Node({self.name}|{self.id}).execute: start complete ...token:{item.token.id} ret:{ret}")
             return ret
         elif ret == NodeAction.WAIT:
@@ -279,6 +305,7 @@ class Node(INode, Generic[T]):
         item.token.log(f"Node({self.name}|{self.id}).execute: execute continue...")
         return ret2
 
+    @tracer.start_as_current_span("node.continue")
     async def continue_(self, item: IItem) -> Optional[NodeAction]:
         """
         Continues the execution of the node and logs the continuation details.
@@ -290,10 +317,14 @@ class Node(INode, Generic[T]):
         Returns:
             The action to be taken after continuation, or None if no action is required.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "item_id": item.id}
+        )
         item.token.log(f"Node({self.name}|{self.id}).continue_: item={item.id}")
         await self.end(item)
         return None
 
+    @tracer.start_as_current_span("node.start")
     async def start(self, item: IItem) -> NodeAction:
         """
         Starts the execution of the node and logs the start details.
@@ -305,12 +336,14 @@ class Node(INode, Generic[T]):
         Returns:
             The action to be taken after start, or None if no action is required.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "item_id": item.id}
+        )
         item.token.log(f"Node({self.name}|{self.id}).start: item={item.id}")
         await self.start_boundary_events(item, item.token)
-        if self.requires_wait:
-            return NodeAction.WAIT
-        return NodeAction.CONTINUE
+        return NodeAction.WAIT if self.requires_wait else NodeAction.CONTINUE
 
+    @tracer.start_as_current_span("node.run")
     async def run(self, item: IItem) -> NodeAction:
         """
         Runs the node's behavior and logs the execution details.
@@ -322,6 +355,9 @@ class Node(INode, Generic[T]):
         Returns:
             The action to be taken after run, or None if no action is required.
         """
+        trace.get_current_span().set_attributes(
+            {"node_name": self.name or self.id, "node_id": self.id, "item_id": item.id}
+        )
         item.token.log(f"Node({self.name}|{self.id}).run: item={item.id}")
         return NodeAction.END
 
@@ -340,6 +376,7 @@ class Node(INode, Generic[T]):
             if hasattr(ebg, "cancel_all_branched"):
                 await ebg.cancel_all_branched(item)
 
+    @tracer.start_as_current_span("node.cancel_boundary_events")
     async def cancel_boundary_events(self, item: IItem) -> None:
         """
         Cancels all boundary events attached to the node for the given item.
@@ -349,24 +386,33 @@ class Node(INode, Generic[T]):
                 current context and state for the execution.
         """
         for boundary_event in self.attachments:
-            item.token.log(f"        cancel_boundary_event:{boundary_event.id}")
-            children_tokens = []
-            if self.type in (BpmnType.SubProcess, BpmnType.AdHocSubProcess, BpmnType.Transaction):
-                for tok in item.token.execution.tokens.values():
-                    if tok.origin_item and tok.origin_item.id == item.id and tok.type == TokenType.SubProcess:
-                        children_tokens = tok.get_children_tokens()
-            else:
-                children_tokens = item.token.get_children_tokens()
+            with tracer.start_as_current_span(
+                "node.cancel_boundary_event", attributes={"boundary_event_id": boundary_event.id}
+            ):
+                item.token.log(f"        cancel_boundary_event:{boundary_event.id}")
+                children_tokens = []
+                if self.type in (BpmnType.SubProcess, BpmnType.AdHocSubProcess, BpmnType.Transaction):
+                    for tok in item.token.execution.tokens.values():
+                        if tok.origin_item and tok.origin_item.id == item.id and tok.type == TokenType.SubProcess:
+                            children_tokens = tok.get_children_tokens()
+                else:
+                    children_tokens = item.token.get_children_tokens()
 
-            if children_tokens:
-                for token in children_tokens:
-                    if token.first_item:
-                        item.token.log(
-                            f"     cancel_boundary_events childToken:{token.id} "
-                            f"startnode:{token.start_node_id} status:{token.first_item.status}"
-                        )
-                        if token.start_node_id == boundary_event.id and token.first_item.status != ItemStatus.end:
-                            await token.terminate()
+                if children_tokens:
+                    for token in children_tokens:
+                        if token.first_item:
+                            with tracer.start_as_current_span(
+                                "node.cancel_boundary_event_child", attributes={"token_id": token.id}
+                            ):
+                                item.token.log(
+                                    f"     cancel_boundary_events childToken:{token.id} "
+                                    f"startnode:{token.start_node_id} status:{token.first_item.status}"
+                                )
+                                if (
+                                    token.start_node_id == boundary_event.id
+                                    and token.first_item.status != ItemStatus.end
+                                ):
+                                    await token.terminate()
 
     def get_boundary_event_items(self, item: IItem) -> List[IItem]:
         """
@@ -400,6 +446,7 @@ class Node(INode, Generic[T]):
                         boundary_items.append(token.current_item)
         return boundary_items
 
+    @tracer.start_as_current_span("node.end")
     async def end(self, item: IItem, cancel: bool = False) -> None:
         """
         Handles the completion process of an item in the current node.
@@ -422,7 +469,15 @@ class Node(INode, Generic[T]):
             f"Node({self.name}|{self.id}|{item.seq}).end: item={item.id} cancel:{cancel} "
             f"attachments:{len(self.attachments)}"
         )
-
+        trace.get_current_span().set_attributes(
+            {
+                "node_name": self.name or self.id,
+                "node_id": self.id,
+                "item_id": item.id,
+                "item_sequence": item.seq,
+                "action": action,
+            }
+        )
         for b in self.behaviours.values():
             await b.end(item)
 
@@ -484,11 +539,13 @@ class Node(INode, Generic[T]):
         Returns:
             A list of outbound items associated with the given item.
         """
-        item.token.log(f"Node({self.name}|{self.id}).get_outbounds: itemId={item.id}")
-        outbounds: List[IItem] = []
         from pybpmn_server.engine.item import Item as ItemClass
 
+        item.token.log(f"Node({self.name}|{self.id}).get_outbounds: itemId={item.id}")
+        outbounds: List[IItem] = []
+        logger.debug(f"Getting outbounds for itemId={item.id} this node {self.id}")
         for flow in self.outbounds:
+            logger.debug(f" ##### {flow.type}")
             if flow.type != BpmnType.MessageFlow:
                 flow_item = ItemClass(flow, item.token)
                 if await flow.run(flow_item) == FlowAction.take:
@@ -496,7 +553,7 @@ class Node(INode, Generic[T]):
                 else:
                     flow_item.token = None
 
-        item.token.log(f"Node({self.name}|{self.id}).get_outbounds: return outbounds{len(outbounds)}")
+        item.token.log(f"Node({self.name}|{self.id}).get_outbounds: return outbounds={len(outbounds)}")
         return outbounds
 
     async def start_boundary_events(self, item: IItem, token: IToken) -> None:

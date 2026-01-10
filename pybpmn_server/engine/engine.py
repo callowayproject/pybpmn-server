@@ -5,13 +5,19 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+
+from opentelemetry import trace
 
 from pybpmn_server.common.configuration import Settings, settings
 from pybpmn_server.engine.execution import Execution
 from pybpmn_server.interfaces.enums import ExecutionEvent
 
+if TYPE_CHECKING:
+    from pybpmn_server.engine.interfaces import IItem
+
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer(__name__)
 
 
 class Engine:
@@ -25,6 +31,7 @@ class Engine:
         self.data_store = self.configuration.data_store
         self.model_data_store = self.configuration.model_data_store
 
+    @tracer.start_as_current_span("engine.start")
     async def start(
         self,
         name: str,
@@ -34,7 +41,7 @@ class Engine:
         user_name: Optional[str] = None,
         parent_item_id: Optional[str] = None,
         no_wait: bool = False,
-    ) -> Execution:
+    ) -> Optional[Execution]:
         """
         Starts the execution of a workflow based on the provided parameters.
 
@@ -53,15 +60,12 @@ class Engine:
             no_wait: If True, the execution will not wait for the workflow to complete before returning.
 
         Returns:
-            Execution: An instance representing the workflow execution, which includes execution context and state.
-
-        Raises:
-            Any exceptions encountered during execution are handled and logged. The
-            method attempts to manage resources and gracefully recover from errors.
+            An instance representing the workflow execution, which includes execution context and state.
         """
         data = data or {}
         self.running_counter += 1
         logger.info(f"^Action:engine.start {name}")
+        trace.get_current_span().set_attribute("workflow_name", name)
         execution = Execution(name, source, configuration=self.configuration)
 
         execution.instance.parent_item_id = parent_item_id
@@ -86,24 +90,35 @@ class Engine:
                 execution.worker.add_done_callback(release_callback)
                 return execution
             else:
-                print(execution)
                 await execution.execute(start_node_id, self.sanitize_data(data))
                 await self.release(execution)
                 logger.info(f".engine.start ended for {name}")
                 return execution
         except Exception as exc:
             await self.exception(exc, execution)
+            return None
         finally:
             self.running_counter -= 1
             if execution and execution.is_locked:
                 await self.release(execution)
 
-    async def restart(
-        self, item_query: Any, data: Any, user_name: str, options: Optional[Dict[str, Any]] = None
-    ) -> Execution:
-        if options is None:
-            options = {}
+    @tracer.start_as_current_span("engine.restart")
+    async def restart(self, item_query: Any, data: Any, user_name: str) -> Optional[Execution]:
+        """
+        Restarts an execution based on the provided item query, data, and user information.
 
+        The method retrieves the item and its associated instance from the data store, restores the execution state,
+        re-initializes the execution with the provided data, and releases the execution lock after completion.
+
+        Args:
+            item_query: A query object or identifier used to locate the item in the data store.
+            data: The data required to restart the execution. This may include input parameters or state information.
+            user_name: The name of the user initiating the restart operation. Used for auditing or logging purposes.
+
+        Returns:
+            An instance of the `Execution` object representing the restarted execution process.
+            This includes all relevant state and runtime information.
+        """
         logger.info("^Action:engine.restart")
         execution = None
         self.running_counter += 1
@@ -118,7 +133,8 @@ class Engine:
             await self.release(execution)
             return execution
         except Exception as exc:
-            return await self.exception(exc, execution)
+            await self.exception(exc, execution)
+            return None
         finally:
             self.running_counter -= 1
             if execution and execution.is_locked:
@@ -130,14 +146,23 @@ class Engine:
         await self.release(execution)
         return execution
 
+    @tracer.start_as_current_span("execution.lock")
     async def lock(self, execution_id: str):
+        """
+        Locks the execution with the specified ID, ensuring exclusive access.
+        """
+        trace.get_current_span().set_attribute("execution_id", execution_id)
         logger.info(f"...locking ..{execution_id}")
         await self.data_store.locker.lock(execution_id)
-        logger.info(f"   locking complete{execution_id}")
 
+    @tracer.start_as_current_span("execution.unlock")
     async def release(self, execution: Optional[Execution], id_: Optional[str] = None):
+        """
+        Releases the lock on the execution with the specified ID, allowing other operations to proceed.
+        """
         if id_ is None and execution:
             id_ = execution.id
+        trace.get_current_span().set_attribute("execution_id", id_)
         logger.info(f"...unlocking ..{id_}")
         await self.data_store.locker.release(id_)
         if execution:
@@ -153,27 +178,43 @@ class Engine:
         if live:
             execution = live
         else:
-            execution = await Execution.restore(self.server, instance, item_id)
+            execution = await Execution.restore(instance, self.configuration, item_id)
             execution.is_locked = True
             self.cache.add(execution)
             logger.info(f"restore completed: {instance.saved}")
 
-        return execution
+        return cast("Execution", execution)
 
-    async def invoke_item(self, item_query: Any, data: Any = None) -> Execution:
+    @tracer.start_as_current_span("execution.invoke_item")
+    async def invoke_item(self, item_query: dict[str, Any], data: Optional[dict[str, Any]] = None) -> Execution:
         return await self.invoke(item_query, data)
 
     async def assign(
         self,
-        item_query: Any,
-        data: Any = None,
+        item_query: dict[str, Any],
+        data: Optional[dict[str, Any]] = None,
         assignment: Any = None,
         user_name: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Execution:
+    ) -> Optional[Execution]:
+        """
+        Assigns an item to a user or task while maintaining proper execution and data flow.
+
+        This method processes the assignment of an item by searching the data store for the
+        item specified by the query, restoring its execution context, and assigning it to
+        a task or user. It performs necessary error handling, logging, and ensures that resources
+        are properly released in all scenarios.
+
+        Args:
+            item_query: Query used to locate the item in the data store.
+            data: Additional data to be passed during assignment.
+            assignment: Assignment-specific data used to configure the task or user allocation.
+            user_name: Name of the user to whom the item is being assigned, if applicable.
+
+        Returns:
+            Execution: The execution instance that processes the assigned item.
+        """
         data = data or {}
         assignment = assignment or {}
-        options = options or {}
 
         logger.info("^Action:engine.assign")
         logger.info(item_query)
@@ -197,21 +238,23 @@ class Engine:
             await self.release(execution)
             return execution
         except Exception as exc:
-            return await self.exception(exc, execution)
+            await self.exception(exc, execution)
+            return None
         finally:
             self.running_counter -= 1
             if execution and execution.is_locked:
                 await self.release(execution)
 
+    @tracer.start_as_current_span("execution.invoke")
     async def invoke(
         self,
-        item_query: Any,
-        data: Any = None,
+        item_query: dict[str, Any],
+        data: Optional[dict[str, Any]] = None,
         user_name: Optional[str] = None,
         restart: bool = False,
         recover: bool = False,
         no_wait: bool = False,
-    ) -> Execution:
+    ) -> Optional[Execution]:
         data = data or {}
 
         logger.info("^Action:engine.invoke")
@@ -256,19 +299,18 @@ class Engine:
                 await self.release(execution)
                 return execution
         except Exception as exc:
-            return await self.exception(exc, execution)
+            await self.exception(exc, execution)
+            return None
         finally:
             self.running_counter -= 1
             if execution and execution.is_locked:
                 await self.release(execution)
 
     async def start_repeat_timer_event(
-        self, instance_id: str, prev_item: Any, data: Any = None, options: Dict[str, Any] = None
-    ) -> Execution:
+        self, instance_id: str, prev_item: IItem, data: Optional[dict[str, Any]] = None
+    ) -> Optional[Execution]:
         if data is None:
             data = {}
-        if options is None:
-            options = {}
 
         logger.info("startRepeatTimeEvent")
         execution = None
@@ -279,7 +321,8 @@ class Engine:
             logger.info(f"StartRepeatTimerEvent completed {execution.is_locked}")
             return execution
         except Exception as exc:
-            return await self.exception(exc, execution)
+            await self.exception(exc, execution)
+            return None
         finally:
             if execution and execution.is_locked:
                 await self.release(execution)
@@ -288,49 +331,74 @@ class Engine:
         self,
         instance_id: str,
         element_id: str,
-        data: Any = None,
-        user_name: str = None,
-        options: Dict[str, Any] = None,
-    ) -> Execution:
+        data: Optional[str, Any] = None,
+        user_name: Optional[str] = None,
+        restart: bool = False,
+        recover: bool = False,
+    ) -> Optional[Execution]:
+        """
+        Starts an event by signaling it within an execution context.
+
+        Handles initialization, signal invocation, and execution state management, ensuring the proper release process
+        even in error scenarios.
+
+        Args:
+            instance_id: The unique identifier for the instance to be restored before signaling.
+            element_id: The unique identifier representing the event element to be signaled.
+            data: Optional data payload associated with the event, defaulting to an empty dictionary.
+            user_name: Optional user name of the individual triggering the event, default is None.
+            restart: Indicates whether the event should trigger a restart, default is False.
+            recover: Indicates whether the event should trigger a recovery, default is False.
+
+        Returns:
+            Execution: The execution context after the event is processed.
+        """
         if data is None:
             data = {}
-        if options is None:
-            options = {}
 
         logger.info("serverinvokeSignal")
         execution = None
         try:
             execution = await self.restore(instance_id)
-            await execution.signal_event(element_id, self.sanitize_data(data), user_name, options)
+            await execution.signal_event(element_id, self.sanitize_data(data), user_name, restart, recover)
             await self.release(execution)
             logger.info(f"Engine.StartEvent completed {execution.is_locked}")
             return execution
         except Exception as exc:
-            return await self.exception(exc, execution)
+            await self.exception(exc, execution)
+            return None
         finally:
             if execution and execution.is_locked:
                 await self.release(execution)
 
+    @tracer.start_as_current_span("engine.throw_message")
     async def throw_message(
         self, message_id: str, data: Any = None, matching_query: Any = None
     ) -> Optional[Execution]:
+        """
+        Throw a message event to trigger a process instance.
+        """
         if data is None:
             data = {}
         if matching_query is None:
             matching_query = {}
 
-        logger.info("..^Action:engine.throwMessage ", message_id, self.sanitize_data(data), matching_query)
+        trace.get_current_span().set_attributes(
+            {"message_id": message_id, "data": data, "matching_query": matching_query}
+        )
+        logger.info(f"..^Action:engine.throwMessage {message_id}, {self.sanitize_data(data)}, {matching_query}")
         if not message_id:
             return None
 
         events_query = {"events.messageId": message_id}
-        events = await self.definitions.find_events(events_query)
+        events = await self.model_data_store.find_events(events_query)
         logger.info(f"..findEvents {len(events)}")
 
         if events:
             event = events[0]
             logger.info(
-                f"..^Action:engine.throwMessage found target event {event.model_name} {json.dumps(data)} {event.element_id}"
+                "..^Action:engine.throwMessage found target event "
+                f"{event.model_name} {json.dumps(data)} {event.element_id}"
             )
             return await self.start(event.model_name, data, event.element_id, event.element_id)
 
@@ -359,7 +427,7 @@ class Engine:
             return []
 
         events_query = {"events.signalId": signal_id}
-        events = await self.definitions.find_events(events_query)
+        events = await self.model_data_store.find_events(events_query)
         logger.info(f"..findEvents {len(events)}")
 
         for event in events:
@@ -383,14 +451,14 @@ class Engine:
         return {"running": self.running_counter, "calls": self.calls_counter}
 
     async def upgrade(self, model: str, after_node_ids: List[str]) -> Union[List[str], Dict[str, Any]]:
-        ds = self.server.data_store
+        ds = self.data_store
         query: Dict[str, Any] = {"name": model}
         if after_node_ids:
             nors = [{"items": {"elemMatch": {"elementId": node}}} for node in after_node_ids]
             query["$nor"] = nors
 
         insts = await ds.find_instances(query, {"projection": {"id": 1}})
-        source = await self.server.definitions.get_source(model, None)
+        source = await self.model_data_store.get_source(model)
 
         res_ids = []
         for inst in insts:
@@ -409,21 +477,37 @@ class Engine:
                 await self.release(None, inst.id)
         return res_ids
 
-    async def exception(self, exc: Exception, execution: Optional[Execution]):
-        import traceback
+    async def exception(self, exc: Exception, execution: Optional[Execution]) -> None:
+        """
+        Handles an exception by logging its details and triggering an optional execution event.
 
-        logger.info(f"Exception: {exc}")
-        logger.info(traceback.format_exc())
+        This method logs the provided exception and its stack trace. If an execution is provided, it triggers the
+        `process_exception` event. Finally, the exception is logged as an error.
+
+        Args:
+            exc: The exception to be handled and logged.
+            execution: The optional execution context that defines the handling behavior, if applicable.
+        """
+        trace.get_current_span().record_exception(exc)
 
         if execution:
             await execution.do_execution_event(execution, ExecutionEvent.process_exception)
 
-        return logger.error(exc)
+        logger.error(exc)
 
-    def sanitize_data(self, data: Any) -> Any:
+    def sanitize_data(self, data: Any) -> dict[str, Any]:
+        """
+        Sanitizes the provided data by converting it to a dictionary if possible.
+
+        Args:
+            data: The data to be sanitized.
+
+        Returns:
+            The sanitized data as a dictionary, or an empty dictionary if the input is None.
+        """
         if data is None:
             return {}
         try:
             return json.loads(json.dumps(data))
-        except:
+        except json.JSONDecodeError:
             return data

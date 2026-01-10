@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional
 
+from opentelemetry import trace
 from pybpmn_parser.bpmn.activities.business_rule_task import BusinessRuleTask as BusinessRuleTaskDef
 from pybpmn_parser.bpmn.activities.call_activity import CallActivity as CallActivityDef
 from pybpmn_parser.bpmn.activities.receive_task import ReceiveTask as ReceiveTaskDef
@@ -23,6 +24,7 @@ from pybpmn_parser.bpmn.activities.sub_process import (
 )
 from pybpmn_parser.bpmn.activities.user_task import UserTask as UserTaskDef
 
+from pybpmn_server.common.utils import import_string
 from pybpmn_server.elements.node import Node
 from pybpmn_server.interfaces.enums import BpmnType, ExecutionStatus, ItemStatus, NodeAction, TokenType
 
@@ -32,6 +34,7 @@ if TYPE_CHECKING:
     from pybpmn_server.engine.item import IItem
 
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer(__name__)
 
 
 class ScriptTask(Node[ScriptTaskDef]):
@@ -41,6 +44,7 @@ class ScriptTask(Node[ScriptTaskDef]):
         super().__init__(type_, def_, id_, process)
         self.script = self.def_.script
 
+    @tracer.start_as_current_span("script_task.run")
     async def run(self, item: IItem) -> NodeAction:
         """
         Execute the script task.
@@ -51,6 +55,7 @@ class ScriptTask(Node[ScriptTaskDef]):
         Returns:
             The action to take after executing the script task.
         """
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name or self.id})
         if self.script:
             item.token.log("executing script task")
             item.token.log(self.script)
@@ -82,42 +87,22 @@ class ServiceTask(Node[ServiceTaskDef]):
             return self.delegate_expression
         return None
 
-    async def run(self, item: IItem) -> NodeAction:  # noqa: C901
+    @tracer.start_as_current_span("service_task.run")
+    async def run(self, item: IItem) -> NodeAction:
         """
         Executes the service task by invoking the specified service with the provided item input.
         """
-        item.context.action = None
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name or self.id})
+
+        item.context.action = NodeAction.WAIT
         item.context.item = item
 
-        app_delegate = item.token.execution.app_delegate
+        config = item.token.execution.configuration
         logger.info(f"invoking service:{self.service_name} input:{json.dumps(item.input, default=str)}")
 
-        services_provider = await app_delegate.get_services_provider(item.token.execution)
-        obj = services_provider
-        method = None
-
-        if obj and self.service_name:
-            path_parts = self.service_name.split(".")
-            for part in path_parts:
-                if hasattr(obj, part):
-                    val = getattr(obj, part)
-                    if callable(val):
-                        method = val
-                    else:
-                        obj = val
-                elif isinstance(obj, dict) and part in obj:
-                    val = obj[part]
-                    if callable(val):
-                        method = val
-                    else:
-                        obj = val
-                else:
-                    break
-
-        if method and callable(method):
-            ret = method(item.input, item.context)
-        else:
-            ret = app_delegate.service_called(item.input, item.context, item)
+        service_provider = config.services_provider
+        method = import_string(service_provider[self.service_name]) if service_provider and self.service_name else None
+        ret = method(item.input, item.context) if method and callable(method) else None
 
         logger.info(f"service returned {ret}")
         item.output = ret
@@ -143,6 +128,7 @@ class BusinessRuleTask(Node[BusinessRuleTaskDef]):
 
         self.decision_ref = getattr(self.def_, "camunda_decision_ref", None)
 
+    @tracer.start_as_current_span("business_rule_task.run")
     async def run(self, item: IItem) -> NodeAction:
         """Run the business rule task."""
         # TODO (pybpmn-server-1ay): refactor to use DMN engine
@@ -173,12 +159,18 @@ class SendTask(Node[SendTaskDef]):
 class UserTask(Node[UserTaskDef]):
     """User task implementation."""
 
+    @tracer.start_as_current_span("user_task.end")
     async def end(self, item: IItem, cancel: bool = False) -> None:
         """End the user task."""
+        trace.get_current_span().set_attributes(
+            {"node_id": self.id, "node_name": self.name or self.id, "item_id": item.id}
+        )
         await super().end(item, cancel)
 
+    @tracer.start_as_current_span("user_task.run")
     async def start(self, item: IItem) -> NodeAction:
         """Start the user task."""
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name, "item_id": item.id})
         assignable_attrs = [
             "camunda_assignee",
             "camunda_candidate_groups",
@@ -266,10 +258,13 @@ class SubProcess(Node[SubProcessDef]):
         """Can this task be invoked?"""
         return False
 
+    @tracer.start_as_current_span("subprocess_task.start")
     async def start(self, item: IItem) -> NodeAction:
         """
         Start the subprocess task.
         """
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name, "item_id": item.id})
+
         token = item.token
         token.log(f"..executing a sub process item:{item.id}")
 
@@ -317,10 +312,13 @@ class AdHocSubProcess(Node[AdHocSubProcessDef]):
         """Can this task be invoked?"""
         return False
 
+    @tracer.start_as_current_span("adhoc_subprocess_task.start")
     async def start(self, item: IItem) -> NodeAction:
         """
         Start the ad-hoc subprocess task.
         """
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name, "item_id": item.id})
+
         token = item.token
         token.log(f"..executing an ad-hoc sub process item:{item.id}")
 
@@ -352,10 +350,12 @@ class AdHocSubProcess(Node[AdHocSubProcessDef]):
 
         return NodeAction.WAIT
 
+    @tracer.start_as_current_span("adhoc_subprocess_task.end")
     async def end(self, item: IItem, cancel: bool = False) -> None:
         """
         End the ad-hoc subprocess task.
         """
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name, "item_id": item.id})
         await super().end(item, cancel)
         children = item.token.get_children_tokens()
         for tok in children:
@@ -376,12 +376,11 @@ class AdHocSubProcess(Node[AdHocSubProcessDef]):
         if not self.child_process:
             return []
         nodes = self.child_process.children_nodes
-        ad_hocs = [
+        return [
             node
             for node in nodes
             if node.type not in (BpmnType.EndEvent, BpmnType.SequenceFlow) and len(node.inbounds) == 0
         ]
-        return ad_hocs
 
 
 class CallActivity(Node[CallActivityDef]):
@@ -413,10 +412,12 @@ class CallActivity(Node[CallActivityDef]):
         engine = execution.server.engine
         await engine.invoke({"items.id": item_id}, execution.instance.data)
 
+    @tracer.start_as_current_span("call_activity_task.start")
     async def start(self, item: IItem) -> NodeAction:
         """
         Starts the execution of a call activity.
         """
+        trace.get_current_span().set_attributes({"node_id": self.id, "node_name": self.name, "item_id": item.id})
         token = item.token
         token.log(f"..executing a call activity for item:{item.id} calling {self.called_element}")
 

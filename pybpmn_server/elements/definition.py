@@ -5,19 +5,21 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, TypeAlias
 
+from opentelemetry import trace
 from pybpmn_parser.bpmn.activities.sub_process import SubProcess as SubProcessDefinition
 from pybpmn_parser.bpmn.activities.sub_process import Transaction as TransactionDefinition
 from pybpmn_parser.bpmn.process.process import Process as ProcessDefinition
-from pybpmn_parser.parse import Parser, ParseResult
+from pybpmn_parser.parse import Parser, ParseResult, Reference
 from pymitter import EventEmitter
 
-from pybpmn_server.elements.flow import Flow
-from pybpmn_server.elements.interfaces import IDefinition, INode
+from pybpmn_server.elements.flow import Flow, MessageFlow
+from pybpmn_server.elements.interfaces import IDefinition, IFlow, INode
 from pybpmn_server.elements.node_loader import populate_non_process_nodes, populate_process_nodes
 from pybpmn_server.elements.process import Process
 from pybpmn_server.interfaces.enums import ExecutionEvent
 
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer(__name__)
 Processable: TypeAlias = ProcessDefinition | SubProcessDefinition | TransactionDefinition
 
 
@@ -31,40 +33,37 @@ class Definition(IDefinition):
         self.source = source
         self.processes: Dict[str, Process] = {}
         self.nodes: Dict[str, Any] = {}
-        self.flows: List[Flow] = []
+        self.flows: List[IFlow] = []
         self.access_rules: List[Any] = []
         self.parser: Parser = Parser()
         self.parse_result: Optional[ParseResult] = None
 
+    @tracer.start_as_current_span("definition.load")
     async def load(self) -> Any:
         """Load definition from source."""
         if not self.source:
             self.parse_result = None
             return self.parse_result
 
-        parse_result = self.parser.parse_string(self.source)
+        self.parse_result = self.parser.parse_string(self.source)
 
         try:
             # Follow TS logic: rootElements -> processes
-            for process in parse_result.definition.processes:
+            for process in self.parse_result.definition.processes:
                 proc = self.load_process(process, None)
                 proc.name = self.name
                 self.processes[process.id] = proc
 
-            # Handle references (SequenceFlows, BoundaryEvents)
-            # This is complex in TS because bpmn-moddle handles refs.
-            # Here we need to manually link them.
             self._link_references()
-
             event = ExecutionEvent.process_loaded
             await self.listener.emit_async(event, {"event": event, "context": self})
 
-            self.parse_result = parse_result
-            return parse_result.definition
+            return self.parse_result.definition
         except Exception as exc:
             logger.error(f"Error in loading definition for {self.name}: {exc}")
             raise exc
 
+    @tracer.start_as_current_span("definition.load_process")
     def load_process(self, process_element: Processable, parent_process: Optional[Process]) -> Process:
         """Load process definition."""
         process = Process(process_element, parent_process)
@@ -79,12 +78,15 @@ class Definition(IDefinition):
         event_sub_processes = []
         children: list[INode] = populate_non_process_nodes(process)
 
+        for child in children:
+            self.nodes[child.id] = child
+
         for node in populate_process_nodes(process):
             node.child_process = self.load_process(node.def_, process)
             if getattr(node.def_, "triggered_by_event", False):
                 event_sub_processes.append(node.child_process)
 
-            self.nodes[process_element.id] = node
+            self.nodes[node.id] = node
             children.append(node)
 
         process.init(children, event_sub_processes)
@@ -98,37 +100,89 @@ class Definition(IDefinition):
 
         return process
 
+    def get_node_by_id(self, node_id: str) -> Optional[INode]:
+        """
+        Retrieve a node by its unique identifier.
+
+        Args:
+            node_id: The unique identifier of the node to retrieve.
+
+        Returns:
+            Optional[INode]: The node with the specified ID, or None if not found.
+
+        Raises:
+            ValueError: If the node does not exist.
+        """
+        if node := self.nodes.get(node_id):
+            return node
+        else:
+            raise ValueError(f"Node {node_id} does not exist in {', '.join(self.nodes.keys())}.")
+
     def _link_references(self) -> None:
         """Link references to other nodes."""
-        # TODO (pybpmn-server-f77): re-implement this method using pybpmn-parser
-        # In a real parser, this would be handled.
-        # Here we need to find SequenceFlows and link them to nodes.
         if not self.parse_result:
-            return
+            raise ValueError("Parse result is None.")
 
-        for el in self.parse_result.elements_by_id.values():
-            if not el:
+        flow_references: dict[str, dict[str, Any]] = {}
+        """Contains partial references to sequence flows. It takes two references to complete: a from and a to."""
+
+        for ref in self.parse_result.references:
+            if ref.element_id is None:
                 continue
-            if el["$type"] == "bpmn:SequenceFlow":
-                from_id = el.get("sourceRef")
-                to_id = el.get("targetRef")
-                if from_id and to_id:
-                    from_node = self.nodes.get(from_id)
-                    to_node = self.nodes.get(to_id)
-                    if from_node and to_node:
-                        flow = Flow(el["$type"], el, el["id"], from_node, to_node)
-                        self.flows.append(flow)
-                        from_node.outbounds.append(flow)
-                        to_node.inbounds.append(flow)
+            element = self.parse_result.elements_by_id[ref.element_id]
+            element_type = element.Meta.name if hasattr(element, "Meta") else "unknown"
 
-            elif el["$type"] == "bpmn:BoundaryEvent":
-                attached_to_id = el.get("attachedToRef")
-                if attached_to_id:
-                    event = self.nodes.get(el["id"])
-                    owner = self.nodes.get(attached_to_id)
-                    if event and owner:
-                        event.attached_to = owner
-                        owner.attachments.append(event)
+            if element_type == "sequenceFlow":
+                ref_element = self.parse_result.elements_by_id[ref.reference_id]
+
+                flow_references[ref.element_id] = update_sequence_flow(
+                    flow_references, ref.element_id, ref.property, ref_element
+                )
+            elif element_type == "boundaryEvent" and ref.property == "attached_to_ref":
+                self._link_boundary_event(ref)
+
+        for ref in flow_references.values():
+            element = self.parse_result.elements_by_id[ref["id"]]
+            element_type = element.Meta.name if hasattr(element, "Meta") else "unknown"
+
+            from_node = self.get_node_by_id(ref["from"])
+            to_node = self.get_node_by_id(ref["to"])
+            flow = Flow(f"bpmn:{element_type}", element, ref["id"], from_node, to_node)
+            self._update_flow_nodes(flow, from_node, to_node)
+
+        for collab in self.parse_result.definition.collaborations:
+            for message_flow in collab.message_flows:
+                from_node = self.get_node_by_id(message_flow.source_ref)
+                to_node = self.get_node_by_id(message_flow.target_ref)
+
+                flow = MessageFlow(message_flow.id, message_flow.Meta.name, from_node, to_node, message_flow)
+                from_node.outbounds.append(flow)
+                to_node.inbounds.append(flow)
+
+    def _link_boundary_event(self, ref: Reference) -> None:
+        """
+        Links a boundary event to its owner node.
+        """
+        event = self.get_node_by_id(ref.element_id)
+        owner = self.get_node_by_id(ref.reference_id)
+
+        owner.attachments.append(event)
+
+        if event.attached_to is None:
+            event.attached_to = owner
+        else:
+            logger.info(f"event already attached to {event.attached_to}")
+
+        logger.info(f"boundary event {ref.element_id} attached to {ref.reference_id}")
+
+    def _update_flow_nodes(self, flow: IFlow, from_node: INode, to_node: INode) -> None:
+        """
+        Updates the flow by adding it to the definition's flows list and linking it to the source and target nodes.
+        """
+        logger.info(f"Updating flow {flow.id} and linking it to {from_node.id} and {to_node.id}")
+        self.flows.append(flow)
+        from_node.outbounds.append(flow)
+        to_node.inbounds.append(flow)
 
     def get_json(self) -> str:
         """
@@ -192,8 +246,28 @@ class Definition(IDefinition):
         nodes = self.get_start_nodes()
         return nodes[0] if nodes else None
 
-    def get_node_by_id(self, id_: str) -> Optional[Any]:
-        """
-        Retrieves the node by its id.
-        """
-        return self.nodes.get(id_)
+
+def update_sequence_flow(
+    flow_map: dict[str, Any], element_id: str, property_name: str, ref_element: Any
+) -> dict[str, str]:
+    """
+    Updates or creates a new flow record.
+
+    A sequence flow record requires two touches: setting the source and target nodes.
+
+    Args:
+        flow_map: The dictionary mapping flow IDs to flow details
+        element_id: The ID of the flow element
+        property_name: The property name indicating the direction of the flow
+        ref_element: The reference element associated with the flow
+
+    Returns:
+        The updated flow record.
+    """
+    default_flow = {"id": element_id, "from": None, "to": None}
+    flow = flow_map.get(element_id, default_flow)
+    if property_name == "source_ref":
+        flow["from"] = ref_element.id
+    else:
+        flow["to"] = ref_element.id
+    return flow
