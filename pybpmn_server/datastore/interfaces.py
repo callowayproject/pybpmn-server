@@ -37,7 +37,7 @@ class FindResult:
 class IDataStore(Protocol):
     """Data store interface."""
 
-    db_configuration: Any
+    db_config: Any
     db: Any
     locker: Any
 
@@ -71,3 +71,4 @@ class IModelsDatastore(Protocol):
     async def save_model(self, model: BpmnModelData) -> bool: ...
     async def delete_model(self, name: Any) -> None: ...
     async def rename_model(self, name: Any, new_name: Any) -> bool: ...
+    async def update_timer(self, name: str) -> bool: ...
