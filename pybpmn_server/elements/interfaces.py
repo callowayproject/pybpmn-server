@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union, runtime_checkable
 
@@ -11,6 +12,8 @@ if TYPE_CHECKING:
     from pybpmn_server.elements.behaviors.behavior import Behavior
     from pybpmn_server.engine.interfaces import IItem
     from pybpmn_server.interfaces.enums import ExecutionEvent, ItemStatus, NodeAction
+
+logger = logging.getLogger(__name__)
 
 
 @runtime_checkable

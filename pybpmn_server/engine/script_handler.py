@@ -3,11 +3,14 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, Union
 
 from pybpmn_server.engine.interfaces import IExecution, IItem, IToken, ScriptHandler
+
+logger = logging.getLogger(__name__)
 
 
 class DefaultScriptHandler(ScriptHandler):
@@ -58,8 +61,8 @@ class DefaultScriptHandler(ScriptHandler):
                 return locs.get("result")
 
         except Exception as exc:
-            print(f"Error in script evaluation: {script}")
-            print(exc)
+            logger.error(f"Error in script evaluation: {script}")
+            logger.exception(exc)
             raise exc
 
     async def execute_script(self, scope: Union[IItem, IExecution], script: str) -> Any:
@@ -89,8 +92,8 @@ class DefaultScriptHandler(ScriptHandler):
             return locs.get("result")
 
         except Exception as exc:
-            print(f"Error in script execution: {script}")
-            print(exc)
+            logger.error(f"Error in script execution: {script}")
+            logger.exception(exc)
             raise exc
 
     def _get_globals(self, scope: Any) -> Dict[str, Any]:

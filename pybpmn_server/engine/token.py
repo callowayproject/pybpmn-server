@@ -32,6 +32,7 @@ token 1   token 1    token 1 (wait for tokens 2 & 3 finish)    token 1 resume   
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from pybpmn_server.datastore.data_objects import TokenData
@@ -43,6 +44,8 @@ if TYPE_CHECKING:
     from pybpmn_server.engine.execution import Execution
     from pybpmn_server.engine.interfaces import IExecution, IItem
     from pybpmn_server.engine.loop import Loop
+
+logger = logging.getLogger(__name__)
 
 
 class Token(IToken):
@@ -312,7 +315,7 @@ class Token(IToken):
         """
         from pybpmn_server.engine.item import Item
 
-        input_data = input_data if input_data else {}
+        input_data = input_data or {}
         self.log_s(f"Token({self.id}).execute:start input {input_data}")
         if self.status == TokenStatus.end:
             self.log_e(f"Token({self.id}).execute:end token status is end: return from execute!!")
@@ -383,8 +386,7 @@ class Token(IToken):
             error_code: Error code to be handled.
             calling_event: The event that triggered the error.
         """
-        error_handler_token = self.get_scope_catch_event("error", error_code)
-        if error_handler_token:
+        if error_handler_token := self.get_scope_catch_event("error", error_code):
             if self.current_item:
                 self.current_item.status_details = {
                     "bpmnError": error_code,
@@ -431,8 +433,7 @@ class Token(IToken):
         Returns:
             None
         """
-        error_handler_token = self.get_scope_catch_event("cancel", None)
-        if error_handler_token:
+        if error_handler_token := self.get_scope_catch_event("cancel", None):
             await error_handler_token.signal(None)
 
     async def process_escalation(self, escalation_code: Any, calling_event: Any) -> None:
@@ -448,8 +449,7 @@ class Token(IToken):
             calling_event: The event that triggered the escalation. It is used primarily for logging
                 purposes to track the source event related to the escalation.
         """
-        error_handler_token = self.get_scope_catch_event("escalation", escalation_code)
-        if error_handler_token:
+        if error_handler_token := self.get_scope_catch_event("escalation", escalation_code):
             self.log(
                 "Action: Escalation, "
                 f"Item: {error_handler_token.current_item.seq if error_handler_token.current_item else None}, "
@@ -618,19 +618,17 @@ class Token(IToken):
         """
         await asyncio.sleep(0.01)
 
-        if not self.path:
-            tokens = self.get_children_tokens()
-            if tokens:
-                first_token = tokens[0]
-                if first_token.path:
-                    self.add_item_to_path(first_token.path[0])
+        if not self.path and (tokens := self.get_children_tokens()):
+            first_token = tokens[0]
+            if first_token.path:
+                self.add_item_to_path(first_token.path[0])
 
         if not self.current_item:
             return
 
         self.log_s(
-            f"Token({self.id}).goNext(): currentNodeId={self.current_node.id} type={self.current_node.type} "
-            f"currentItem.status={self.current_item.status}"
+            f"Token({self.id}).go_next(): current_node_id={self.current_node.id} type={self.current_node.type} "
+            f"current_item.status={self.current_item.status}"
         )
 
         if self.current_item.status == ItemStatus.wait:
@@ -662,14 +660,13 @@ class Token(IToken):
         this_item = self.current_item
         promises = []
 
+        self.log(f"Token({self.id}).goNext(): verify outbounds...")
         if diverging:
-            self.log(f"Token({self.id}).goNext(): verify outbonds....")
             for flow_item in outbounds:
-                self.log(f"Token({self.id}).goNext(): ... outbonds flowItemId={flow_item.id}")
+                self.log(f"Token({self.id}).go_next(): ... outbounds flow_item_id={flow_item.id}")
                 flow_item.status = ItemStatus.end
                 self.add_item_to_path(flow_item)
-                next_node = getattr(flow_item.element, "to", None)
-                if next_node:
+                if next_node := getattr(flow_item.element, "to", None):
                     promises.append(
                         Token.start_new_token(
                             TokenType.Diverge, self.execution, next_node, None, self, this_item, None
@@ -678,20 +675,18 @@ class Token(IToken):
             if self.type != TokenType.SubProcess:
                 await self.end()
         else:
-            self.log(f"Token({self.id}).goNext(): verify outbonds....")
             for flow_item in outbounds:
-                self.log(f"Token({self.id}).goNext(): ... outbonds flowItemId={flow_item.id}")
+                self.log(f"Token({self.id}).go_next(): ... outbounds flow_item_id={flow_item.id}")
                 flow_item.status = ItemStatus.end
                 self.add_item_to_path(flow_item)
-                next_node = getattr(flow_item.element, "to", None)
-                if next_node:
+                if next_node := getattr(flow_item.element, "to_node", None):
                     self._current_node = next_node
                     promises.append(self.execute(None))
 
-        self.log(f"Token({self.id}).goNext(): waiting for num promises {len(promises)}")
+        self.log(f"Token({self.id}).go_next(): waiting for num promises {len(promises)}")
         if promises:
             await asyncio.gather(*promises)
-        self.log_e(f"Token({self.id}).goNext(): is done currentNodeId={self.current_node.id}")
+        self.log_e(f"Token({self.id}).go_next(): is done current_node_id={self.current_node.id}")
 
     def log(self, *msg: Any) -> None:
         """

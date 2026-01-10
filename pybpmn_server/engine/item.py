@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from ulid import ULID
 
 from pybpmn_server.datastore.data_objects import ItemData
-from pybpmn_server.elements.node import Node
 from pybpmn_server.engine.interfaces import IExecution, IItem, IToken
 from pybpmn_server.interfaces.enums import ItemStatus
 
 if TYPE_CHECKING:
     from pybpmn_server.elements.interfaces import Element, INode
+
+logger = logging.getLogger(__name__)
 
 
 class Item(IItem):
@@ -65,10 +67,6 @@ class Item(IItem):
         self.token.append_data(val, self)
 
     @property
-    def options(self) -> Any:
-        return self.token.execution.options
-
-    @property
     def context(self) -> IExecution:
         return self.token.execution
 
@@ -90,7 +88,7 @@ class Item(IItem):
 
     @property
     def node(self) -> INode:
-        return Node.from_element(self.element)
+        return self.element
 
     def save(self) -> ItemData:
         """Serialize the item data for storage or transmission."""
