@@ -145,11 +145,11 @@ class TimerBehavior(Behavior):
                 # In TS: exec.promises.push(exec.signalItem(item.id, {}));
                 await exec_.signal_item(item.id, {})
             else:
-                await exec_.server.engine.invoke({"items.id": item.id}, {})
+                await exec_.engine.invoke({"items.id": item.id}, {})
 
         # Check for repeat
         if self.time_cycle and self.repeat > getattr(item, "timer_count", 0):
-            await exec_.server.engine.start_repeat_timer_event(exec_.id, item, {})
+            await exec_.engine.start_repeat_timer_event(exec_.id, item, {})
 
     def end(self, item: IItem) -> None:
         """
