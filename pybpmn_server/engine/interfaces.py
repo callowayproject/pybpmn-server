@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import datetime  # NOQA: TC003
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union
 
 from ulid import ULID
 
@@ -197,6 +197,8 @@ class IExecution(ABC):
         self.uids: Dict[str, int] = {}
         self.ending: bool = False
         self.operation: Optional[str] = None
+        self.script_handler = self.configuration.script_handler
+        self.engine = self.configuration.engine
 
     @property
     def id(self) -> str:
@@ -242,14 +244,14 @@ class IExecution(ABC):
 
     @abstractmethod
     async def execute(
-        self, start_node_id: Optional[Any] = None, input_data: Optional[Dict[str, Any]] = None
+        self, start_node_id: Optional[str] = None, input_data: Optional[Dict[str, Any]] = None
     ) -> None: ...
 
     @abstractmethod
     async def signal_item(
         self,
-        execution_id: Any,
-        input_data: Any,
+        execution_id: str,
+        input_data: dict[str, Any],
         user_name: Optional[str] = None,
         restart: bool = False,
         recover: bool = False,
@@ -258,15 +260,17 @@ class IExecution(ABC):
     @abstractmethod
     async def signal_event(
         self,
-        execution_id: Any,
-        input_data: Any,
+        execution_id: str,
+        input_data: dict[str, Any],
         user_name: Optional[str] = None,
         restart: bool = False,
         recover: bool = False,
     ) -> IExecution: ...
 
     @abstractmethod
-    async def signal_repeat_timer_event(self, execution_id: Any, prev_item: Any, input_data: Any) -> IExecution: ...
+    async def signal_repeat_timer_event(
+        self, execution_id: str, prev_item: Any, input_data: dict[str, Any]
+    ) -> IExecution: ...
 
     @abstractmethod
     def get_items(self, query: Optional[Any] = None) -> List[IItem]: ...
@@ -384,3 +388,55 @@ class IItem(ABC):
     def token_id(self) -> Any:
         """Execution Token."""
         ...
+
+
+class IEngine(Protocol):
+    """Represents the execution engine handling business process executions."""
+
+    running_counter: int
+    calls_counter: int
+
+    async def start(
+        self,
+        name: Any,
+        data: Optional[Any] = None,
+        start_node_id: Optional[str] = None,
+        user_name: Optional[str] = None,
+        options: Optional[Any] = None,
+    ) -> IExecution: ...
+    async def get(self, instance_query: Any) -> IExecution: ...
+    async def invoke(
+        self,
+        item_query: Any,
+        data: Dict[str, Any],
+        user_name: Optional[str] = None,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> IExecution: ...
+    async def assign(
+        self,
+        item_query: dict[str, Any],
+        data: Dict[str, Any],
+        assignment: Dict[str, Any],
+        user_name: str,
+    ) -> IExecution: ...
+    async def start_repeat_timer_event(
+        self,
+        instance_id: str,
+        prev_item: IItem,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> IExecution: ...
+    async def start_event(
+        self,
+        instance_id: str,
+        element_id: str,
+        data: Optional[Dict[str, Any]] = None,
+        user_name: Optional[str] = None,
+        restart: bool = False,
+        recover: bool = False,
+    ) -> IExecution: ...
+    async def throw_message(
+        self, message_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]
+    ) -> IExecution: ...
+    async def throw_signal(self, signal_id: Any, data: Dict[str, Any], matching_query: Dict[str, Any]) -> Any: ...
+    async def restart(self, item_query: Any, data: Any, user_name: Any, options: Any) -> IExecution: ...
+    async def upgrade(self, model: str, after_node_ids: List[str]) -> Union[List[str], Dict[str, Any]]: ...
