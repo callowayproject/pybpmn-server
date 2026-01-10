@@ -102,6 +102,10 @@ def populate_non_process_nodes(process: Process) -> list[INode]:  # NOQA: C901
         type_ = f"bpmn:{field_metadata['manual_tasks']['name']}"
         nodes.append(Node(type_, el, el.id, process))
 
+    for el in definition.tasks:
+        type_ = f"bpmn:{field_metadata['tasks']['name']}"
+        nodes.append(Node(type_, el, el.id, process))
+
     return nodes
 
 
