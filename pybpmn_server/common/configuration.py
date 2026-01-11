@@ -12,6 +12,7 @@ from pymitter import EventEmitter
 from pybpmn_server.common.utils import import_string
 from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
 from pybpmn_server.engine.interfaces import IEngine, ScriptHandler
+from pybpmn_server.interfaces.common import AppDelegateBase
 from pybpmn_server.server.interfaces import ICacheManager
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,9 @@ class Settings(BaseSettings):
     _listener: Optional[EventEmitter] = None
     _span_exporter: Optional[SpanExporter] = None
 
-    _engine: IEngine = None
+    app_delegate_class: str = Field(default="pybpmn_server.engine.default_app_delegate.DefaultAppDelegate")
+    _app_delegate: Optional[AppDelegateBase] = None
+    _engine: Optional[IEngine] = None
 
     @model_validator(mode="after")
     def finalize_configuration(self) -> Self:
@@ -175,6 +178,15 @@ class Settings(BaseSettings):
             self._engine = Engine(self)
 
         return self._engine
+
+    @property
+    def app_delegate(self) -> AppDelegateBase:
+        """Get the app delegate."""
+        if self._app_delegate is None:
+            self._app_delegate = import_string(self.app_delegate_class)(
+                listener=self.listener, data_store=self.data_store
+            )
+        return self._app_delegate
 
 
 settings = Settings()
