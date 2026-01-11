@@ -423,14 +423,15 @@ class CallActivity(Node[CallActivityDef]):
 
         context = item.context
         model_name = self.called_element
+        model_source = await context.engine.model_data_store.get_source(model_name)
         if not model_name:
             return NodeAction.CONTINUE
 
-        response = await context.engine.start(model_name, item.input, None, None, {"parent_item_id": item.id})
+        response = await context.engine.start(model_name, model_source, item.input, None, None, parent_item_id=item.id)
 
         token.log(f"..end of executing a call activity for item:{item.id} calling {self.called_element}")
-        token.log(f"..response :{response.execution.status}")
+        token.log(f"..response :{response}")
 
-        if response.execution.status == ExecutionStatus.end:
+        if response == ExecutionStatus.end:
             return NodeAction.CONTINUE
         return NodeAction.WAIT
