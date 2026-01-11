@@ -14,7 +14,7 @@ from pybpmn_server.common.configuration import Settings
 from pybpmn_server.common.configuration import settings as default_settings
 from pybpmn_server.elements.tasks import CallActivity
 from pybpmn_server.engine import data_handler
-from pybpmn_server.engine.interfaces import IExecution, IToken
+from pybpmn_server.engine.interfaces import IExecution, IItem, IToken
 from pybpmn_server.interfaces.enums import ExecutionEvent, ExecutionStatus, TokenStatus, TokenType
 
 if TYPE_CHECKING:
@@ -225,10 +225,10 @@ class Execution(IExecution):
             await self.save()
             self.log(f"Execution({self.name}).assign: finished!")
 
-    async def signal_item(
+    async def signal_item(  # noqa: C901
         self,
-        item_id: Any,
-        input_data: Any,
+        execution_id: str,
+        input_data: dict[str, Any],
         user_name: Optional[str] = None,
         restart: bool = False,
         recover: bool = False,
@@ -238,7 +238,7 @@ class Execution(IExecution):
         Signal an item within the execution with input data, user name, and options.
 
         Args:
-            item_id: The ID of the item to signal.
+            execution_id: The ID of the item to signal.
             input_data: The input data to be assigned to the item.
             user_name: The name of the user performing the signal operation.
             restart: Flag to indicate if this is a restart operation.
@@ -250,7 +250,7 @@ class Execution(IExecution):
         """
         import json
 
-        self.log(f"Execution({self.name}).signal_item: item_id={item_id} data {json.dumps(input_data)}")
+        self.log(f"Execution({self.name}).signal_item: item_id={execution_id} data {json.dumps(input_data)}")
         self.operation = "signal"
         self.user_name = user_name
         token = None
@@ -266,7 +266,7 @@ class Execution(IExecution):
             await self.do_execution_event(self.process, ExecutionEvent.process_invoke)
 
         for t in self.tokens.values():
-            if t.current_item and t.current_item.id == item_id:
+            if t.current_item and t.current_item.id == execution_id:
                 self.item = t.current_item
                 token = t
                 break
@@ -279,12 +279,12 @@ class Execution(IExecution):
                         "label": "Invoke Item",
                         "action": "signalInput",
                         "id": token.current_node.id,
-                        "itemId": item_id,
-                        "userName": user_name,
+                        "item_id": execution_id,
+                        "user_name": user_name,
                         "restart": restart,
                         "recover": recover,
                         "no_wait": no_wait,
-                        "inputData": input_data,
+                        "input_data": input_data,
                     }
                 )
             )
@@ -299,7 +299,7 @@ class Execution(IExecution):
 
         self.log(
             f"Execution({self.name}).signal_item: returning .. waiting for promises status:{self.instance.status} "
-            f"id: {item_id}"
+            f"id: {execution_id}"
         )
 
         await self._check_end()
@@ -311,7 +311,9 @@ class Execution(IExecution):
         if self.process:
             await self.do_execution_event(self.process, ExecutionEvent.process_invoked)
 
-        self.log(f"Execution({self.name}).signal_item: returned process status:{self.instance.status} id: {item_id}")
+        self.log(
+            f"Execution({self.name}).signal_item: returned process status:{self.instance.status} id: {execution_id}"
+        )
 
         self.report()
 
@@ -360,7 +362,7 @@ class Execution(IExecution):
 
         return self
 
-    async def signal_event(
+    async def signal_event(  # noqa: C901
         self,
         execution_id: Any,
         input_data: Any,
@@ -489,7 +491,7 @@ class Execution(IExecution):
         await self.do_execution_event(self, ExecutionEvent.process_saving)
         await self.data_store.save_instance(state)
 
-    def get_items(self, query: Optional[Any] = None) -> List[Any]:
+    def get_items(self, query: Optional[Any] = None) -> List[IItem]:
         """
         Retrieves a list of items from the execution, optionally filtered by a query.
 
@@ -499,11 +501,9 @@ class Execution(IExecution):
         Returns:
             A list of items matching the query.
         """
-        items = []
+        items: List[IItem] = []
         for t in self.tokens.values():
-            for i in t.path:
-                items.append(i)
-
+            items.extend(iter(t.path))
         items.sort(key=lambda x: x.seq)
         return items
 
@@ -559,15 +559,15 @@ class Execution(IExecution):
         return None
 
     @staticmethod
-    async def restore(
+    async def restore(  # noqa: C901
         state: InstanceData, configuration: Optional[Settings] = None, item_id: Optional[Any] = None
     ) -> Execution:
         """
         Restores an execution from a given state, optionally starting from a specific item ID.
 
         Args:
-            server: The BPMN server instance.
             state: The execution state to restore from.
+            configuration: The configuration to restore from.
             item_id: The ID of the item to start the execution from. Defaults to None.
 
         Returns:
@@ -656,19 +656,39 @@ class Execution(IExecution):
         for t in self.tokens.values():
             await t.resume()
 
-    def report_token(self, token: IToken, level: int) -> None:
+    def report_token(self, token: IToken, level: int) -> dict[str, Any]:
         """
         Report the state of a token and its children recursively.
 
         Args:
             token: The token to report.
             level: The indentation level for logging.
+
+        Returns:
+            The token report dictionary.
         """
+        import json
+
+        if not isinstance(token, IToken):
+            raise ValueError(f"token must be an instance of IToken not {type(token)}")
         branch = token.origin_item.element_id if token.origin_item else "root"
         parent = token.parent_token.id if token.parent_token else "-"
+
         p = "->".join([str(item.node.id) for item in token.path])
         loop_str = f" Loop: {token.loop.id} key:{token.items_key}" if token.loop else ""
-        import json
+
+        token_report: dict[str, Any] = {
+            "level": level,
+            "branch": branch,
+            "parent": parent,
+            "token": (token.id, token.type.value, token.status.value),
+            "path": p,
+            "current_node": token.current_node.id,
+            "loop": token.loop.id if token.loop else None,
+            "loop_key": token.items_key if token.loop else None,
+            "data": token.data,
+            "children": [],
+        }
 
         self.log(
             f"{'  ' * (level + 1)}"
@@ -677,7 +697,9 @@ class Execution(IExecution):
         )
 
         for t in token.children_tokens:
-            self.report_token(t, level + 1)
+            token_report["children"].append(self.report_token(t, level + 1))
+
+        return token_report
 
     def report(self) -> None:
         """
@@ -685,12 +707,25 @@ class Execution(IExecution):
         """
         self.log(".Execution Report ----")
         self.log(f"..Status: {self.instance.status}")
-        for token in self.tokens.values():
-            if not token.parent_token:
-                self.report_token(token, 0)
+        instance_report = {
+            "status": self.instance.status.value,
+            "tokens": [self.report_token(token, 0) for token in self.tokens.values() if not token.parent_token],
+            "data": self.instance.data,
+            "items": [],
+        }
 
         for indx, item in enumerate(self.get_items()):
-            key_str = f" key:{item.item_key}" if item.item_key is not None else ""
+            item_report = {
+                "index": indx,
+                "token": item.token.id,
+                "element": item.element.id,
+                "element_type": item.type,
+                "status": item.status.value,
+                "start_time": item.started_at,
+                "end_time": item.ended_at,
+                "loop_key": item.item_key,
+            }
+            instance_report["items"].append(item_report)  # type: ignore[union-attr]
             if item.element.type == "bpmn:SequenceFlow":
                 self.log(
                     f"..Item:{indx} -T# {item.token.id} {item.element.id} Type: {item.element.type} "
@@ -699,11 +734,17 @@ class Execution(IExecution):
             else:
                 start_str = item.started_at.isoformat() if item.started_at else ""
                 end_str = item.ended_at.isoformat() if item.ended_at else ""
+                key_str = f" key:{item.item_key}" if item.item_key is not None else ""
                 self.log(
                     f"..Item:{indx} -T# {item.token.id} {item.element.id} Type: {item.element.type} "
                     f"status: {item.status} from {start_str} to {end_str} id: {item.id}{key_str}"
                 )
+        # TODO: Create data store for execution reports
+        # Otel doesn't like complex data structures. Probably will have to store this object
+        # trace.get_current_span().set_attribute("execution_report", instance_report)
+        import pprint
 
+        pprint.pprint(instance_report)
         self.log(".data:")
         self.log(json.dumps(self.instance.data))
 
@@ -751,7 +792,7 @@ class Execution(IExecution):
         Log a message at the default log level.
 
         Args:
-            msg: The message to log.
+            *msg: The message(s) to log.
         """
         logger.info(", ".join(msg))
 
@@ -760,7 +801,7 @@ class Execution(IExecution):
         Log an error message.
 
         Args:
-            msg: The error message to log.
+            *msg: The error message(s) to log.
         """
         logger.info(", ".join(msg))
 
@@ -769,7 +810,7 @@ class Execution(IExecution):
         Log an error message.
 
         Args:
-            msg: The error message to log.
+            *msg: The error message(s) to log.
         """
         logger.info(", ".join(msg))
 
@@ -778,7 +819,7 @@ class Execution(IExecution):
         Log an informational message.
 
         Args:
-            msg: The message to log.
+            *msg: The message(s) to log.
         """
         logger.info(", ".join(msg))
 
@@ -789,12 +830,19 @@ class Execution(IExecution):
         Args:
             msg: The error message to log.
         """
-        asyncio.create_task(self.do_execution_event(self, ExecutionEvent.process_error))
+        asyncio.create_task(self.do_execution_event(self, ExecutionEvent.process_error))  # noqa: RUF006
         # self.instance.logs.append(msg)
         logger.error(msg)
 
     def append_data(self, input_data: Any, item: Any, data_path: Optional[Any] = None) -> None:
-        """Append data to the items this transaction belongs to."""
+        """
+        Append data to the items this transaction belongs to.
+
+        Args:
+            input_data: The data to append.
+            item: The item to which the data should be appended.
+            data_path: Optional path within the item's data structure to append the data. Defaults to None.
+        """
         data_handler.merge_data(self.instance.data, input_data, item, data_path)
 
     def get_data(self, data_path: Any) -> Any:
