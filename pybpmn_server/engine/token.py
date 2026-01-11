@@ -91,6 +91,13 @@ class Token(IToken):
         """List of child Tokens spawned by this Token."""
         return self.get_children_tokens()
 
+    def set_current_node(self, node: INode) -> None:
+        """Set the current node for the token."""
+        self.log(
+            f"Token({self.id}).setCurrentNode():  new node.id={node.id} current node.is='{self._current_node.id}'"
+        )
+        self._current_node = node
+
     def has_node(self, node_id: str) -> bool:
         """
         Checks if a node with the specified ID exists in the path.
@@ -604,7 +611,7 @@ class Token(IToken):
 
         self.log_e(f"Token({self.id}).end(): finished!")
 
-    async def go_next(self) -> Any:
+    async def go_next(self) -> Any:  # noqa: C901
         """
         Processes the transition of the token to the next node within the workflow.
 
