@@ -125,13 +125,12 @@ class Gateway(Node):
                     f"            ..canReach: {can_reach} - token status: {token.status} - item status "
                     f"{token.current_item.status}"
                 )
-                if can_reach:
-                    if (
-                        token.items_key is None
-                        or item.token.items_key is None
-                        or (f"{item.token.items_key}.{token.items_key}").startswith(f"{token.items_key}.")
-                    ):
-                        related.append(token)
+                if can_reach and (
+                    token.items_key is None
+                    or item.token.items_key is None
+                    or f"{item.token.items_key}.{token.items_key}".startswith(f"{token.items_key}.")
+                ):
+                    related.append(token)
         for t in related:
             execution.log(f"    .. related token: {t.id} {t.status} {t.items_key}")
         return related
@@ -188,18 +187,29 @@ class Gateway(Node):
         return {"pending_tokens": pending_tokens, "waiting_tokens": waiting_tokens}
 
     @tracer.start_as_current_span("gateway.start")
-    async def start(self, item: IItem) -> NodeAction:
+    async def start(self, item: IItem) -> NodeAction:  # noqa: C901
+        """
+        Starts the gateway for the given item.
+
+        Args:
+            item: The item for which the gateway is started.
+
+        Returns:
+            NodeAction: The action to be taken after starting the gateway.
+        """
         item.token.log(f"Gateway({item.element.name}|{item.element.id}).start: node.type={item.node.type}")
         if len(self.inbounds) > 1:
             item.token.log(
-                f"Gateway({item.element.name}|{item.element.id}).start: Starting a converging gateway this.inbounds.length={len(self.inbounds)}"
+                f"Gateway({item.element.name}|{item.element.id}).start: Starting a converging gateway "
+                f"this.inbounds.length={len(self.inbounds)}"
             )
 
             result = self.analyze_converging_tokens(item)
             if len(result["pending_tokens"]) > 0:
                 if self.type == BpmnType.ExclusiveGateway:
                     item.token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).start: cancel other pending_tokens.length={len(result['pending_tokens'])}"
+                        f"Gateway({item.element.name}|{item.element.id}).start: cancel other "
+                        f"pending_tokens.length={len(result['pending_tokens'])}"
                     )
                     for t in result["pending_tokens"]:
                         item.token.log(f"..cancel ending token #{t.id}")
@@ -208,7 +218,8 @@ class Gateway(Node):
                         await t.terminate()
                 else:
                     item.token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).start: result.pending_tokens.length = {len(result['pending_tokens'])} > 0 return NODE_ACTION.WAIT"
+                        f"Gateway({item.element.name}|{item.element.id}).start: result.pending_tokens.length = "
+                        f"{len(result['pending_tokens'])} > 0 return NODE_ACTION.WAIT"
                     )
                     return NodeAction.WAIT
             elif item.token.type == "Diverge":  # TOKEN_TYPE
@@ -216,7 +227,8 @@ class Gateway(Node):
                 converging_gateway_current_node = item.token.current_node
 
                 item.token.log(
-                    f"Gateway({item.element.name}|{item.element.id}).start: let us converge now waiting_tokens.length={len(result['waiting_tokens'])}"
+                    f"Gateway({item.element.name}|{item.element.id}).start: let us converge now "
+                    f"waiting_tokens.length={len(result['waiting_tokens'])}"
                 )
                 for t in result["waiting_tokens"]:
                     item.token.log(f"..converging ending token #{t.id}")
@@ -232,11 +244,12 @@ class Gateway(Node):
 
                 if parent_token:
                     item.token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).start: converged! restart the parent token from this item! parentToken={parent_token.id}"
+                        f"Gateway({item.element.name}|{item.element.id}).start: converged! restart the parent token "
+                        f"from this item! parentToken={parent_token.id}"
                     )
                     parent_token.status = TokenStatus.running
                     if converging_gateway_current_node:
-                        parent_token.current_node = converging_gateway_current_node
+                        parent_token.set_current_node(converging_gateway_current_node)
                     item.token = parent_token
 
                     await parent_token.current_node.run(item)
@@ -244,14 +257,16 @@ class Gateway(Node):
                     await parent_token.go_next()
 
                     old_current_token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).start: ending current child token {old_current_token.id}"
+                        f"Gateway({item.element.name}|{item.element.id}).start: ending current child "
+                        f"token {old_current_token.id}"
                     )
                     if old_current_token.current_item:
                         old_current_token.current_item.status = ItemStatus.end
                     await old_current_token.terminate()
 
                     item.token.log(
-                        f"Gateway({item.element.name}|{item.element.id}).start: all token terminate return NODE_ACTION.END"
+                        f"Gateway({item.element.name}|{item.element.id}).start: all token terminate "
+                        f"return NODE_ACTION.END"
                     )
                     return NodeAction.END
             else:
@@ -265,7 +280,24 @@ class Gateway(Node):
 
 
 class XORGateway(Gateway):
+    """
+    An Exclusive gateway that only takes one outbound.
+    """
+
     async def get_outbounds(self, item: IItem) -> List[IItem]:
+        """
+        Retrieves and processes the outbounds for a given item.
+
+        If there are multiple outbounds, logs a message indicating that the additional outbounds have been
+        removed and only the first one has been retained.
+
+        Args:
+            item: The item for which the outbounds are being retrieved.
+
+        Returns:
+            A list containing the first outbound if multiple outbounds exist, or the original
+                list of outbounds if there is only one.
+        """
         outbounds = await super().get_outbounds(item)
         if len(outbounds) > 1:
             item.token.log("..XORGateway : removed other outbounds , took the first")
@@ -274,17 +306,40 @@ class XORGateway(Gateway):
 
 
 class EventBasedGateway(Gateway):
+    """
+    A gateway where precisely one of the outgoing branches is activated depending on the event first triggered.
+    """
+
     def __init__(self, id_: str, process: Any, type_: str, def_: Any):
         super().__init__(type_, def_, id_, process)
         self.working = False
 
     async def restored(self, item: IItem) -> None:
+        """
+        Resumes the event-based gateway after restoration.
+
+        Args:
+            item: The item being restored.
+        """
         super().resume(item)
 
     async def run(self, item: IItem) -> NodeAction:
+        """
+        Runs the event-based gateway logic.
+        """
         return NodeAction.END
 
     async def cancel_all_branched(self, ending_item: IItem) -> None:
+        """
+        Cancels all branched tokens associated with the specified ending item.
+
+        The cancellation logic ensures that only tokens meeting specific conditions (waiting state, current item not
+        ended, and originating from the given ending item) are terminated.
+
+        Args:
+            ending_item: The item used to determine which branched tokens to cancel. Tokens will only be canceled if
+                they originate from this item.
+        """
         if self.working:
             return
         self.working = True
@@ -297,7 +352,8 @@ class EventBasedGateway(Gateway):
 
             if is_waiting and current_item_not_ending and is_origin_item:
                 ending_item.token.log(
-                    f"..EventBasedGateway:<{self.id}>-- cancelling {token.current_node.id if token.current_node else 'None'}"
+                    f"..EventBasedGateway:<{self.id}>-- cancelling "
+                    f"{token.current_node.id if token.current_node else 'None'}"
                 )
                 await token.terminate()
 
