@@ -122,7 +122,7 @@ class ModelsDatastore(IModelsDatastore):
 
     async def get_list(self, query: Optional[dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Retrieve models from the filesystem based on the provided query."""
-        files = []
+        files: List[Dict[str, Any]] = []
         path = self.definitions_path
 
         if path.exists():

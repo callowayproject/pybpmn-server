@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
     from pybpmn_server.engine.interfaces import IItem
 
-    from .node import Node
 
 tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
@@ -85,7 +84,7 @@ class Flow(IFlow):
 class MessageFlow(Flow):
     """Message flow element representing a connection between nodes in a BPMN process for message passing."""
 
-    def __init__(self, id_: str, type_: str, from_node: Node, to_node: Node, def_: Any):
+    def __init__(self, id_: str, type_: str, from_node: INode, to_node: INode, def_: Any):
         super().__init__(type_, def_, id_, from_node, to_node)
         self.is_message_flow = True
 

@@ -51,9 +51,7 @@ class MessageEventBehavior(Behavior):
         Returns None if not applicable or not found.
         """
         message_ref = self.definition.get("messageRef")
-        if message_ref:
-            return message_ref.get("name")
-        return None
+        return message_ref.get("name") if message_ref else None
 
     async def describe(self) -> List[List[str]]:
         """
