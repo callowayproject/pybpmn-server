@@ -9,11 +9,12 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from ulid import ULID
 
 from pybpmn_server.datastore.data_objects import ItemData
+from pybpmn_server.elements.interfaces import IFlow, INode
 from pybpmn_server.engine.interfaces import IExecution, IItem, IToken
 from pybpmn_server.interfaces.enums import ItemStatus
 
 if TYPE_CHECKING:
-    from pybpmn_server.elements.interfaces import Element, INode
+    from pybpmn_server.elements.interfaces import Element
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +54,16 @@ class Item(IItem):
         self.data: Any = None
 
     def log(self, *msg: Any) -> Any:
+        """
+        Log a message using the token associated with the item.
+        """
         return self.token.log(*msg)
 
     @property
     def data_from_token(self) -> Any:  # Renamed to avoid collision with self.data if needed, but TS used a getter
+        """
+        Retrieve the data associated with the token.
+        """
         return self.token.data
 
     @data_from_token.setter
@@ -64,31 +71,57 @@ class Item(IItem):
         self.token.append_data(val, self)
 
     def set_data(self, val: Any) -> None:
+        """
+        Append data to the token associated with the item.
+        """
         self.token.append_data(val, self)
 
     @property
     def context(self) -> IExecution:
+        """
+        Retrieve the execution context associated with the token.
+        """
         return self.token.execution
 
     @property
     def element_id(self) -> str:
+        """
+        Retrieve the ID of the element associated with the item.
+        """
         return self.element.id
 
     @property
     def name(self) -> str:
+        """
+        Retrieve the name of the item's element.
+        """
         return self.element.name
 
     @property
     def token_id(self) -> Any:
+        """
+        Retrieve the ID of the token associated with the item.
+        """
         return self.token.id
 
     @property
     def type(self) -> str:
+        """
+        Retrieve the type of the item's element.
+        """
         return self.element.type
 
     @property
     def node(self) -> INode:
-        return self.element
+        """
+        Retrieve the node associated with the item's element.
+
+        Returns:
+            INode: The node if the element is an INode or IFlow, otherwise raises ValueError.
+        """
+        if isinstance(self.element, (INode, IFlow)):
+            return self.element  # type: ignore[return-value]
+        raise ValueError(f"Element is not an INode or IFlow: {self.element}")
 
     def save(self) -> ItemData:
         """Serialize the item data for storage or transmission."""
