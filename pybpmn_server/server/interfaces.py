@@ -16,6 +16,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional, Protocol
 
 if TYPE_CHECKING:
+    from pymitter import EventEmitter
+
     from pybpmn_server.common.configuration import Settings
     from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
     from pybpmn_server.engine.interfaces import IEngine, IExecution, ScriptHandler
@@ -26,7 +28,7 @@ class IBPMNServer(Protocol):
     """Represents the core BPMN server and its dependencies."""
 
     engine: IEngine
-    listener: Any  # EventEmitter
+    listener: EventEmitter
     configuration: Settings
     definitions: IModelsDatastore
     app_delegate: AppDelegateBase
@@ -34,20 +36,6 @@ class IBPMNServer(Protocol):
     cache: ICacheManager
     cron: ICron
     script_handler: ScriptHandler
-
-
-class IServerComponent(Protocol):
-    """Represents a component of the BPMN server."""
-
-    server: IBPMNServer
-    configuration: Settings
-    cron: Any
-    cache: Any
-    app_delegate: AppDelegateBase
-    engine: Any
-    data_store: IDataStore
-    script_handler: ScriptHandler
-    definitions: Any
 
 
 class ICron(Protocol):

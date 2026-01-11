@@ -27,8 +27,6 @@ class BPMNServer:
         self.model_data_store = self.configuration.model_data_store
         self.app_delegate = DefaultAppDelegate(self.listener, self.data_store)
         self.script_handler = self.configuration.script_handler
-        # TODO (pybpmn-server-h00): Refactor app delegate startup calling
-        # self.app_delegate.start_up(self.configuration)
 
     def status(self) -> Dict[str, Any]:
         """Get the status of the server."""
