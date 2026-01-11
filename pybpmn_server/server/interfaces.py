@@ -53,9 +53,17 @@ class IServerComponent(Protocol):
 class ICron(Protocol):
     """Manages scheduling and timer events for the server."""
 
-    def check_timers(self, duration: Any) -> Any: ...
-    def start(self) -> Any: ...
-    def start_timers(self) -> Any: ...
+    def start(self) -> Any:
+        """
+        Start the timer management process.
+        """
+        ...
+
+    def start_timers(self) -> Any:
+        """
+        Start the timer management process, ensuring only one instance runs at a time.
+        """
+        ...
 
 
 class ICacheManager(Protocol):
