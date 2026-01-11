@@ -135,10 +135,10 @@ async def start(
 ```python
 async def execute(self, input_data: Optional[dict[str, Any]] = None) -> Any:
     try:
-        result = await self.current_node.execute(item)
+        result = await self.current_node.execute(input_data)
         return result
     except Exception as exc:
-        await self.exception(exc, execution)
+        await exception(exc, execution)
         return None
 ```
 
