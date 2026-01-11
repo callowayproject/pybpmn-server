@@ -69,8 +69,32 @@ class ICron(Protocol):
 class ICacheManager(Protocol):
     """Manages instance-level caching within the BPMN server."""
 
-    def list(self) -> list[IExecution]: ...
-    def add(self, execution: IExecution) -> None: ...
-    def remove(self, instance_id: Any) -> None: ...
-    def shutdown(self) -> None: ...
-    def get_instance(self, instance_id: str) -> Optional[IExecution]: ...
+    def list(self) -> list[IExecution]:
+        """
+        Returns a list of all live instances in the cache.
+        """
+        ...
+
+    def add(self, execution: IExecution) -> None:
+        """
+        Adds a live instance to the cache.
+        """
+        ...
+
+    def remove(self, instance_id: Any) -> None:
+        """
+        Removes a live instance from the cache by its ID.
+        """
+        ...
+
+    def shutdown(self) -> None:
+        """
+        Shuts down all live instances in the cache.
+        """
+        ...
+
+    def get_instance(self, instance_id: str) -> Optional[IExecution]:
+        """
+        Retrieves a live instance from the cache by its ID.
+        """
+        ...
