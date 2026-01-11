@@ -6,9 +6,9 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union, runtime_checkable
 
-from pybpmn_parser.parse import ParseResult
-
 if TYPE_CHECKING:
+    from pybpmn_parser.parse import ParseResult
+
     from pybpmn_server.elements.behaviors.behavior import Behavior
     from pybpmn_server.engine.interfaces import IItem
     from pybpmn_server.interfaces.enums import ExecutionEvent, ItemStatus, NodeAction
@@ -17,14 +17,35 @@ logger = logging.getLogger(__name__)
 
 
 @runtime_checkable
-class ILoopBehaviour(Protocol):
+class ILoopBehavior(Protocol):
+    """
+    Behavior for handling loop characteristics in BPMN elements.
+    """
+
     collection: Any
 
-    def is_sequential(self) -> bool: ...
-    def is_standard(self) -> bool: ...
+    @property
+    def is_sequential(self) -> bool:
+        """
+        Checks if the loop behavior is standard (non-camunda specific).
+
+        Returns True if standard, False otherwise.
+        """
+        ...
+
+    @property
+    def is_standard(self) -> bool:
+        """
+        Checks if the loop behavior is standard (non-camunda specific).
+
+        Returns True if standard, False otherwise.
+        """
+        ...
 
 
 class IDefinition(Protocol):
+    """Behavioral model for BPMN."""
+
     name: Any
     processes: Dict[Any, Any]
     nodes: Dict[Any, Any]
@@ -33,11 +54,38 @@ class IDefinition(Protocol):
     access_rules: List[Any]
     parse_result: Optional[ParseResult]
 
-    async def load(self) -> Any: ...
-    def load_process(self, process_element: Any, parent_process: Any) -> Any: ...
-    def get_json(self) -> str: ...
-    def get_start_node(self) -> INode: ...
-    def get_node_by_id(self, id_: Any) -> INode: ...
+    async def load(self) -> Any:
+        """Load definition from source."""
+        ...
+
+    def load_process(self, process_element: Any, parent_process: Any) -> Any:
+        """Load process definition."""
+        ...
+
+    def get_json(self) -> str:
+        """Get definition as JSON string."""
+        ...
+
+    def get_start_node(self) -> INode:
+        """
+        Retrieves the start node for the definition, considering user-invokable start events.
+        """
+        ...
+
+    def get_node_by_id(self, node_id: str) -> INode:
+        """
+        Retrieve a node by its unique identifier.
+
+        Args:
+            node_id: The unique identifier of the node to retrieve.
+
+        Returns:
+            Optional[INode]: The node with the specified ID, or None if not found.
+
+        Raises:
+            ValueError: If the node does not exist.
+        """
+        ...
 
 
 T = TypeVar("T")
@@ -159,7 +207,7 @@ class INode(Element, ABC, Generic[T]):
 
     @property
     @abstractmethod
-    def loop_definition(self) -> Optional[ILoopBehaviour]:
+    def loop_definition(self) -> Optional[ILoopBehavior]:
         """Get the loop definition associated with the node."""
         ...
 

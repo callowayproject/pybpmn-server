@@ -26,8 +26,7 @@ class LoopBehavior(Behavior):
         if not loop_characteristics:
             return None
 
-        collection = getattr(loop_characteristics, "collection", None)
-        if collection:
+        if collection := getattr(loop_characteristics, "collection", None):
             return collection
 
         attrs = getattr(loop_characteristics, "$attrs", {})
@@ -40,10 +39,10 @@ class LoopBehavior(Behavior):
 
         Returns True if standard, False otherwise.
         """
-        loop_characteristics = getattr(self.node.def_, "loopCharacteristics", None)
-        if not loop_characteristics:
+        if loop_characteristics := getattr(self.node.def_, "loopCharacteristics", None):
+            return loop_characteristics.get("$type") == "bpmn:StandardLoopCharacteristics"
+        else:
             return False
-        return loop_characteristics.get("$type") == "bpmn:StandardLoopCharacteristics"
 
     @property
     def is_sequential(self) -> bool:
@@ -52,7 +51,7 @@ class LoopBehavior(Behavior):
 
         Returns True if sequential, False otherwise.
         """
-        loop_characteristics = getattr(self.node.def_, "loopCharacteristics", None)
-        if not loop_characteristics:
+        if loop_characteristics := getattr(self.node.def_, "loopCharacteristics", None):
+            return getattr(loop_characteristics, "isSequential", False)
+        else:
             return False
-        return getattr(loop_characteristics, "isSequential", False)

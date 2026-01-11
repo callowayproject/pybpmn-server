@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar
 from opentelemetry import trace
 
 from pybpmn_server.elements.behaviors.behavior_loader import BehaviorName
-from pybpmn_server.elements.interfaces import Element, ILoopBehaviour, INode
+from pybpmn_server.elements.interfaces import Element, ILoopBehavior, INode
 from pybpmn_server.interfaces.enums import (
     BpmnType,
     ExecutionEvent,
@@ -216,20 +216,17 @@ class Node(INode, Generic[T]):
         return False
 
     @property
-    def loop_definition(self) -> Optional[ILoopBehaviour]:
+    def loop_definition(self) -> Optional[ILoopBehavior]:
         """
         Retrieves the loop definition associated with the node.
 
         Returns:
             The loop behavior if defined, None otherwise.
         """
-        from pybpmn_server.elements.behaviors.loop import LoopBehavior
+        from pybpmn_server.elements.interfaces import ILoopBehavior
 
         result = self.get_behaviour(BehaviorName.LoopCharacteristics)
-        if isinstance(result, LoopBehavior):
-            return result  # type: ignore[return-value]
-        else:
-            return None
+        return result if isinstance(result, ILoopBehavior) else None
 
     @property
     def is_catching(self) -> bool:

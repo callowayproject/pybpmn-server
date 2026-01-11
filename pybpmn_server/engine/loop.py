@@ -38,31 +38,31 @@ class Loop:
             self._items = data_object.items
             self.completed = data_object.completed
             self.sequence = data_object.sequence
-            self.definition = node.loop_definition
             self.end_flag = data_object.end_flag
             self.data_path = data_object.data_path
         else:
-            self.definition = node.loop_definition
             self.completed = 1
             self.sequence = 0
             if token.data_path:
-                self.data_path = token.data_path + "." + self.node.id
+                self.data_path = f"{token.data_path}.{self.node.id}"
             else:
                 self.data_path = self.node.id
+
+        self.definition = node.loop_definition
 
     def is_sequential(self) -> bool:
         """
         Check if the loop is sequential based on its definition.
         """
         assert self.definition is not None
-        return self.definition.is_sequential()
+        return self.definition.is_sequential
 
     def is_standard(self) -> bool:
         """
         Check if the loop is standard based on its definition.
         """
         assert self.definition is not None
-        return self.definition.is_standard()
+        return self.definition.is_standard
 
     def save(self) -> LoopData:
         """
@@ -195,7 +195,7 @@ class Loop:
                 TokenType.Instance,
                 token.execution,
                 token.current_node,
-                loop.data_path + "." + str(seq),
+                f"{loop.data_path}.{seq!s}",
                 token,
                 token.current_item,
                 loop,
@@ -203,7 +203,6 @@ class Loop:
                 False,
                 seq,
             )
-            return False
         elif loop.is_standard():
             token.log("standard loop")
             seq = loop.sequence
@@ -212,7 +211,7 @@ class Loop:
                 TokenType.Instance,
                 token.execution,
                 token.current_node,
-                loop.data_path + "." + str(seq),
+                f"{loop.data_path}.{seq!s}",
                 token,
                 token.current_item,
                 loop,
@@ -220,7 +219,6 @@ class Loop:
                 False,
                 str(seq),
             )
-            return False
         else:  # parallel
             seq_idx = 0
             items = await loop.get_items()
@@ -232,7 +230,7 @@ class Loop:
                         TokenType.Instance,
                         token.execution,
                         token.current_node,
-                        loop.data_path + "." + str(seq),
+                        f"{loop.data_path}.{seq!s}",
                         token,
                         token.current_item,
                         loop,
@@ -250,7 +248,8 @@ class Loop:
                 token.error("loop has no items")
 
             token.log(f"..loop: fired all tokens {seq_idx}")
-            return False
+
+        return False
 
     @staticmethod
     async def cancel(from_item: Any) -> None:
@@ -320,7 +319,6 @@ class Loop:
                     await token.end()
                     if token.parent_token:
                         await token.parent_token.go_next()
-                    return False
                 else:
                     await token.current_node.end(token.current_item)
                     await token.end()
@@ -329,15 +327,15 @@ class Loop:
                         TokenType.Instance,
                         token.execution,
                         token.current_node,
-                        token.loop.data_path + "." + str(seq),
+                        f"{token.loop.data_path}.{seq!s}",
                         token.parent_token,
-                        token.parent_token.current_item if token.parent_token else None,
+                        (token.parent_token.current_item if token.parent_token else None),
                         token.loop,
                         data,
                         False,
                         seq,
                     )
-                    return False
+                return False
             elif token.loop.is_standard():
                 await token.end()
                 if token.loop.end_flag:
@@ -352,7 +350,7 @@ class Loop:
                         TokenType.Instance,
                         token.execution,
                         token.current_node,
-                        token.loop.data_path + "." + str(seq),
+                        f"{token.loop.data_path}.{seq!s}",
                         token.parent_token,
                         token.current_item,
                         token.loop,
