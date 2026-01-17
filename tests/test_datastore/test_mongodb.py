@@ -13,11 +13,14 @@ from pybpmn_server.datastore.mongodb import MongoDB, profile
 class TestProfile:
     """Tests for the profile context manager."""
 
-    def test_profile_prints_duration_when_enabled(self, mocker, capsys):
+    def test_profile_prints_duration_when_enabled(self, mocker, caplog):
         """
         The profile context manager prints the duration of the operation when 'enable_profiler' is set to True.
         """
         # Arrange
+        import logging
+
+        caplog.set_level(logging.DEBUG)
         db_config = MongoDBSettings(enable_profiler=True)
         mongo_db = mocker.MagicMock(spec=MongoDB)
         mongo_db.db_config = db_config
@@ -27,9 +30,10 @@ class TestProfile:
             pass
 
         # Assert
-        captured = capsys.readouterr()
-        assert "test_op:" in captured.out
-        assert "ms" in captured.out
+        captured = caplog.messages
+        assert len(captured) == 1
+        assert "test_op:" in captured[0]
+        assert "ms" in captured[0]
 
     def test_profile_does_not_print_when_disabled(self, mocker, capsys):
         """

@@ -22,7 +22,7 @@ class BPMNServer:
         self.cron = self.configuration.cron
         self.engine = self.configuration.engine
 
-        self.cache = self.configuration.cache
+        self.cache = self.configuration.cache_manager
         self.data_store = self.configuration.data_store
         self.model_data_store = self.configuration.model_data_store
         self.app_delegate = DefaultAppDelegate(self.listener, self.data_store)

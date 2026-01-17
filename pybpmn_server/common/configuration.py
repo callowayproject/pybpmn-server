@@ -13,7 +13,7 @@ from pybpmn_server.common.utils import import_string
 from pybpmn_server.datastore.interfaces import IDataStore, IModelsDatastore
 from pybpmn_server.engine.interfaces import IEngine, ScriptHandler
 from pybpmn_server.interfaces.common import AppDelegateBase
-from pybpmn_server.server.interfaces import ICacheManager
+from pybpmn_server.server.interfaces import ICacheManager, ICron
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +115,8 @@ class Settings(BaseSettings):
     _app_delegate: Optional[AppDelegateBase] = None
     _engine: Optional[IEngine] = None
 
+    _cron: Optional[ICron] = None
+
     @model_validator(mode="after")
     def finalize_configuration(self) -> Self:
         """Finalize the configuration."""
@@ -187,6 +189,16 @@ class Settings(BaseSettings):
                 listener=self.listener, data_store=self.data_store
             )
         return self._app_delegate
+
+    @property
+    def cron(self) -> ICron:
+        """Get the cron."""
+        from pybpmn_server.server.cron import Cron
+
+        if self._cron is None:
+            self._cron = Cron(self)
+
+        return self._cron
 
 
 settings = Settings()
