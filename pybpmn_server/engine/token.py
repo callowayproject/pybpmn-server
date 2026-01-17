@@ -82,9 +82,7 @@ class Token(IToken):
     def last_item(self) -> Optional[IItem]:
         """The second-to-last executed node in the Token's path, if not sequence flow."""
         nodes = [item for item in self.path if item.element.type != "bpmn:SequenceFlow"]
-        if len(nodes) > 1:
-            return nodes[-2]
-        return None
+        return nodes[-2] if len(nodes) > 1 else None
 
     @property
     def children_tokens(self) -> List[IToken]:

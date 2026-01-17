@@ -60,13 +60,8 @@ class Execution(IExecution):
         Check if the execution has ended and perform cleanup if necessary.
         """
         active = sum(
-            1
+            t.status != TokenStatus.end and t.status != TokenStatus.terminated and t.type != TokenType.EventSubProcess
             for t in self.tokens.values()
-            if (
-                t.status != TokenStatus.end
-                and t.status != TokenStatus.terminated
-                and t.type != TokenType.EventSubProcess
-            )
         )
         if active == 0:
             await self.end()

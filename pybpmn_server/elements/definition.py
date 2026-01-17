@@ -68,13 +68,6 @@ class Definition(IDefinition):
         """Load process definition."""
         process = Process(process_element, parent_process)
 
-        # TODO (pybpmn-server-bgb): Process extension elements. Especially execution and task listeners
-        # if process_element.extension_elements:
-        #     for ext in process_element.extension_elements.process_element.extension_elements.values():
-        #         if ext.get("event"):
-        #             scripts = [c.get("$body") for c in ext.get("$children", []) if c.get("$body")]
-        #             process.scripts[ext["event"]] = scripts
-
         event_sub_processes = []
         children: list[INode] = populate_non_process_nodes(process)
 

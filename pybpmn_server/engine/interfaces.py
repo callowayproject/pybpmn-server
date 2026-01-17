@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ulid import ULID
 
-from pybpmn_server.common.configuration import settings as default_settings
 from pybpmn_server.datastore.data_objects import InstanceData, TokenData
 from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, NodeAction, TokenStatus
 
@@ -735,6 +734,8 @@ class IEngine(ABC):
     """Represents the execution engine handling business process executions."""
 
     def __init__(self, configuration: Optional[Settings] = None) -> None:
+        from pybpmn_server.common.configuration import settings as default_settings
+
         self.running_counter: int = 0
         self.calls_counter: int = 0
         self.configuration = configuration or default_settings
