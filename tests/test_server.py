@@ -1,4 +1,5 @@
 """Tests for pybpmn_server.server."""
+
 import asyncio
 from unittest.mock import MagicMock
 

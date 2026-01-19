@@ -60,6 +60,7 @@ test = [
     "pytest",
     "mongomock",
     "mypy",
+    "polyfactory",
 ]
 docs = [
     "mkdocs-include-markdown-plugin",
