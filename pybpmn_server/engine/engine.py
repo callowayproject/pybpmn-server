@@ -75,9 +75,9 @@ class Engine(IEngine):
         """
         Starts the execution of a workflow based on the provided parameters.
 
-        This method initializes and manages the execution of a workflow, applying the
-        necessary configurations and handling execution control. It also ensures
-        proper resource management such as locking and releasing the execution.
+        This method initializes and manages the execution of a workflow, applying the necessary configurations and
+        handling execution control. It also ensures proper resource management such as locking and
+        releasing the execution.
 
         Args:
             name: The name of the workflow to start.

@@ -35,10 +35,12 @@ class Node(INode, Generic[T]):
     """
     Represents a workflow process node and its associated behaviors, events, and execution logic.
 
-    This class serves as a crucial component in the workflow processing engine, providing
-    methods to manage node execution, validate input and output, trigger events, handle loop
-    behaviors, and interact with the execution token. Nodes represent logical units in a
-    workflow and can process events, scripts, and data transformations specific to their type.
+    This class and its subclasses are the behavior objects that encapsulate the data objects from the BPMN parser.
+    They provide methods to manage node execution, validate input and output, trigger events, handle loop
+    behaviors, and interact with the execution token.
+
+    Nodes represent logical units in a workflow and can process events, scripts, and data transformations
+    specific to their type.
     """
 
     def _get_def_attr(self, name: str, default: Any = None) -> Any:
