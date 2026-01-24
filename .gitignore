@@ -168,3 +168,5 @@ site-packages
 reports
 *.env
 todo.txt
+temp.py
+.chunkhound.json

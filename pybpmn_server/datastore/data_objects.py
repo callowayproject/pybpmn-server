@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime  # NOQA: TC003
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, TypeAdapter
@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field, TypeAdapter
 from pybpmn_server.interfaces.enums import ExecutionStatus, ItemStatus, TokenStatus, TokenType
 
 if TYPE_CHECKING:
+    from pybpmn_parser.bpmn.event.start_event import StartEvent
+
     from pybpmn_server.elements.interfaces import IDefinition
 
 
@@ -165,50 +167,44 @@ class BpmnModelData(BaseModel):
                 documentation=process.documentation,
             )
             self.processes.append(process_data)
+
             for event in process.def_.start_events:
-                event_data = EventData(
-                    type=f"bpmn:{event.Meta.name}",
-                    element_id=event.id,
-                    name=event.name,
-                    lane=event.lane,
-                    candidate_groups=getattr(event, "camunda_candidate_groups", None),
-                    candidate_users=getattr(event, "camunda_candidate_users", None),
-                    process_id=process.id,
-                    documentation=event.documentation,
-                )
-                if event.timer_event_definition:
-                    event_data.subType = "Timer"
+                event_data = process_start_event(event, process.id)
+                self.events.append(event_data)
 
 
-"""
-    parse(definition: Definition) {
+def process_start_event(event: StartEvent, process_id: str) -> EventData:
+    """Parse the start event definition into event data."""
+    documentation = "\n".join(doc.content for doc in event.documentation)
+    event_data = EventData(
+        type=f"bpmn:{event.Meta.name}",
+        element_id=event.id,
+        name=event.name,
+        candidate_groups=getattr(event, "camunda_candidate_groups", None),
+        candidate_users=getattr(event, "camunda_candidate_users", None),
+        process_id=process_id,
+        documentation=documentation,
+    )
 
-        definition.nodes.forEach(n => {
+    if event.timer_event_definition:
+        event_data.sub_type = "Timer"
+        expression = (
+            event.timer_event_definition[0].time_date
+            or event.timer_event_definition[0].time_duration
+            or event.timer_event_definition[0].time_cycle
+        )
+        event_data.time = TimerData(
+            expression=expression,
+            expression_format="iso",
+            reference_date_time=datetime.now(tz=timezone.utc),
+            time_due=None,
+        )
 
-            if (n.type == 'bpmn:StartEvent') {
+    if event.message_event_definition:
+        event_data.sub_type = "Message"
+        event_data.message_id = event.message_event_definition[0].id
 
-                let timer = n.hasTimer();
-                if (timer) {
-                    event.timeDue = timer.timeDue();
-                    event.subType = 'Timer';
-                    event.expression = timer.timeCycle;
-                    if (!event.expression)
-                        event.expression = timer.duration;
-                    event.referenceDateTime = new Date().getTime();
-                }
-                let msg = n.hasMessage();
-                if (msg) {
-                    event.messageId = msg.messageId;
-                    event.subType = 'Message';
-                    //console.log('timer:' + timer.timeDueInSeconds());
-                }
-                let signal = n.hasSignal();
-                if (signal) {
-                    event.signalId = signal.signalId;
-                    event.subType = 'Signal';
-                }
-                this.events.push(event);
-            }
-        });
-    }
-"""
+    if event.signal_event_definition:
+        event_data.sub_type = "Signal"
+        event_data.signal_id = event.signal_event_definition[0].id
+    return event_data

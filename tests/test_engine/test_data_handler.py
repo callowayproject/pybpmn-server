@@ -1,5 +1,7 @@
 """Test cases for `data_handler.py`."""
 
+from typing import Any
+
 import pytest
 
 from pybpmn_server.engine.data_handler import get_and_create_data, get_data, merge_data
@@ -10,7 +12,7 @@ class TestAppendData:
 
     def test_append_data_with_list_path_and_input_data(self):
         """Test: `append_data` should append input data to a list if the path ends in `[]`."""
-        instance_data = {"root": {"items": []}}
+        instance_data: dict[str, Any] = {"root": {"items": []}}
         input_data = {"name": "test_item"}
         merge_data(instance_data, input_data, item=None, data_path="root.items[]")
 
@@ -33,7 +35,7 @@ class TestAppendData:
             def __init__(self):
                 self.vars = {}
 
-        instance_data = {}
+        instance_data: dict[str, Any] = {}
         input_data = {"vars.test": "value"}
         item = FakeItem()
         merge_data(instance_data, input_data, item=item, data_path=None)
@@ -94,7 +96,7 @@ class TestGetAndCreateData:
 
     def test_get_and_create_data_with_valid_path(self):
         """Test: `get_and_create_data` should create a nested dictionary for a valid dot-delimited path."""
-        instance_data = {}
+        instance_data: dict[str, Any] = {}
         result = get_and_create_data(instance_data, "root.settings.theme")
         assert result == {}
         assert "root" in instance_data
@@ -121,7 +123,7 @@ class TestGetAndCreateData:
 
     def test_get_and_create_data_with_array_path(self):
         """Test: `get_and_create_data` should create an empty array if the path ends with '[]'."""
-        instance_data = {}
+        instance_data: dict[str, Any] = {}
         result = get_and_create_data(instance_data, "root.items[]", as_array=True)
         assert result == []
         assert "root" in instance_data
@@ -130,7 +132,7 @@ class TestGetAndCreateData:
 
     def test_get_and_create_data_with_partial_creation(self):
         """Test: `get_and_create_data` should create missing parts of the path as dictionaries."""
-        instance_data = {"root": {"existing": {}}}
+        instance_data: dict[str, Any] = {"root": {"existing": {}}}
         result = get_and_create_data(instance_data, "root.new_path.sub_path")
         assert result == {}
         assert "new_path" in instance_data["root"]
@@ -139,7 +141,7 @@ class TestGetAndCreateData:
 
     def test_get_and_create_data_with_no_target_object(self):
         """Test: `get_and_create_data` should create and assign structures even if the starting object is missing."""
-        instance_data = {}
+        instance_data: dict[str, Any] = {}
         result = get_and_create_data(instance_data, "level1.level2.level3", as_array=False)
         assert result == {}
         assert "level1" in instance_data
@@ -148,6 +150,6 @@ class TestGetAndCreateData:
 
     def test_get_and_create_data_with_invalid_instance_data(self):
         """Test: `get_and_create_data` should raise an error when instance_data is not a dictionary."""
-        instance_data = []  # Invalid type
+        instance_data = []  # type: ignore[var-annotated]
         with pytest.raises(TypeError):
             get_and_create_data(instance_data, "key.value")

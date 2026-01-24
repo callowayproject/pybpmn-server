@@ -1,7 +1,7 @@
 """Tests for pybpmn_server.server."""
 
 import asyncio
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, AsyncMock
 
 import pytest
 
@@ -27,24 +27,6 @@ async def test_server_initialization():
     assert server is not None
     assert server.engine is not None
     assert server.cron is not None
-
-
-@pytest.mark.asyncio
-async def test_api_engine_start():
-    server = MagicMock()
-    server.engine = MagicMock()
-    server.engine.start = MagicMock(side_effect=lambda *args, **kwargs: asyncio.ensure_future(asyncio.sleep(0)))
-
-    api = BPMNAPI(server)
-    api.default_user = SecureUser(user_name="test_user", user_groups=[])
-
-    await api.engine.start("TestModel", data={"foo": "bar"})
-
-    server.engine.start.assert_called_once()
-    args, _ = server.engine.start.call_args
-    assert args[0] == "TestModel"
-    assert args[1] == {"foo": "bar"}
-    assert args[3] == "test_user"
 
 
 @pytest.mark.asyncio

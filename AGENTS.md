@@ -1,5 +1,7 @@
 # Agent Instructions
 
+## Issue Tracking
+
 This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
 
 ## Quick Reference
@@ -17,7 +19,7 @@ bd sync               # Sync with git
 ### Installation
 
 ```bash
-uv sync --extra test  # Install with test dependencies
+uv sync --all-groups
 ```
 
 ### Running Tests
