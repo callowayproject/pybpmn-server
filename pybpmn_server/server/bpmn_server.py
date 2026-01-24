@@ -45,7 +45,7 @@ class BPMNServer:
 SERVER = None
 
 
-def get_server(config: Optional[Settings] = None, options: Optional[Dict[str, Any]] = None) -> BPMNServer:
+def get_server(config: Optional[Settings] = None) -> BPMNServer:
     """Get the BPMN Server instance, initializing it if necessary."""
     global SERVER  # noqa: PLW0603
 

@@ -1,3 +1,5 @@
+"""This module provides functionality to evaluate and execute scripts."""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,13 +17,33 @@ logger = logging.getLogger(__name__)
 
 class DefaultScriptHandler(ScriptHandler):
     """
-    Handles execution of expressions and scripts.
+    Handles evaluation and execution of scripts with advanced input parsing and context management.
 
-    Initially uses Python's exec/eval.
-    TODO (pybpmn-server-mia): Integrate RestrictedPython for sandboxing.
+    This class is designed to evaluate specific expressions and execute scripts
+    within a given context, which could include data and execution instances. It
+    supports both inline script evaluation and external Python script execution
+    through subprocess calls. The class provides functionality to handle different
+    types of expressions and scope configurations while utilizing custom global
+    mappings.
     """
 
     async def evaluate_input_expression(self, item: IItem, exp: Any, date_format: bool = False) -> Any:
+        """
+        Evaluates input expressions based on the provided item and expression.
+
+        If the expression is empty, returns None. Otherwise, processes the expression
+        to handle string values, custom expressions starting with '$', and comma-separated
+        values. If date_format is True and the value is a string, attempts to convert
+        it to a datetime object.
+
+        Args:
+            item: The item context for expression evaluation.
+            exp: The expression to evaluate.
+            date_format: Flag to indicate date formatting. Defaults to False.
+
+        Returns:
+            The evaluated expression value, or None if the expression is empty.
+        """
         if not exp:
             return None
 
@@ -39,6 +61,25 @@ class DefaultScriptHandler(ScriptHandler):
         return val
 
     async def evaluate_expression(self, scope: Union[IItem, IToken], expression: str) -> Any:
+        """
+        Evaluates a given expression in the context of a provided scope using Python's `eval` or `exec` functions.
+
+        The function determines whether the expression starts with a "$" to adjust its processing accordingly.
+        Evaluation is supported for both single-line expressions and multi-line scripts.
+
+        Args:
+            scope: The context or scope in which the expression is evaluated. This is used to provide global
+                variables during evaluation.
+            expression: The code expression or script to evaluate.
+
+        Returns:
+            The result of the evaluated expression. Returns `None` if the input
+                expression is empty.
+
+        Raises:
+            Exception: Propagates any exception encountered during expression evaluation
+                after logging the error.
+        """
         if not expression:
             return None
 
@@ -66,6 +107,17 @@ class DefaultScriptHandler(ScriptHandler):
             raise exc
 
     async def execute_script(self, scope: Union[IItem, IExecution], script: str) -> Any:
+        """
+        Executes a given script in the context of a provided scope using Python's `exec` function.
+
+        Args:
+            scope: The context or scope in which the script is executed. This is used to provide global
+                variables during execution.
+            script: The code script to execute.
+
+        Returns:
+            The result of the executed script. Returns `None` if the input script is empty.
+        """
         if not script:
             return None
 
@@ -97,6 +149,16 @@ class DefaultScriptHandler(ScriptHandler):
             raise exc
 
     def _get_globals(self, scope: Any) -> Dict[str, Any]:
+        """
+        Retrieves the global variables for the given scope.
+
+        Args:
+            scope: The context or scope in which the script is executed. This is used to provide global
+                variables during execution.
+
+        Returns:
+            A dictionary containing the global variables for the given scope.
+        """
         is_token = hasattr(scope, "start_node_id")
         is_execution = hasattr(scope, "tokens")
 
@@ -129,6 +191,17 @@ class DefaultScriptHandler(ScriptHandler):
         return g
 
     async def run_python(self, item: Any, code: str, input_data: Any = None) -> Any:
+        """
+        Runs a Python script in a subprocess and returns the output.
+
+        Args:
+            item: The item associated with the script execution.
+            code: The Python code to execute.
+            input_data: Optional input data to pass to the script.
+
+        Returns:
+            The output of the executed Python script.
+        """
         python_cmd = os.environ.get("PYTHON_CMD", "python3")
         data_json = json.dumps(getattr(item, "data", {}))
         item_info = json.dumps(
