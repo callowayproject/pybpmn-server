@@ -135,7 +135,6 @@ class ProcessData(BaseModel):
     is_executable: bool = Field(default=False)
     candidate_starter_groups: List[str] = Field(default_factory=list)
     candidate_starter_users: List[str] = Field(default_factory=list)
-    history_time_to_live: Optional[str] = Field(default=None)
     is_startable_in_tasklist: bool = Field(default=True)
     documentation: Optional[str] = Field(default=None)
 
@@ -162,7 +161,6 @@ class BpmnModelData(BaseModel):
                 is_executable=process.is_executable,
                 candidate_starter_groups=process.camunda_candidate_starter_groups,
                 candidate_starter_users=process.camunda_candidate_starter_users,
-                history_time_to_live=process.history_time_to_live,
                 is_startable_in_tasklist=process.is_startable_in_tasklist,
                 documentation=process.documentation,
             )

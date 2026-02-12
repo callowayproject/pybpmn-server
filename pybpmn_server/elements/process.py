@@ -31,7 +31,6 @@ class Process:
         self.documentation: Optional[str] = " ".join(doc.content for doc in definition.documentation)
         self.candidate_starter_groups = getattr(definition, "camunda_candidate_starter_groups", None)
         self.candidate_starter_users = getattr(definition, "camunda_candidate_starter_users", None)
-        self.history_time_to_live = getattr(definition, "camunda_history_time_to_live", None)
         self.is_startable_in_tasklist = getattr(definition, "camunda_is_startable_in_tasklist", True)
 
     def init(self, children: List[INode], event_sub_processes: List[Process]) -> None:

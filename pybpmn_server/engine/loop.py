@@ -24,7 +24,7 @@ class Loop:
 
     def __init__(self, node: INode, token: IToken, data_object: Optional[LoopData] = None):
         self.node = node
-        self.ownerToken = token
+        self.owner_token = token
         self.completed = 1
         self.sequence = 0
         self.data_path: str = ""
@@ -78,7 +78,7 @@ class Loop:
         return LoopData(
             id=self.id,
             node_id=self.node.id,
-            owner_token_id=self.ownerToken.id,
+            owner_token_id=self.owner_token.id,
             data_path=self.data_path,
             items=self._items,
             end_flag=self.end_flag,
@@ -116,8 +116,8 @@ class Loop:
         """
         if self._items is None:
             assert self.definition is not None
-            self._items = self.ownerToken.execution.script_handler.evaluate_expression(
-                self.ownerToken, self.definition.collection
+            self._items = self.owner_token.execution.script_handler.evaluate_expression(
+                self.owner_token, self.definition.collection
             )
             if isinstance(self._items, int):
                 self._items = list(range(self._items))
